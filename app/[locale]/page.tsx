@@ -4,6 +4,7 @@ import Image from "next/image";
 import Social from "@/components/partials/auth/social";
 import Copyright from "@/components/partials/auth/copyright";
 import Logo from "@/components/partials/auth/logo";
+
 const Login = ({ params: { locale } }: { params: { locale: string } }) => {
   return (
     <>
@@ -59,7 +60,7 @@ const Login = ({ params: { locale } }: { params: { locale: string } }) => {
                   <Social locale={locale} />
                 </div>
                 <div className="md:max-w-[345px] mx-auto font-normal text-default-500 mt-12 uppercase text-sm">
-                  Don’t have an account?{" "}
+                  Don't have an account?{" "}
                   <Link
                     href="/auth/register"
                     className="text-default-900  font-medium hover:underline"
