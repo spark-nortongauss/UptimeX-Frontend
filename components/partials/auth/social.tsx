@@ -8,17 +8,9 @@ const Social = ({ locale }: { locale: string }) => {
         <li className="flex-1">
           <a
             href="#"
-            className="inline-flex h-10 w-10 p-2 bg-[#1C9CEB] text-white text-2xl flex-col items-center justify-center rounded-full"
+            className="inline-flex h-10 w-10 p-2 bg-[#00BCF2] text-white text-2xl flex-col items-center justify-center rounded-full"
           >
-            <Image width={300} height={300} className="w-full h-full" src="/images/icon/tw.svg" alt="" />
-          </a>
-        </li>
-        <li className="flex-1">
-          <a
-            href="#"
-            className="inline-flex h-10 w-10 p-2 bg-[#395599] text-white text-2xl flex-col items-center justify-center rounded-full"
-          >
-            <Image width={300} height={300} className="w-full h-full" src="/images/icon/fb.svg" alt="" />
+            <Image width={300} height={300} className="w-full h-full" src="/images/icon/Microsoft_logo.png" alt="" />
           </a>
         </li>
         <li className="flex-1">
