@@ -28,27 +28,12 @@ export default async function RootLayout({
   const messages = await getMessages();
   const direction = getLangDir(locale);
   return (
-    <html lang={locale} dir={direction}>
-      <body className={`${inter.className} dashcode-app `}>
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <AuthProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <MountedProvider>
-                <DirectionProvider direction={direction}>
-                  {children}
-                </DirectionProvider>
-              </MountedProvider>
-              <Toaster />
-              <SonnerToaster />
-            </ThemeProvider>
-          </AuthProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages} locale={locale}>
+      <AuthProvider>
+        <DirectionProvider direction={direction}>
+          {children}
+        </DirectionProvider>
+      </AuthProvider>
+    </NextIntlClientProvider>
   );
 }

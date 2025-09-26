@@ -49,11 +49,10 @@ const t = useTranslations("CalendarApp")
 
   useEffect(() => {
     const draggableEl = document.getElementById("external-events");
-
     const initDraggable = () => {
       if (draggableEl) {
+      if (draggableEl) {
         new Draggable(draggableEl, {
-          itemSelector: ".fc-event",
           eventData: function (eventEl) {
             let title = eventEl.getAttribute("title");
             let id = eventEl.getAttribute("data");
@@ -72,12 +71,12 @@ const t = useTranslations("CalendarApp")
     };
 
     if (dragEvents.length > 0) {
+    if (dragEvents.length > 0) {
       initDraggable();
     }
+    }
 
-    return () => {
       draggableEl?.removeEventListener("mousedown", initDraggable);
-    };
   }, [dragEvents]);
   // event click
   const handleEventClick = (arg: any) => {

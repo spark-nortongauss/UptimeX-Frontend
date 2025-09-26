@@ -24,6 +24,9 @@ export function Menu() {
 console.log(config.sidebar);
 
 
+console.log(config.sidebar);
+
+
     return (
         <MenuClassic />
     );

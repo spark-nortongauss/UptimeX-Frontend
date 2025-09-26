@@ -57,12 +57,6 @@ export function MenuClassic({ }) {
         };
         scrollableNodeRef.current?.addEventListener("scroll", handleScroll);
     }, [scrollableNodeRef]);
-
-    return (
-        <>
-            {isDesktop && (
-                <div className="flex items-center justify-between  px-4 py-4">
-                    <Logo />
                     <SidebarHoverToggle />
                 </div>
             )}
