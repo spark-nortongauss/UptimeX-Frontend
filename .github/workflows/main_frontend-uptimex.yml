@@ -22,13 +22,17 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        working-directory: UptimeX-Frontend
         run: npm ci
 
       - name: Build Next.js app
+        working-directory: UptimeX-Frontend
         run: npm run build
 
       - name: Prepare standalone deployment
+        working-directory: UptimeX-Frontend
         run: |
+          rm -rf deploy
           mkdir -p deploy
           cp -r .next/standalone/. deploy/
           mkdir -p deploy/.next
@@ -41,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: ./deploy
+          path: UptimeX-Frontend/deploy
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,6 +56,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+          path: ./deploy
       
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -59,5 +64,5 @@ jobs:
         with:
           app-name: 'frontend-uptimeX'
           slot-name: 'Production'
-          package: .
+          package: ./deploy
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0EF1A91AECEA48729CFEB66797043C64 }}
