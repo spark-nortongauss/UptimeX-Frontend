@@ -9,12 +9,8 @@
 # testing
 /coverage
 
-# next.js - Only ignore cache and trace, NOT the build output
-/.next/cache
-/.next/trace
-
-# But we NEED the .next folder for deployment, so don't ignore it completely
-# The build output will be created in CI/CD and included in the artifact
+# next.js build output (CI/CD will build this)
+/.next
 
 # output directory
 /out/
