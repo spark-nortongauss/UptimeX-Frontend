@@ -31,8 +31,9 @@ jobs:
         run: |
           mkdir -p deploy
           cp -r .next/standalone/* deploy/
+          mkdir -p deploy/.next
           cp -r .next/static deploy/.next/static
-          cp -r public deploy/public || true
+          if [ -d "public" ]; then cp -r public deploy/public; fi
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
