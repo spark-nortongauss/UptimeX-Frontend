@@ -33,6 +33,8 @@ jobs:
           cp -r .next/standalone/. deploy/
           mkdir -p deploy/.next
           cp -r .next/static deploy/.next/static
+          # Next.js requires BUILD_ID alongside static assets when running standalone
+          cp .next/BUILD_ID deploy/.next/BUILD_ID
           if [ -d "public" ]; then cp -r public deploy/public; fi
 
       - name: Upload artifact for deployment job
