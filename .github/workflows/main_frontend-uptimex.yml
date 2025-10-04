@@ -28,18 +28,20 @@ jobs:
           npm ci
           npm run build
           test -f .next/standalone/server.js || (echo "standalone server missing" && ls -la .next && exit 1)
+          mkdir -p deploy
+          cp -R .next deploy/.next
+          cp -R public deploy/public
+          cp server.js deploy/server.js
+          cp next.config.mjs deploy/next.config.mjs
+          cp package*.json deploy/
+          (cd deploy && zip -r ../deploy.zip .)
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           if-no-files-found: error
-          path: |
-            .next/
-            public/
-            server.js
-            next.config.mjs
-            package*.json
+          path: deploy.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -57,8 +59,9 @@ jobs:
 
       - name: Verify artifact layout before deploy
         run: |
-          echo "Listing downloaded artifact contents:" && ls -la . && ls -la .next || true
-          test -f .next/standalone/server.js || (echo "ERROR: server.js missing in artifact" && ls -la .next || true && exit 1)
+          echo "Listing downloaded artifact contents:" && ls -la . || true
+          unzip -l deploy.zip | sed -n '1,200p' || true
+          unzip -l deploy.zip | grep -q "\.next/standalone/server\.js" || (echo "ERROR: server.js missing in artifact zip" && exit 1)
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -66,5 +69,5 @@ jobs:
         with:
           app-name: 'frontend-uptimeX'
           slot-name: 'Production'
-          package: .
+          package: deploy.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0EF1A91AECEA48729CFEB66797043C64 }}
