@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -27,23 +27,20 @@ jobs:
         run: |
           npm ci
           npm run build
+          test -f .next/standalone/server.js || (echo "standalone server missing" && ls -la .next && exit 1)
+          mkdir -p deploy
+          cp -R .next deploy/.next
+          cp -R public deploy/public
+          cp server.js deploy/server.js
+          cp next.config.mjs deploy/next.config.mjs
+          cp package*.json deploy/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           if-no-files-found: error
-          path: |
-            .next/standalone/**
-            .next/static/**
-            .next/server/**
-            .next/**
-            node_modules/**
-            package*.json
-            next.config.mjs
-            public/**
-            server.js
-            web.config
+          path: deploy/
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,13 +48,13 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
