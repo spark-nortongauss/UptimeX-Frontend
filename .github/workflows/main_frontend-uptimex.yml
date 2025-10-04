@@ -38,6 +38,8 @@ jobs:
             package*.json
             next.config.mjs
             public/
+            server.js
+            web.config
 
   deploy:
     runs-on: ubuntu-latest
