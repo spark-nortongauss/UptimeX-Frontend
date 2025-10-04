@@ -7,8 +7,6 @@ const nextConfig = {
   ],
   reactStrictMode: false,
   output: 'standalone',
-  // Ensure route types manifest generation is not required in prod
-  // Next handles this internally on build; no dev bundler
 }
 
 export default nextConfig;
