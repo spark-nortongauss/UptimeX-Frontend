@@ -54,12 +54,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          path: node-app
+          path: .
 
       - name: Verify artifact layout before deploy
         run: |
-          echo "Listing downloaded artifact contents:" && ls -la node-app && ls -la node-app/deploy || true
-          test -f node-app/deploy/.next/standalone/server.js || (echo "ERROR: server.js missing in artifact" && ls -la node-app/deploy/.next || true && exit 1)
+          echo "Listing downloaded artifact contents:" && ls -la . && ls -la .next || true
+          test -f .next/standalone/server.js || (echo "ERROR: server.js missing in artifact" && ls -la .next || true && exit 1)
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -67,5 +67,5 @@ jobs:
         with:
           app-name: 'frontend-uptimeX'
           slot-name: 'Production'
-          package: node-app/deploy
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0EF1A91AECEA48729CFEB66797043C64 }}
