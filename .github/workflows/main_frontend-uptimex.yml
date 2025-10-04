@@ -32,12 +32,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
+          if-no-files-found: error
           path: |
-            .next/
-            node_modules/
+            .next/standalone/**
+            .next/static/**
+            .next/server/**
+            .next/**
+            node_modules/**
             package*.json
             next.config.mjs
-            public/
+            public/**
             server.js
             web.config
 
