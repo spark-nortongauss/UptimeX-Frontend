@@ -28,11 +28,20 @@ jobs:
           npm ci
           npm run build
           test -f .next/standalone/server.js || (echo "standalone server missing" && ls -la .next && exit 1)
+          # Prepare deploy folder
           mkdir -p deploy
-          cp -R .next deploy/.next
+          # Copy standalone server first
+          mkdir -p deploy/.next/standalone
+          cp -R .next/standalone/* deploy/.next/standalone/
+          # Ensure static assets live where the standalone server expects: .next/standalone/.next/static
+          mkdir -p deploy/.next/standalone/.next/static
+          cp -R .next/static/* deploy/.next/standalone/.next/static/
+          # Copy public assets
           cp -R public deploy/public
+          # App entry and configs
           cp server.js deploy/server.js
           cp next.config.mjs deploy/next.config.mjs
+          cp web.config deploy/web.config
           cp package*.json deploy/
           (cd deploy && zip -r ../deploy.zip .)
 
