@@ -9,6 +9,23 @@ const nextConfig = {
   output: 'standalone',
   // Ensure each deploy has a fresh BUILD_ID to invalidate Azure caches
   generateBuildId: async () => `${Date.now()}`,
+  // Force browsers/Azure to revalidate Next static and data assets
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        source: '/_next/data/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig;
