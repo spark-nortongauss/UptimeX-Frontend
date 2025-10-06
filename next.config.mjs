@@ -7,6 +7,8 @@ const nextConfig = {
   ],
   reactStrictMode: false,
   output: 'standalone',
+  // Ensure each deploy has a fresh BUILD_ID to invalidate Azure caches
+  generateBuildId: async () => `${Date.now()}`,
 }
 
 export default nextConfig;
