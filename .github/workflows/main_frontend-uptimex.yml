@@ -33,9 +33,9 @@ jobs:
           # Copy standalone server first
           mkdir -p deploy/.next/standalone
           cp -R .next/standalone/* deploy/.next/standalone/
-          # Ensure static assets live where the standalone server expects: .next/standalone/.next/static
-          mkdir -p deploy/.next/standalone/.next/static
-          cp -R .next/static/* deploy/.next/standalone/.next/static/
+          # Ensure static assets at root .next/static (expected by standalone server)
+          mkdir -p deploy/.next/static
+          cp -R .next/static/* deploy/.next/static/
           # Copy public assets
           cp -R public deploy/public
           # App entry and configs

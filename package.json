@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "mkdir -p .next/standalone/.next/static && cp -R .next/static/* .next/standalone/.next/static/",
+    "postbuild": "echo 'postbuild: no-op'",
     "start": "node .next/standalone/server.js",
     "lint": "eslint"
   },
