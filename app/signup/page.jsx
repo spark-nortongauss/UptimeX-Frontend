@@ -1,43 +1,119 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import AuthLayout from "@/components/AuthLayout"
+import { useState } from "react"
 
 export default function SignUpPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: ""
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+    
+    // Handle sign up logic here
+    console.log("Sign up:", formData)
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+  }
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
-      <Card className="w-full max-w-md border-gray-200 shadow-xl">
-        <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-          <CardDescription>Start monitoring with UptimeX in minutes.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" name="username" placeholder="yourname" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="you@example.com" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="********" required />
-            </div>
+    <AuthLayout
+      title="Sign up"
+      description="Create an account to start using UptimeX"
+      linkText="Already registered?"
+      linkHref="/signin"
+      linkLabel="Sign in"
+      showTerms={true}
+    >
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input 
+            id="name" 
+            name="name" 
+            type="text" 
+            placeholder="John Doe" 
+            value={formData.name}
+            onChange={handleInputChange}
+            className="form-input"
+            required 
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input 
+            id="email" 
+            name="email" 
+            type="email" 
+            placeholder="you@example.com" 
+            value={formData.email}
+            onChange={handleInputChange}
+            className="form-input"
+            required 
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input 
+            id="password" 
+            name="password" 
+            type="password" 
+            placeholder="********" 
+            value={formData.password}
+            onChange={handleInputChange}
+            className="form-input"
+            required 
+          />
+        </div>
 
-            <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">Sign Up</Button>
-          </form>
+        <div className="flex items-start space-x-2">
+          <input 
+            id="terms" 
+            type="checkbox" 
+            checked={acceptTerms}
+            onChange={(e) => setAcceptTerms(e.target.checked)}
+            className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            required
+          />
+          <Label htmlFor="terms" className="text-sm text-gray-600">
+            You Accept Our{" "}
+            <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+              Terms And Conditions
+            </a>{" "}
+            And{" "}
+            <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
+              Privacy Policy
+            </a>
+          </Label>
+        </div>
 
-          <div className="mt-6 text-sm text-gray-600 flex items-center justify-between">
-            <Link href="/signin" className="hover:underline">Already registered?</Link>
-            <Link href="#" className="text-gray-500 hover:underline cursor-not-allowed" onClick={(e) => e.preventDefault()}>Forgot password?</Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <Button 
+          type="submit" 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+          disabled={isLoading || !acceptTerms}
+        >
+          {isLoading ? "Creating Account..." : "Create An Account"}
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }
