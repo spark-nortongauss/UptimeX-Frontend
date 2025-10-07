@@ -59,7 +59,7 @@ export default function HeroSection() {
               transition={{ delay: 0.4, duration: 0.8 }}
               className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed"
             >
-              Comprehensive monitoring and observability platform that keeps your applications running smoothly with real-time insights and intelligent alerts.
+              tay ahead of downtime with a smart monitoring platform built for real-time insights and instant alerts.
             </motion.p>
 
             {/* Stats */}
