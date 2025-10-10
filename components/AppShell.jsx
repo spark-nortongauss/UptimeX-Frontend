@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import Sidebar from "@/components/Sidebar"
 
-const HIDE_SIDEBAR_ROUTES = new Set(["/", "/signin", "/signup"]) // no auth yet
+const HIDE_SIDEBAR_ROUTES = new Set(["/", "/signin", "/signup"]) 
 
 export default function AppShell({ children }) {
   const pathname = usePathname()

@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 export default function AuthCallback() {
   const router = useRouter()
@@ -20,12 +21,14 @@ export default function AuthCallback() {
         
         if (error) {
           console.error('Auth callback error:', error)
+          toast.error('Authentication failed. Please try again.')
           router.push('/signin?error=auth_callback_failed')
           return
         }
 
         if (data.session) {
           console.log('Authentication successful, redirecting to dashboard');
+          toast.success('Successfully signed in! Welcome back.')
           // Successful authentication, redirect to dashboard
           router.push('/dashboard')
         } else {
@@ -35,6 +38,7 @@ export default function AuthCallback() {
         }
       } catch (error) {
         console.error('Unexpected error in auth callback:', error)
+        toast.error('An unexpected error occurred. Please try again.')
         router.push('/signin?error=unexpected_error')
       }
     }

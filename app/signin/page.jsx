@@ -15,14 +15,12 @@ export default function SignInPage() {
     password: ""
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
   const { signIn, signInWithGoogle } = useAuthStore()
   const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
     
     try {
       await signIn(formData.email, formData.password)
@@ -30,7 +28,6 @@ export default function SignInPage() {
       router.push("/dashboard")
     } catch (err) {
       const errorMessage = err.message || "Failed to sign in"
-      setError(errorMessage)
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)
@@ -46,14 +43,12 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
-    setError("")
     
     try {
       await signInWithGoogle()
       // The redirect will be handled by the OAuth flow
     } catch (err) {
       const errorMessage = err.message || "Failed to sign in with Google"
-      setError(errorMessage)
       toast.error(errorMessage)
       setIsLoading(false)
     }
@@ -68,11 +63,6 @@ export default function SignInPage() {
       linkLabel="Sign up"
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input 

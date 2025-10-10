@@ -17,28 +17,22 @@ export default function SignUpPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
   const { signUp, signInWithGoogle } = useAuthStore()
   const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
-    setSuccess("")
     
     try {
       await signUp(formData.email, formData.password, {
         full_name: formData.name
       })
       const successMessage = "Account created successfully! Please check your email to verify your account."
-      setSuccess(successMessage)
       toast.success(successMessage)
       // Don't redirect immediately, let user verify email first
     } catch (err) {
       const errorMessage = err.message || "Failed to create account"
-      setError(errorMessage)
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)
@@ -54,15 +48,12 @@ export default function SignUpPage() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
-    setError("")
-    setSuccess("")
     
     try {
       await signInWithGoogle()
       // The redirect will be handled by the OAuth flow
     } catch (err) {
       const errorMessage = err.message || "Failed to sign up with Google"
-      setError(errorMessage)
       toast.error(errorMessage)
       setIsLoading(false)
     }
@@ -78,16 +69,6 @@ export default function SignUpPage() {
       showTerms={true}
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-            {success}
-          </div>
-        )}
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
           <Input 
