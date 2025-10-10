@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import AuthLayout from "@/components/AuthLayout"
 import { useState } from "react"
+import { useAuthStore } from "@/lib/stores/authStore"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -12,18 +15,26 @@ export default function SignInPage() {
     password: ""
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const { signIn } = useAuthStore()
+  const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
     
-    // Handle sign in logic here
-    console.log("Sign in:", formData)
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signIn(formData.email, formData.password)
+      toast.success("Successfully signed in! Welcome back.")
+      router.push("/dashboard")
+    } catch (err) {
+      const errorMessage = err.message || "Failed to sign in"
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleInputChange = (e) => {
@@ -42,6 +53,11 @@ export default function SignInPage() {
       linkLabel="Sign up"
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input 

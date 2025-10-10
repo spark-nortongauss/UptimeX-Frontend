@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import AuthLayout from "@/components/AuthLayout"
 import { useState } from "react"
+import { useAuthStore } from "@/lib/stores/authStore"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -14,18 +17,32 @@ export default function SignUpPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const { signUp } = useAuthStore()
+  const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
+    setSuccess("")
     
-    // Handle sign up logic here
-    console.log("Sign up:", formData)
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signUp(formData.email, formData.password, {
+        full_name: formData.name
+      })
+      const successMessage = "Account created successfully! Please check your email to verify your account."
+      setSuccess(successMessage)
+      toast.success(successMessage)
+      // Don't redirect immediately, let user verify email first
+    } catch (err) {
+      const errorMessage = err.message || "Failed to create account"
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleInputChange = (e) => {
@@ -45,6 +62,16 @@ export default function SignUpPage() {
       showTerms={true}
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            {success}
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
           <Input 

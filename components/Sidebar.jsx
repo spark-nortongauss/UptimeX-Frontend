@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Cpu, Activity, User, Settings, Monitor } from "lucide-react"
+import { Home, Cpu, Activity, User, Settings, Monitor, LogOut } from "lucide-react"
+import { useAuthStore } from "@/lib/stores/authStore"
+import { toast } from "sonner"
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
@@ -16,6 +18,19 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { signOut } = useAuthStore()
+
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      toast.success("Successfully logged out")
+      router.push('/signin')
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast.error("Failed to logout")
+    }
+  }
 
   return (
     <aside className="hidden md:flex md:w-64 lg:w-72 shrink-0 border-r border-gray-200/80 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -48,6 +63,18 @@ export default function Sidebar() {
             )
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="border-t border-gray-200 pt-4">
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            className="w-full justify-start gap-3 h-10 text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <LogOut className="h-5 w-5" />
+            <span className="ml-2 font-medium">Logout</span>
+          </Button>
+        </div>
 
         <div className="mt-auto text-xs text-gray-400 px-2">© {new Date().getFullYear()} UptimeX</div>
       </div>
