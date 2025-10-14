@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import AuthLayout from "@/components/AuthLayout"
 import { useState } from "react"
+import Link from "next/link"
 import { useAuthStore } from "@/lib/stores/authStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -15,6 +16,7 @@ export default function SignInPage() {
     password: ""
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [statusMsg, setStatusMsg] = useState("")
   const { signIn, signInWithGoogle } = useAuthStore()
   const router = useRouter()
 
@@ -53,6 +55,7 @@ export default function SignInPage() {
       setIsLoading(false)
     }
   }
+
 
   return (
     <AuthLayout
@@ -101,9 +104,9 @@ export default function SignInPage() {
               Remember me
             </Label>
           </div>
-          <a href="#" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
+          <button type="button" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
             Forgot password?
-          </a>
+          </button>
         </div>
 
         <Button 
