@@ -104,9 +104,9 @@ export default function SignInPage() {
               Remember me
             </Label>
           </div>
-          <button type="button" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
+          <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
             Forgot password?
-          </button>
+          </Link>
         </div>
 
         <Button 
