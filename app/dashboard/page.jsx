@@ -1,45 +1,61 @@
 "use client"
 
-import { useAuthStore } from '@/lib/stores/authStore';
-import AuthGuard from '@/components/AuthGuard';
+import AuthGuard from '@/components/AuthGuard'
+import HeroSection from '@/components/dashboard/HeroSection'
+import AlertSeverityCards from '@/components/dashboard/AlertSeverityCards'
+import GeographicMapPanel from '@/components/dashboard/GeographicMapPanel'
+import ActiveAlarmsTable from '@/components/dashboard/ActiveAlarmsTable'
+import SectionHeader from '@/components/dashboard/SectionHeader'
+import SystemHealthCards from '@/components/dashboard/SystemHealthCards'
+import TemperatureChart from '@/components/dashboard/TemperatureChart'
+import NetworkConnectivityCharts from '@/components/dashboard/NetworkConnectivityCharts'
+import RFMetrics from '@/components/dashboard/RFMetrics'
+import OpticalCharts from '@/components/dashboard/OpticalCharts'
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
-
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
-
   return (
     <AuthGuard>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Welcome back, {userName}!
-          </h1>
-          <p className="text-gray-600 mt-2">Here's your monitoring overview.</p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold mb-2">Total Monitors</h3>
-            <p className="text-3xl font-bold text-blue-600">0</p>
-            <p className="text-sm text-gray-500 mt-1">Active monitoring services</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold mb-2">Uptime</h3>
-            <p className="text-3xl font-bold text-green-600">100%</p>
-            <p className="text-sm text-gray-500 mt-1">Last 30 days</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold mb-2">Incidents</h3>
-            <p className="text-3xl font-bold text-red-600">0</p>
-            <p className="text-sm text-gray-500 mt-1">This month</p>
-          </div>
-        </div>
+      <div className="space-y-8">
+        {/* 1. HERO SECTION */}
+        <HeroSection />
+
+        {/* 2. ALERT SEVERITY CARDS */}
+        <AlertSeverityCards />
+
+        {/* 3. GEOGRAPHIC MAP PANEL */}
+        <GeographicMapPanel />
+
+        {/* 4. ACTIVE ALARMS TABLE */}
+        <ActiveAlarmsTable />
+
+        {/* 5. DETAILED SYSTEM STATUS HEADER */}
+        <SectionHeader title="DETAILED SYSTEM" subtitle="STATUS" />
+
+        {/* 6. SYSTEM HEALTH CARDS */}
+        <SystemHealthCards />
+
+        {/* 7. TEMPERATURE MONITORING CHART */}
+        <TemperatureChart />
+
+        {/* 8. WAN LINK STATUS HEADER */}
+        <SectionHeader title="WAN LINK" subtitle="STATUS" />
+
+        {/* 9. NETWORK CONNECTIVITY CHARTS */}
+        <NetworkConnectivityCharts />
+
+        {/* 10. RF STATUS HEADER */}
+        <SectionHeader title="SYSTEM RF" subtitle="STATUS" />
+
+        {/* 11. RF POWER METRICS */}
+        <RFMetrics />
+
+        {/* 12. OPTICAL STATUS HEADER */}
+        <SectionHeader title="SYSTEM OPTICAL" subtitle="STATUS" />
+
+        {/* 13. OPTICAL SIGNAL CHARTS */}
+        <OpticalCharts />
       </div>
     </AuthGuard>
   )
 }
-
 

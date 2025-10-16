@@ -34,13 +34,7 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:w-64 lg:w-72 shrink-0 border-r border-gray-200/80 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="flex h-screen sticky top-0 flex-col gap-4 p-4">
-        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1.5">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <Monitor className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-lg text-gray-900">UptimeX</span>
-        </Link>
+      <div className="flex h-[calc(100vh-56px)] sticky top-14 flex-col gap-4 p-4">
 
         <nav className="flex-1 space-y-1">
           {navItems.map(({ href, label, icon: Icon }) => {
