@@ -1,66 +1,39 @@
 "use client"
 
-import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
+import { useMemo, useState } from 'react'
 
-const markers = [
-  { top: '62%', left: '22%', color: '#22c55e' }, // USA
-  { top: '56%', left: '48%', color: '#eab308' }, // Europe
-  { top: '68%', left: '85%', color: '#3b82f6' }, // Japan
-  { top: '72%', left: '30%', color: '#ef4444' }, // Brazil
-  { top: '52%', left: '80%', color: '#a855f7' }, // India
-  { top: '78%', left: '60%', color: '#22c55e' }, // Africa
-]
+// Dynamically import the map with SSR disabled
+const DeviceMap = dynamic(() => import('./DeviceMap'), { ssr: false })
 
 export default function GeographicMapPanel() {
-  const [scale, setScale] = useState(1)
+  const [zoom, setZoom] = useState(2)
+
+  const dummyDevices = useMemo(
+    () => [
+      { id: 'us-nyc-1', name: 'NYC Edge-1', status: 'active', lat: 40.7128, lng: -74.006 },
+      { id: 'uk-ldn-1', name: 'London Core', status: 'warning', lat: 51.5074, lng: -0.1278 },
+      { id: 'jp-tyo-1', name: 'Tokyo POP', status: 'active', lat: 35.6762, lng: 139.6503 },
+      { id: 'br-sp-1', name: 'São Paulo', status: 'error', lat: -23.5505, lng: -46.6333 },
+      { id: 'in-del-1', name: 'Delhi Hub', status: 'active', lat: 28.6139, lng: 77.209 },
+      { id: 'za-jnb-1', name: 'Johannesburg', status: 'active', lat: -26.2041, lng: 28.0473 },
+      { id: 'au-syd-1', name: 'Sydney', status: 'warning', lat: -33.8688, lng: 151.2093 },
+    ],
+    []
+  )
 
   return (
     <div className="relative overflow-hidden rounded-xl border bg-background">
       <div className="flex items-center justify-between p-4 border-b">
         <h3 className="font-semibold">Overall Network Status</h3>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setScale((s) => Math.max(0.8, s - 0.2))}
-          >
-            -
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setScale((s) => Math.min(2, s + 0.2))}
-          >
-            +
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.max(2, z - 1))}>-</Button>
+          <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.min(12, z + 1))}>+</Button>
         </div>
       </div>
       <div className="relative" style={{ height: 420 }}>
-        <div 
-          className="absolute inset-0" 
-          style={{ 
-            transform: `scale(${scale})`, 
-            transformOrigin: 'center' 
-          }}
-        >
-          <img 
-            src="/globe.svg" 
-            alt="map" 
-            className="w-full h-full object-cover opacity-80 invert-[.85]" 
-          />
-          {markers.map((marker, idx) => (
-            <span
-              key={idx}
-              className="absolute h-3 w-3 rounded-full shadow ring-2 ring-background"
-              style={{ 
-                top: marker.top, 
-                left: marker.left, 
-                backgroundColor: marker.color 
-              }}
-            />
-          ))}
-        </div>
+        <DeviceMap devices={dummyDevices} zoom={zoom} />
       </div>
     </div>
   )
