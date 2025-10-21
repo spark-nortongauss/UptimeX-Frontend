@@ -4,8 +4,18 @@ import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { useMemo, useState } from 'react'
 
-// Dynamically import the map with SSR disabled
-const DeviceMap = dynamic(() => import('./DeviceMap'), { ssr: false })
+// Dynamically import the map with SSR disabled and proper error handling
+const DeviceMap = dynamic(() => import('./DeviceMap'), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Loading map...</p>
+      </div>
+    </div>
+  )
+})
 
 export default function GeographicMapPanel() {
   const [zoom, setZoom] = useState(2)
