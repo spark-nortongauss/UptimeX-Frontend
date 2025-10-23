@@ -27,10 +27,10 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          console.log('Authentication successful, redirecting to dashboard');
+          console.log('Authentication successful, redirecting to observability overview');
           toast.success('Successfully signed in! Welcome back.')
-          // Successful authentication, redirect to dashboard
-          router.push('/dashboard')
+          // Successful authentication, redirect to observability overview
+          router.push('/observability/overview')
         } else {
           console.log('No session found, redirecting to signin');
           // No session found, redirect to signin

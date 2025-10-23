@@ -27,7 +27,7 @@ export default function SignInPage() {
     try {
       await signIn(formData.email, formData.password)
       toast.success("Successfully signed in! Welcome back.")
-      router.push("/dashboard")
+      router.push("/observability/overview")
     } catch (err) {
       const errorMessage = err.message || "Failed to sign in"
       toast.error(errorMessage)

@@ -52,7 +52,7 @@ export default function Topbar() {
     <header className="fixed top-0 inset-x-0 h-14 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-40">
       <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center gap-4">
         {/* Left: Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+        <Link href="/observability/overview" className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <Monitor className="w-5 h-5 text-white" />
           </div>
