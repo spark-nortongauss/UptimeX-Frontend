@@ -119,22 +119,22 @@ export default function DetailedPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gray-50">
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">SELECT THE SYSTEM</h1>
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">SELECT THE SYSTEM</h1>
           </div>
 
           {/* Search Bar */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="relative">
               <input
                 type="text"
                 placeholder="Enter the system name or ID"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-1/2 px-4 py-3 text-lg border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -142,40 +142,40 @@ export default function DetailedPage() {
           {/* Data Table */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[10%]">
                       System ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[10%]">
                       System Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[10%]">
                       Current Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[8%]">
                       SLA
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[8%]">
                       System Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[8%]">
                       # of Sectors
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[8%]">
                       # of MUs
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[8%]">
                       # of RUs
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[15%]">
                       System Location
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[8%]">
                       Created At
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">
                       Updated At
                     </th>
                   </tr>
@@ -183,43 +183,92 @@ export default function DetailedPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredSystems.map((system, index) => (
                     <tr key={system.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
-                        {system.id}
+                      <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.id}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.name}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.name}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
                         <StatusBadge status={system.status} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.sla}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.sla}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.type}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.type}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.sectors}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.sectors}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.mus}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.mus}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.rus}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.rus}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.location}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate" title={system.location}>{system.location}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                        {system.createdAt}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <div className="truncate">{system.createdAt}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {system.updatedAt}
+                      <td className="px-3 sm:px-6 py-4 text-sm text-gray-900">
+                        <div className="truncate">{system.updatedAt}</div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Mobile Card View for very small screens */}
+          <div className="block sm:hidden mt-4">
+            <div className="space-y-3">
+              {filteredSystems.map((system) => (
+                <div key={system.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 text-sm truncate">{system.id}</h3>
+                      <p className="text-xs text-gray-600 truncate">{system.name}</p>
+                    </div>
+                    <div className="ml-2 shrink-0">
+                      <StatusBadge status={system.status} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-gray-500">SLA:</span>
+                      <p className="font-medium truncate">{system.sla}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Type:</span>
+                      <p className="font-medium truncate">{system.type}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Sectors:</span>
+                      <p className="font-medium">{system.sectors}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">MUs:</span>
+                      <p className="font-medium">{system.mus}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">RUs:</span>
+                      <p className="font-medium">{system.rus}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Created:</span>
+                      <p className="font-medium text-xs">{system.createdAt}</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 truncate">Location: {system.location}</p>
+                    <p className="text-xs text-gray-500">Updated: {system.updatedAt}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

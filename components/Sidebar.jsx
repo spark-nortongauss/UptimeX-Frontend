@@ -79,7 +79,7 @@ const navigationItems = [
   }
 ]
 
-export default function Sidebar({ isCollapsed, onToggle }) {
+export default function Sidebar({ isCollapsed, onToggle, isMobile, isMobileSidebarOpen, onCloseMobileSidebar }) {
   const pathname = usePathname()
   const router = useRouter()
   const { signOut } = useAuthStore()
@@ -119,24 +119,30 @@ export default function Sidebar({ isCollapsed, onToggle }) {
   }
 
   return (
-    <aside className={`hidden md:flex shrink-0 border-r border-gray-200/80 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-all duration-300 ease-out ${
-      isCollapsed ? 'w-16' : 'w-64 lg:w-72'
+    <aside className={`shrink-0 border-r border-gray-200/80 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 transition-all duration-300 ease-out ${
+      isMobile 
+        ? `fixed top-14 left-0 h-[calc(100vh-56px)] w-64 z-50 transform transition-transform duration-300 ease-in-out ${
+            isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`
+        : `hidden md:flex ${isCollapsed ? 'w-16' : 'w-64 lg:w-72'}`
     }`}>
       <div className="flex h-[calc(100vh-56px)] sticky top-14 flex-col gap-4 p-4 relative">
-        {/* Collapse/Expand Button */}
-        <Button
-          onClick={onToggle}
-          variant="ghost"
-          size="icon"
-          className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 h-6 w-6 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-3 w-3 text-gray-600" />
-          ) : (
-            <ChevronLeft className="h-3 w-3 text-gray-600" />
-          )}
-        </Button>
+        {/* Collapse/Expand Button - Only show on desktop */}
+        {!isMobile && (
+          <Button
+            onClick={onToggle}
+            variant="ghost"
+            size="icon"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 h-6 w-6 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-3 w-3 text-gray-600" />
+            ) : (
+              <ChevronLeft className="h-3 w-3 text-gray-600" />
+            )}
+          </Button>
+        )}
         <nav className="flex-1 space-y-1">
           {navigationItems.map((item) => {
             const isActive = isItemActive(item)
@@ -183,20 +189,20 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                         isActive ? "bg-blue-50 text-blue-700 hover:bg-blue-100" : "text-gray-600"
                       )}
                     >
-                      <Link href={item.href} className="flex items-center w-full">
+                      <Link href={item.href} className="flex items-center w-full" onClick={isMobile ? onCloseMobileSidebar : undefined}>
                         {item.icon ? (
                           <item.icon className={cn("h-5 w-5", isActive ? "text-blue-700" : "text-gray-500")} />
                         ) : (
                           <Circle className={cn("h-5 w-5", isActive ? "text-blue-700" : "text-gray-500")} />
                         )}
-                        {!isCollapsed && <span className="ml-2 font-medium transition-opacity duration-200 ease-out">{item.label}</span>}
+                        {(!isCollapsed || isMobile) && <span className="ml-2 font-medium transition-opacity duration-200 ease-out">{item.label}</span>}
                       </Link>
                     </Button>
                   )}
                 </div>
 
                 {/* Submenu Items */}
-                {hasChildren && isExpanded && !isCollapsed && (
+                {hasChildren && isExpanded && (!isCollapsed || isMobile) && (
                   <div className="ml-6 mt-1 space-y-1 transition-all duration-200 ease-out">
                     {item.children.map((child) => {
                       const isChildActive = checkChildActive(child)
@@ -210,7 +216,7 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                             isChildActive ? "bg-blue-50 text-blue-700 hover:bg-blue-100" : "text-gray-600 hover:text-gray-900"
                           )}
                         >
-                          <Link href={child.href} className="flex items-center w-full">
+                          <Link href={child.href} className="flex items-center w-full" onClick={isMobile ? onCloseMobileSidebar : undefined}>
                             {child.icon ? (
                               <child.icon className={cn("h-4 w-4", isChildActive ? "text-blue-700" : "text-gray-500")} />
                             ) : (
@@ -236,11 +242,11 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             className="w-full justify-start gap-3 h-10 text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <LogOut className="h-5 w-5" />
-            {!isCollapsed && <span className="ml-2 font-medium transition-opacity duration-200 ease-out">Logout</span>}
+            {(!isCollapsed || isMobile) && <span className="ml-2 font-medium transition-opacity duration-200 ease-out">Logout</span>}
           </Button>
         </div>
 
-        {!isCollapsed && (
+        {(!isCollapsed || isMobile) && (
           <div className="mt-auto text-xs text-gray-400 px-2 transition-opacity duration-200 ease-out">© {new Date().getFullYear()} UptimeX</div>
         )}
       </div>
