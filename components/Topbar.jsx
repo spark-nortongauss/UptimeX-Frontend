@@ -3,16 +3,16 @@
 import { useMemo, useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Monitor, Search, HelpCircle, ChevronDown, LogOut, Menu } from "lucide-react"
+import { Monitor, Search, HelpCircle, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/stores/authStore"
-import { toast } from "sonner"
 
 // Thin top navigation bar shown above the sidebar layout
-export default function Topbar({ onMobileMenuToggle, isMobile, isMobileSidebarOpen }) {
+export default function Topbar() {
   const router = useRouter()
-  const { user, signOut } = useAuthStore()
+  const { user } = useAuthStore()
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -27,16 +27,7 @@ export default function Topbar({ onMobileMenuToggle, isMobile, isMobileSidebarOp
 
   const email = user?.email || ""
 
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      toast.success("Successfully logged out")
-      router.push("/signin")
-    } catch (error) {
-      console.error("Logout error:", error)
-      toast.error("Failed to logout")
-    }
-  }
+  // Logout is now handled in the sidebar footer
 
   // Close menu on outside click
   useEffect(() => {
@@ -51,19 +42,6 @@ export default function Topbar({ onMobileMenuToggle, isMobile, isMobileSidebarOp
   return (
     <header className="fixed top-0 inset-x-0 h-14 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-40">
       <div className="h-full px-2 sm:px-4 lg:px-8 flex items-center gap-2 sm:gap-4">
-        {/* Mobile Hamburger Menu */}
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onMobileMenuToggle}
-            className="md:hidden text-gray-600 hover:text-gray-900 shrink-0"
-            aria-label="Toggle mobile menu"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        )}
-
         {/* Left: Logo */}
         <Link href="/observability/overview" className="flex items-center gap-1 sm:gap-2 shrink-0">
           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -71,6 +49,9 @@ export default function Topbar({ onMobileMenuToggle, isMobile, isMobileSidebarOp
           </div>
           <span className="font-semibold text-gray-900 text-sm sm:text-base">UptimeX</span>
         </Link>
+
+        {/* Sidebar Trigger - Now on the right of logo */}
+        <SidebarTrigger className="text-gray-600 hover:text-gray-900 shrink-0" />
 
         {/* Center: Search - Hidden on mobile, shown on tablet+ */}
         <div className="flex-1 max-w-2xl mx-auto hidden sm:flex items-center">
@@ -121,9 +102,6 @@ export default function Topbar({ onMobileMenuToggle, isMobile, isMobileSidebarOp
                 <div className="flex flex-col">
                   <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm" onClick={() => router.push("/alerts")}>Notifications</Button>
                   <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm" onClick={() => router.push("/settings")}>Settings</Button>
-                  <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm text-red-600 hover:text-red-700" onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" /> Log out
-                  </Button>
                 </div>
               </div>
             )}
@@ -133,5 +111,3 @@ export default function Topbar({ onMobileMenuToggle, isMobile, isMobileSidebarOp
     </header>
   )
 }
-
-
