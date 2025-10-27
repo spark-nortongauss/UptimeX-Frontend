@@ -71,11 +71,30 @@ export default function DeviceMap({ devices, zoom = 2 }) {
             pathOptions={{ color, fillColor: color, fillOpacity: 0.9, weight: 2 }}
           >
             <Popup>
-              <div className="text-sm">
-                <div className="font-semibold">{d.name}</div>
-                <div className="text-xs text-muted-foreground">{d.lat.toFixed(3)}, {d.lng.toFixed(3)}</div>
-                <div className="mt-1">
-                  Status: <span style={{ color }}>{d.status}</span>
+              <div className="text-sm p-1">
+                <div className="font-semibold mb-2 text-base">{d.name}</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">IP:</span>
+                    <span className="font-mono">{d.ip}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Port:</span>
+                    <span className="font-mono">{d.port}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Location:</span>
+                    <span>{d.lat.toFixed(4)}, {d.lng.toFixed(4)}</span>
+                  </div>
+                  {d.description && (
+                    <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+                      <span className="text-muted-foreground">{d.description}</span>
+                    </div>
+                  )}
+                  <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
+                    <span className="text-muted-foreground">Status: </span>
+                    <span style={{ color, fontWeight: 600 }}>{d.status.toUpperCase()}</span>
+                  </div>
                 </div>
               </div>
             </Popup>

@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import zabbixService from '@/lib/services/zabbixService'
 
 // Dynamically import the map with SSR disabled and proper error handling
 const DeviceMap = dynamic(() => import('./DeviceMap'), { 
@@ -19,19 +20,58 @@ const DeviceMap = dynamic(() => import('./DeviceMap'), {
 
 export default function GeographicMapPanel() {
   const [zoom, setZoom] = useState(2)
+  const [devices, setDevices] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const dummyDevices = useMemo(
-    () => [
-      { id: 'us-nyc-1', name: 'NYC Edge-1', status: 'active', lat: 40.7128, lng: -74.006 },
-      { id: 'uk-ldn-1', name: 'London Core', status: 'warning', lat: 51.5074, lng: -0.1278 },
-      { id: 'jp-tyo-1', name: 'Tokyo POP', status: 'active', lat: 35.6762, lng: 139.6503 },
-      { id: 'br-sp-1', name: 'São Paulo', status: 'error', lat: -23.5505, lng: -46.6333 },
-      { id: 'in-del-1', name: 'Delhi Hub', status: 'active', lat: 28.6139, lng: 77.209 },
-      { id: 'za-jnb-1', name: 'Johannesburg', status: 'active', lat: -26.2041, lng: 28.0473 },
-      { id: 'au-syd-1', name: 'Sydney', status: 'warning', lat: -33.8688, lng: 151.2093 },
-    ],
-    []
-  )
+  useEffect(() => {
+    let isMounted = true
+    async function load() {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await zabbixService.getHostsInventory()
+        const hosts = res?.data || []
+        const mapped = hosts
+          .map(h => {
+            const inv = h.inventory || {}
+            // Some responses may have inventory as [] when empty
+            const lat = parseFloat(inv.location_lat)
+            const lon = parseFloat(inv.location_lon)
+            if (Number.isFinite(lat) && Number.isFinite(lon)) {
+              // Basic status heuristic: available 1 -> active, 2 -> warning, else default
+              const iface = Array.isArray(h.interfaces) && h.interfaces.length > 0 ? h.interfaces[0] : null
+              let status = 'default'
+              if (iface) {
+                if (iface.available === '1') status = 'active'
+                else if (iface.available === '2') status = 'warning'
+                else if (iface.available === '0') status = 'error'
+              }
+              return {
+                id: h.hostid,
+                name: h.name || h.host,
+                status,
+                lat,
+                lng: lon,
+                ip: iface?.ip || 'N/A',
+                port: iface?.port || 'N/A',
+                description: h.description || '',
+                available: iface?.available || '0',
+              }
+            }
+            return null
+          })
+          .filter(Boolean)
+        if (isMounted) setDevices(mapped)
+      } catch (e) {
+        if (isMounted) setError(e?.message || 'Failed to load devices')
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+    load()
+    return () => { isMounted = false }
+  }, [])
 
   return (
     <div className="relative overflow-hidden rounded-xl border bg-background">
@@ -43,7 +83,20 @@ export default function GeographicMapPanel() {
         </div>
       </div>
       <div className="relative" style={{ height: 420 }}>
-        <DeviceMap devices={dummyDevices} zoom={zoom} />
+        {loading ? (
+          <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Loading device locations...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-sm text-red-500">{error}</p>
+          </div>
+        ) : (
+          <DeviceMap devices={devices} zoom={zoom} />
+        )}
       </div>
     </div>
   )
