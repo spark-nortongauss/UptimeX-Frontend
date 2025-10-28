@@ -56,6 +56,9 @@ export default function GeographicMapPanel() {
                 ip: iface?.ip || 'N/A',
                 port: iface?.port || 'N/A',
                 description: h.description || '',
+                type: inv.type || 'N/A',
+                type_full: inv.type_full || 'N/A',
+                vendor: inv.vendor || 'N/A',
                 available: iface?.available || '0',
               }
             }

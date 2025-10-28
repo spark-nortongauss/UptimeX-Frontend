@@ -83,14 +83,30 @@ export default function DeviceMap({ devices, zoom = 2 }) {
                     <span className="font-mono">{d.port}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Location:</span>
-                    <span>{d.lat.toFixed(4)}, {d.lng.toFixed(4)}</span>
+                    <span className="text-muted-foreground">Latitude:</span>
+                    <span>{d.lat.toFixed(4)}</span>
                   </div>
-                  {d.description && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Longitude:</span>
+                    <span>{d.lng.toFixed(4)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Type:</span>
+                    <span>{d.type}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Type_Full:</span>
+                    <span>{d.type_full}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Vendor:</span>
+                    <span>{d.vendor}</span>
+                  </div>
+                  {/* {d.description && (
                     <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
                       <span className="text-muted-foreground">{d.description}</span>
                     </div>
-                  )}
+                  )} */}
                   <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
                     <span className="text-muted-foreground">Status: </span>
                     <span style={{ color, fontWeight: 600 }}>{d.status.toUpperCase()}</span>
