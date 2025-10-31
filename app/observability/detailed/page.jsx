@@ -6,80 +6,6 @@ import { zabbixService } from '@/lib/services/zabbixService'
 import { useZabbixStore } from '@/lib/stores/zabbixStore'
 import { geocodingService } from '@/lib/services/geocodingService'
 
-// Sample data matching the screenshot
-const systemsData = [
-  {
-    id: "NGDAS0001",
-    name: "NY Airport",
-    status: "Normal",
-    targetSla: "99.9%",
-    achievedSla: "99.95%",
-    type: "DAS",
-    sectors: "6",
-    mus: "6",
-    rus: "130",
-    location: "1st New York Ave. Airport",
-    createdAt: "2021-05-12",
-    updatedAt: "2024-12-18"
-  },
-  {
-    id: "NGDAS0002",
-    name: "NY Airport",
-    status: "Critical",
-    targetSla: "99.9%",
-    achievedSla: "98.5%",
-    type: "DAS",
-    sectors: "6",
-    mus: "6",
-    rus: "130",
-    location: "1st New York Ave. Airport",
-    createdAt: "2021-05-12",
-    updatedAt: "2024-12-18"
-  },
-  {
-    id: "NGDAS0003",
-    name: "NY Airport",
-    status: "Major",
-    targetSla: "99.9%",
-    achievedSla: "99.2%",
-    type: "DAS",
-    sectors: "6",
-    mus: "6",
-    rus: "130",
-    location: "1st New York Ave. Airport",
-    createdAt: "2021-05-12",
-    updatedAt: "2024-12-18"
-  },
-  {
-    id: "NGDAS0004",
-    name: "NY Airport",
-    status: "Minor",
-    targetSla: "99.9%",
-    achievedSla: "99.7%",
-    type: "DAS",
-    sectors: "6",
-    mus: "6",
-    rus: "130",
-    location: "1st New York Ave. Airport",
-    createdAt: "2021-05-12",
-    updatedAt: "2024-12-18"
-  },
-  {
-    id: "NGDAS0005",
-    name: "NY Airport",
-    status: "Information",
-    targetSla: "99.9%",
-    achievedSla: "99.92%",
-    type: "DAS",
-    sectors: "6",
-    mus: "6",
-    rus: "130",
-    location: "1st New York Ave. Airport",
-    createdAt: "2021-05-12",
-    updatedAt: "2024-12-18"
-  }
-]
-
 // Status badge component with color coding
 const StatusBadge = ({ status }) => {
   const getStatusStyles = (status) => {
@@ -108,7 +34,6 @@ const StatusBadge = ({ status }) => {
 
 export default function DetailedPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  // Start empty so no dummy rows are shown before API resolves
   const [systems, setSystems] = useState([])
   const [loading, setLoading] = useState(true)
   const { problems, fetchProblems } = useZabbixStore()
@@ -142,18 +67,20 @@ export default function DetailedPage() {
         // Ensure alarms are available to derive status
         await fetchProblems({ limit: 200 })
 
-        // Fetch both inventory and SLA (Actual/Target) in parallel
-        const [invRes, slaRes] = await Promise.all([
+        // Fetch inventory, SLA (Actual/Target), and created-at in parallel
+        const [invRes, slaRes, createdRes] = await Promise.all([
           zabbixService.getHostsInventory(),
-          zabbixService.getUptimeFromProblems({})
+          zabbixService.getUptimeFromProblems({}),
+          zabbixService.getHostsCreatedAt()
         ])
         
         console.log('Inventory response:', invRes)
         console.log('SLA response:', slaRes)
         
-        // Create a map of hostid -> target SLA and hostid -> actual SLA from uptime-from-problems
+        // Create maps for SLA and created-at
         const sloTargetMap = new Map()
         const sliMap = new Map()
+        const createdAtMap = new Map()
         if (slaRes?.success && slaRes?.data?.hosts) {
           slaRes.data.hosts.forEach(host => {
             if (host.hostid) {
@@ -168,6 +95,13 @@ export default function DetailedPage() {
           console.log('Target SLA Map:', sloTargetMap)
           console.log('Actual SLA Map:', sliMap)
         }
+        if (createdRes?.success && Array.isArray(createdRes.data)) {
+          createdRes.data.forEach(row => {
+            if (!row || !row.hostid) return
+            const ts = row.createdAtTs
+            if (ts && Number.isFinite(Number(ts))) createdAtMap.set(row.hostid, Number(ts))
+          })
+        }
         
         if (invRes?.success && Array.isArray(invRes.data)) {
           console.log('Processing', invRes.data.length, 'hosts')
@@ -178,9 +112,10 @@ export default function DetailedPage() {
             const lat = inv.location_lat
             const lon = inv.location_lon
             const status = hostIdToStatus.get(hostid) || 'Normal'
-            // Get the correct sloTarget and SLI for this host from the SLA data
             const sloTarget = sloTargetMap.get(hostid) || null
             const sli = sliMap.get(hostid) || null
+            const ts = createdAtMap.get(hostid)
+            const createdAtStr = ts ? new Date(ts * 1000).toISOString().slice(0, 10) : ''
             return {
               id: hostid,
               name: inv.name || h.name || h.host || 'Unknown',
@@ -188,12 +123,9 @@ export default function DetailedPage() {
               targetSla: sloTarget !== null ? `${sloTarget}%` : '',
               achievedSla: sli !== null ? `${sli.toFixed(2)}%` : '',
               type: inv.type_full || 'DAS',
-              sectors: '6',
-              mus: '6',
-              rus: '130',
               location: 'Location Not Available',
               coordinates: lat && lon ? { lat, lon } : null,
-              createdAt: '2021-05-12',
+              createdAt: createdAtStr,
             }
           })
           
@@ -214,7 +146,7 @@ export default function DetailedPage() {
                   }
                 } catch (error) {
                   console.warn(`Geocoding failed for ${system.id}:`, error)
-                  return system // Keep original coordinates
+                  return system
                 }
               }
               return system
@@ -231,7 +163,6 @@ export default function DetailedPage() {
           if (mounted) setLoading(false)
         }
       } catch (e) {
-        // On error, keep as empty to avoid showing dummy rows
         console.error('Failed loading detailed systems:', e)
         if (mounted) setLoading(false)
       }
@@ -239,7 +170,7 @@ export default function DetailedPage() {
 
     load()
     return () => { mounted = false }
-  }, [fetchProblems]) // Remove hostIdToStatus from dependencies to prevent infinite re-renders
+  }, [fetchProblems])
 
   // Update systems status when problems change
   useEffect(() => {
@@ -250,7 +181,7 @@ export default function DetailedPage() {
       }))
       setSystems(updatedSystems)
     }
-  }, [hostIdToStatus]) // Only update status when hostIdToStatus changes
+  }, [hostIdToStatus])
 
   const filteredSystems = useMemo(() => {
     if (!searchTerm) return systems
@@ -309,43 +240,34 @@ export default function DetailedPage() {
                 <table className="w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[9%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         System ID
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[9%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         System Name
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[9%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         Current Status
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         Target SLA
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         Achieved SLA
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         System Type
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
-                        # of Sectors
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
-                        # of MUs
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
-                        # of RUs
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[14%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         System Location
                       </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 w-[7%]">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                         Created At
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredSystems.map((system, index) => (
+                    {filteredSystems.map((system) => (
                       <tr key={system.id} className="hover:bg-gray-50">
                         <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
                           <div className="truncate">{system.id}</div>
@@ -364,15 +286,6 @@ export default function DetailedPage() {
                         </td>
                         <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
                           <div className="truncate">{system.type}</div>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
-                          <div className="truncate">{system.sectors}</div>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
-                          <div className="truncate">{system.mus}</div>
-                        </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
-                          <div className="truncate">{system.rus}</div>
                         </td>
                         <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
                           <div className="truncate" title={system.location}>{system.location}</div>
@@ -429,21 +342,9 @@ export default function DetailedPage() {
                         <span className="text-gray-500">Achieved SLA:</span>
                         <p className="font-medium truncate">{system.achievedSla}</p>
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <span className="text-gray-500">Type:</span>
                         <p className="font-medium truncate">{system.type}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Sectors:</span>
-                        <p className="font-medium">{system.sectors}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">MUs:</span>
-                        <p className="font-medium">{system.mus}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">RUs:</span>
-                        <p className="font-medium">{system.rus}</p>
                       </div>
                       <div className="col-span-2">
                         <span className="text-gray-500">Created:</span>
