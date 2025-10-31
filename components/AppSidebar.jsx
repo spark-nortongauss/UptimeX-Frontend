@@ -30,7 +30,7 @@ import {
   Bug,
   Server,
   Plus,
-  Rack,
+  Layers,
   Building,
   LogOut,
   ChevronRight,
@@ -69,7 +69,7 @@ const navigationItems = [
     items: [
       { label: "Assets", href: "/inventory/assets", icon: Server },
       { label: "New Provisioning", href: "/inventory/provisioning", icon: Plus },
-      { label: "Racks", href: "/inventory/racks", icon: Rack },
+      { label: "Racks", href: "/inventory/racks", icon: Layers },
       { label: "Facilities", href: "/inventory/facilities", icon: Building },
     ]
   },

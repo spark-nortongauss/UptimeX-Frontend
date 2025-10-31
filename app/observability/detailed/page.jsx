@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import AuthGuard from '@/components/AuthGuard'
 import { zabbixService } from '@/lib/services/zabbixService'
 import { useZabbixStore } from '@/lib/stores/zabbixStore'
@@ -33,6 +34,7 @@ const StatusBadge = ({ status }) => {
 }
 
 export default function DetailedPage() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [systems, setSystems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -268,7 +270,13 @@ export default function DetailedPage() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredSystems.map((system) => (
-                      <tr key={system.id} className="hover:bg-gray-50">
+                      <tr 
+                        key={system.id} 
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => router.push(`/observability/detailed/${system.id}`)}
+                        role="button"
+                        aria-label={`View details for system ${system.id}`}
+                      >
                         <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
                           <div className="truncate">{system.id}</div>
                         </td>
@@ -323,7 +331,13 @@ export default function DetailedPage() {
             ) : (
               <div className="space-y-3">
                 {filteredSystems.map((system) => (
-                  <div key={system.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+                  <div 
+                    key={system.id} 
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 cursor-pointer"
+                    onClick={() => router.push(`/observability/detailed/${system.id}`)}
+                    role="button"
+                    aria-label={`View details for system ${system.id}`}
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 text-sm truncate">{system.id}</h3>
