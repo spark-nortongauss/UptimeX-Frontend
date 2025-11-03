@@ -14,7 +14,9 @@ export default function Topbar() {
   const router = useRouter()
   const { user } = useAuthStore()
   const [open, setOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
   const menuRef = useRef(null)
+  const searchInputRef = useRef(null)
 
   const displayName = useMemo(() => {
     return (
@@ -39,6 +41,27 @@ export default function Topbar() {
     return () => document.removeEventListener("mousedown", onClick)
   }, [open])
 
+  // Handle search form submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      router.push(`/internalsearch/search?q=${encodeURIComponent(searchTerm.trim())}`)
+      setSearchTerm("")
+    }
+  }
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value)
+  }
+
+  // Handle Enter key in search input
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit(e)
+    }
+  }
+
   return (
     <header className="fixed top-0 inset-x-0 h-14 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-40">
       <div className="h-full px-2 sm:px-4 lg:px-8 flex items-center gap-2 sm:gap-4">
@@ -55,14 +78,18 @@ export default function Topbar() {
 
         {/* Center: Search - Hidden on mobile, shown on tablet+ */}
         <div className="flex-1 max-w-2xl mx-auto hidden sm:flex items-center">
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <Input
+              ref={searchInputRef}
               type="text"
               placeholder="Search or jump to..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onKeyDown={handleSearchKeyDown}
               className="pl-9 h-9 bg-white/70 text-sm"
             />
-          </div>
+          </form>
         </div>
 
         {/* Right: Help + User */}

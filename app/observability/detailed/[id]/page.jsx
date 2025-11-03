@@ -7,18 +7,24 @@ import TemperatureChart from '@/components/dashboard/TemperatureChart'
 import NetworkConnectivityCharts from '@/components/dashboard/NetworkConnectivityCharts'
 import RFMetrics from '@/components/dashboard/RFMetrics'
 import OpticalCharts from '@/components/dashboard/OpticalCharts'
+import SystemTopbar from '@/components/observability/SystemTopbar'
+import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
 
 export default function DetailedSystemPage({ params }) {
   const { id } = params || {}
+  const { systemsById } = useSystemSelectionStore()
+  const selected = systemsById[id]
+  const availability = selected?.achievedSla ? Number(String(selected.achievedSla).replace('%','')) : undefined
 
   return (
     <AuthGuard>
       <div className="space-y-8">
-        {/* 5. DETAILED SYSTEM STATUS HEADER */}
-        <SectionHeader title="DETAILED SYSTEM" subtitle="STATUS" />
+
+        {/* Top bar with system name, status and quick actions */}
+        <SystemTopbar systemId={id} />
 
         {/* 6. SYSTEM HEALTH CARDS */}
-        <SystemHealthCards />
+        <SystemHealthCards availability={availability} />
 
         {/* 7. TEMPERATURE MONITORING CHART */}
         <TemperatureChart />

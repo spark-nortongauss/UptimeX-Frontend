@@ -41,7 +41,10 @@ function DonutGauge({ value = 0 }) {
   )
 }
 
-export default function SystemHealthCards() {
+export default function SystemHealthCards({ availability }) {
+  const availabilityValue = typeof availability === 'number' && !Number.isNaN(availability)
+    ? Math.max(0, Math.min(100, Number(availability.toFixed(2))))
+    : 0
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
@@ -60,7 +63,7 @@ export default function SystemHealthCards() {
           <CardTitle>Overall Availability</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center">
-          <DonutGauge value={99.5} />
+          <DonutGauge value={availabilityValue} />
         </CardContent>
       </Card>
       

@@ -6,6 +6,7 @@ import AuthGuard from '@/components/AuthGuard'
 import { zabbixService } from '@/lib/services/zabbixService'
 import { useZabbixStore } from '@/lib/stores/zabbixStore'
 import { geocodingService } from '@/lib/services/geocodingService'
+import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
 
 // Status badge component with color coding
 const StatusBadge = ({ status }) => {
@@ -38,7 +39,11 @@ export default function DetailedPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [systems, setSystems] = useState([])
   const [loading, setLoading] = useState(true)
+  const { setSystems: cacheSystems, selectSystem } = useSystemSelectionStore()
+  const [currentPage, setCurrentPage] = useState(1)
   const { problems, fetchProblems } = useZabbixStore()
+  
+  const ROWS_PER_PAGE = 10
 
   // Determine highest severity per host and map to page status
   const hostIdToStatus = useMemo(() => {
@@ -158,6 +163,8 @@ export default function DetailedPage() {
           console.log('Geocoded systems:', geocodedSystems)
           if (mounted) {
             setSystems(geocodedSystems)
+            // cache systems for downstream pages/components
+            cacheSystems(geocodedSystems)
             setLoading(false)
           }
         } else {
@@ -185,17 +192,49 @@ export default function DetailedPage() {
     }
   }, [hostIdToStatus])
 
+  // Filter by System Name only (not ID)
   const filteredSystems = useMemo(() => {
     if (!searchTerm) return systems
-    const term = searchTerm.toLowerCase()
+    const term = searchTerm.toLowerCase().trim()
     return systems.filter(system =>
-      String(system.id).toLowerCase().includes(term) ||
       String(system.name).toLowerCase().includes(term)
     )
   }, [searchTerm, systems])
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredSystems.length / ROWS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ROWS_PER_PAGE
+  const endIndex = startIndex + ROWS_PER_PAGE
+  const paginatedSystems = useMemo(() => {
+    return filteredSystems.slice(startIndex, endIndex)
+  }, [filteredSystems, startIndex, endIndex])
+
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm])
+
+  // Reset to page 1 when filtered systems change
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1)
+    }
+  }, [filteredSystems.length, totalPages, currentPage])
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value)
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
   }
 
   return (
@@ -212,12 +251,17 @@ export default function DetailedPage() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Enter the system name or ID"
+                placeholder="Enter the system name"
                 value={searchTerm}
                 onChange={handleSearch}
                 className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+            {searchTerm && (
+              <p className="mt-2 text-sm text-gray-600">
+                Found {filteredSystems.length} system{filteredSystems.length !== 1 ? 's' : ''} matching "{searchTerm}"
+              </p>
+            )}
           </div>
 
           {/* Data Table */}
@@ -238,42 +282,43 @@ export default function DetailedPage() {
                 </div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        System ID
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        System Name
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        Current Status
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        Target SLA
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        Achieved SLA
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        System Type
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        System Location
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                        Created At
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredSystems.map((system) => (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          System ID
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          System Name
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          Current Status
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          Target SLA
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          Achieved SLA
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          System Type
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          System Location
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                          Created At
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {paginatedSystems.map((system) => (
                       <tr 
                         key={system.id} 
                         className="hover:bg-gray-50 cursor-pointer"
-                        onClick={() => router.push(`/observability/detailed/${system.id}`)}
+                        onClick={() => { selectSystem(system.id, system); router.push(`/observability/detailed/${system.id}`) }}
                         role="button"
                         aria-label={`View details for system ${system.id}`}
                       >
@@ -302,10 +347,49 @@ export default function DetailedPage() {
                           <div className="truncate">{system.createdAt}</div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-4 px-3 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">
+                        Showing {startIndex + 1} to {Math.min(endIndex, filteredSystems.length)} of {filteredSystems.length} results
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                          currentPage === 1
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      <span className="text-sm text-gray-700 px-2">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                          currentPage === totalPages
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -329,12 +413,13 @@ export default function DetailedPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
-                {filteredSystems.map((system) => (
+              <>
+                <div className="space-y-3">
+                  {paginatedSystems.map((system) => (
                   <div 
                     key={system.id} 
                     className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 cursor-pointer"
-                    onClick={() => router.push(`/observability/detailed/${system.id}`)}
+                    onClick={() => { selectSystem(system.id, system); router.push(`/observability/detailed/${system.id}`) }}
                     role="button"
                     aria-label={`View details for system ${system.id}`}
                   >
@@ -368,9 +453,46 @@ export default function DetailedPage() {
                     <div className="mt-2 pt-2 border-t border-gray-200">
                       <p className="text-xs text-gray-500 truncate">Location: {system.location}</p>
                     </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Mobile Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-4 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-sm text-gray-700">
+                      Showing {startIndex + 1} to {Math.min(endIndex, filteredSystems.length)} of {filteredSystems.length}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                          currentPage === 1
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      <span className="text-sm text-gray-700 px-2">
+                        {currentPage} / {totalPages}
+                      </span>
+                      <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                          currentPage === totalPages
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
