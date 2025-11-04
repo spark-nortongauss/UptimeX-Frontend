@@ -21,10 +21,8 @@ export default function Header() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Monitor className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">UptimeX</span>
+            <img src="/assets/observone_logo_1080p.png" alt="ObservOne logo" className="w-8 h-8 rounded-lg object-contain" />
+            <span className="text-xl font-bold text-gray-900">ObservOne</span>
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -45,7 +43,7 @@ export default function Header() {
                           >
                             <Monitor className="h-6 w-6 text-white" />
                             <div className="mb-2 mt-4 text-lg font-medium text-white">
-                              UptimeX Platform
+                              ObservOne Platform
                             </div>
                             <p className="text-sm leading-tight text-white/90">
                               Comprehensive monitoring and observability solution for modern applications.

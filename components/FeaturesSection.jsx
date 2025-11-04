@@ -114,7 +114,7 @@ export default function FeaturesSection() {
             Trusted by thousands of companies worldwide
           </h3>
           <p className="text-gray-300 text-lg mb-12 max-w-2xl mx-auto">
-            Join the growing community of developers and businesses who rely on UptimeX for their monitoring needs.
+            Join the growing community of developers and businesses who rely on ObservOne for their monitoring needs.
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">

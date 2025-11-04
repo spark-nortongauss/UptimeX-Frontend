@@ -67,14 +67,14 @@ export default function AboutSection() {
         >
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-800 text-sm font-medium mb-4">
             <Heart className="w-4 h-4 mr-2" />
-            About UptimeX
+            About ObservOne
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Built by developers,
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> for developers</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We started UptimeX because we experienced the pain of unreliable monitoring tools firsthand. Our mission is to provide the most reliable, intuitive, and powerful monitoring platform for modern applications.
+            We started ObservOne because we experienced the pain of unreliable monitoring tools firsthand. Our mission is to provide the most reliable, intuitive, and powerful monitoring platform for modern applications.
           </p>
         </motion.div>
 
@@ -89,10 +89,10 @@ export default function AboutSection() {
             <h3 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h3>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
-                Founded in 2023 by a team of seasoned engineers from Google, Netflix, and Uber, UptimeX was born out of frustration with existing monitoring solutions that were either too complex, too expensive, or simply unreliable.
+                Founded in 2023 by a team of seasoned engineers from Google, Netflix, and Uber, ObservOne was born out of frustration with existing monitoring solutions that were either too complex, too expensive, or simply unreliable.
               </p>
               <p>
-                We believe that monitoring shouldn't be an afterthought. It should be simple to set up, reliable to depend on, and powerful enough to grow with your business. That's why we built UptimeX from the ground up with these principles in mind.
+                We believe that monitoring shouldn't be an afterthought. It should be simple to set up, reliable to depend on, and powerful enough to grow with your business. That's why we built ObservOne from the ground up with these principles in mind.
               </p>
               <p>
                 Today, we're proud to serve thousands of companies worldwide, from startups to Fortune 500 enterprises, helping them maintain perfect uptime and deliver exceptional user experiences.

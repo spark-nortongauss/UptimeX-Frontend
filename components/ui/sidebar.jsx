@@ -146,7 +146,9 @@ const Sidebar = React.forwardRef((
   },
   ref
 ) => {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
+  // Track if the sidebar was auto-expanded due to hover while in collapsed state
+  const hoverExpandedRef = React.useRef(false)
 
   if (collapsible === "none") {
     return (
@@ -185,6 +187,22 @@ const Sidebar = React.forwardRef((
     );
   }
 
+  const handleMouseEnter = React.useCallback(() => {
+    if (isMobile) return
+    if (state === "collapsed") {
+      hoverExpandedRef.current = true
+      setOpen(true)
+    }
+  }, [isMobile, state, setOpen])
+
+  const handleMouseLeave = React.useCallback(() => {
+    if (isMobile) return
+    if (hoverExpandedRef.current) {
+      hoverExpandedRef.current = false
+      setOpen(false)
+    }
+  }, [isMobile, setOpen])
+
   return (
     <div
       ref={ref}
@@ -215,6 +233,8 @@ const Sidebar = React.forwardRef((
             : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className
         )}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         {...props}>
         <div
           data-sidebar="sidebar"

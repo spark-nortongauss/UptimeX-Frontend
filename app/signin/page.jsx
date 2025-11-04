@@ -86,7 +86,7 @@ export default function SignInPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      description="Sign in to continue to UptimeX"
+      description="Sign in to continue to ObservOne"
       linkText="Don't have an account?"
       linkHref="/signup"
       linkLabel="Sign up"

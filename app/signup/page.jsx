@@ -62,7 +62,7 @@ export default function SignUpPage() {
   return (
     <AuthLayout
       title="Sign up"
-      description="Create an account to start using UptimeX"
+      description="Create an account to start using ObservOne"
       linkText="Already registered?"
       linkHref="/signin"
       linkLabel="Sign in"

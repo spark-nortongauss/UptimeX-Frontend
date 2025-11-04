@@ -9,9 +9,11 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarInput,
 } from "@/components/ui/sidebar"
 import {
   Eye,
@@ -37,6 +39,7 @@ import {
 } from "lucide-react"
 import { useAuthStore } from "@/lib/stores/authStore"
 import { toast } from "sonner"
+import { useUIStore } from "@/lib/stores/uiStore"
 
 const navigationItems = [
   {
@@ -85,6 +88,7 @@ export default function AppSidebar() {
   const router = useRouter()
   const { signOut } = useAuthStore()
   const [expandedGroups, setExpandedGroups] = useState(new Set())
+  const { sidebarSearch, setSidebarSearch } = useUIStore()
 
   const handleLogout = async () => {
     try {
@@ -114,12 +118,39 @@ export default function AppSidebar() {
     })
   }
 
+  const normalizedQuery = sidebarSearch.trim().toLowerCase()
+  const filteredSections = normalizedQuery
+    ? navigationItems
+        .map((section) => ({
+          ...section,
+          items: section.items.filter(
+            (it) =>
+              it.label.toLowerCase().includes(normalizedQuery) ||
+              it.href.toLowerCase().includes(normalizedQuery)
+          ),
+        }))
+        .filter((s) => s.items.length > 0)
+    : navigationItems
+
   return (
     <Sidebar collapsible="icon" variant="sidebar">
       <SidebarContent className="pt-20">
-      {navigationItems.map((section) => {
+        {/* Compact sidebar search */}
+        <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
+          <div className="relative px-2">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <SidebarInput
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              placeholder="Search menu"
+              className="pl-8 h-8 text-xs"
+            />
+          </div>
+        </SidebarHeader>
+      {filteredSections.map((section) => {
         const SectionIcon = section.icon
-        const isExpanded = expandedGroups.has(section.title)
+        const isSearching = normalizedQuery.length > 0
+        const isExpanded = isSearching || expandedGroups.has(section.title)
         const hasSubItems = section.items.length > 0
 
         return (

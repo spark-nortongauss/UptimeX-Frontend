@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "UptimeX - Monitor Your Services",
+  title: "ObservOne - Monitor Your Services",
   description: "Professional uptime monitoring for your web services",
 };
 

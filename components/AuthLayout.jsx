@@ -77,12 +77,10 @@ export default function AuthLayout({
         
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-8">
-              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center mr-4">
-                <span className="text-2xl font-bold text-gray-900">UX</span>
-              </div>
-              <h1 className="text-4xl font-bold">UptimeX</h1>
+            <div className="text-center">
+            <div className="flex items-center justify-center gap-1 md:gap-1.5 mb-3 mr-12">
+                <img src="/assets/observone_icon_1080p.png" alt="ObservOne icon" className="h-12 md:h-16 lg:h-20 w-auto -mr-3 md:-mr-4 mt-3" />
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-none">ObservOne</h1>
             </div>
             <p className="text-xl text-gray-300 max-w-md">
               Unlock your project performance with advanced monitoring and analytics
