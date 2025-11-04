@@ -33,31 +33,31 @@ export default function SystemTopbar({ systemId }) {
   const system = systemsById[systemId]
 
   return (
-    <div className="w-full bg-white border rounded-lg p-4 mb-6">
+    <div className="w-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-4 mb-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <div className="text-sm text-gray-500">System Name</div>
-          <div className="text-xl font-semibold text-gray-900">
+          <div className="text-sm text-gray-500 dark:text-gray-400">System Name</div>
+          <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {system?.name || systemId}
           </div>
         </div>
 
         <div className="flex items-center gap-6 w-full sm:w-auto">
           <div className="flex flex-col gap-1">
-            <div className="text-sm text-gray-500">Current Status</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Current Status</div>
             <div>
               <StatusBadge status={system?.status} />
             </div>
           </div>
 
-          <div className="hidden sm:block w-px h-10 bg-gray-200" />
+          <div className="hidden sm:block w-px h-10 bg-gray-200 dark:bg-neutral-800" />
 
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline">Ping</Button>
-            <Button size="sm" variant="outline">Inventory</Button>
-            <Button size="sm" variant="outline">Download</Button>
-            <Button size="sm" variant="outline">Export</Button>
-            <Button size="sm">Report</Button>
+            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">Ping</Button>
+            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">Inventory</Button>
+            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">Download</Button>
+            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">Export</Button>
+            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">Report</Button>
           </div>
         </div>
       </div>

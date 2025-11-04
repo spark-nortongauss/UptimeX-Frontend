@@ -35,6 +35,11 @@ export default function ClientLayout({ children }) {
   const showLayout = shouldShowLayout(pathname || "/")
 
   if (!showLayout) {
+    // Make sure no global dark class leaks onto auth/public pages
+    if (typeof window !== 'undefined') {
+      document.documentElement.classList.remove('dark')
+      document.body?.classList?.remove('dark')
+    }
     return children
   }
 

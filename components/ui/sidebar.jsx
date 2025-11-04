@@ -56,6 +56,8 @@ const SidebarProvider = React.forwardRef((
 ) => {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
+  // Track whether user explicitly pinned the sidebar open via the trigger
+  const pinnedRef = React.useRef(false)
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -108,6 +110,9 @@ const SidebarProvider = React.forwardRef((
     openMobile,
     setOpenMobile,
     toggleSidebar,
+    // Expose pin controls so the trigger can persist open state
+    getPinned: () => pinnedRef.current,
+    setPinned: (val) => { pinnedRef.current = Boolean(val) },
   }), [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar])
 
   return (
@@ -149,6 +154,8 @@ const Sidebar = React.forwardRef((
   const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
   // Track if the sidebar was auto-expanded due to hover while in collapsed state
   const hoverExpandedRef = React.useRef(false)
+  // Access pinned state from provider
+  const { getPinned } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -199,9 +206,12 @@ const Sidebar = React.forwardRef((
     if (isMobile) return
     if (hoverExpandedRef.current) {
       hoverExpandedRef.current = false
-      setOpen(false)
+      // Only collapse back if user hasn't pinned it open via trigger
+      if (!getPinned()) {
+        setOpen(false)
+      }
     }
-  }, [isMobile, setOpen])
+  }, [isMobile, setOpen, getPinned])
 
   return (
     <div
@@ -248,7 +258,7 @@ const Sidebar = React.forwardRef((
 Sidebar.displayName = "Sidebar"
 
 const SidebarTrigger = React.forwardRef(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state, setPinned } = useSidebar()
 
   return (
     <Button
@@ -259,6 +269,9 @@ const SidebarTrigger = React.forwardRef(({ className, onClick, ...props }, ref) 
       className={cn("h-7 w-7", className)}
       onClick={(event) => {
         onClick?.(event)
+        // If currently collapsed, user intends to pin open; if expanded, unpin
+        const willExpand = state === "collapsed"
+        setPinned(willExpand)
         toggleSidebar()
       }}
       {...props}>

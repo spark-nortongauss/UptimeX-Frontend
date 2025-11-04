@@ -239,11 +239,11 @@ export default function DetailedPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50">
-        <div className="px-4 sm:px-6 lg:px-8 py-6">
+      <div className="min-h-screen text-gray-900 dark:text-gray-100">
+        <div className="">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">SELECT THE SYSTEM</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">SELECT THE SYSTEM</h1>
           </div>
 
           {/* Search Bar */}
@@ -254,18 +254,18 @@ export default function DetailedPage() {
                 placeholder="Enter the system name"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 dark:border-neutral-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
             {searchTerm && (
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Found {filteredSystems.length} system{filteredSystems.length !== 1 ? 's' : ''} matching "{searchTerm}"
               </p>
             )}
           </div>
 
           {/* Data Table */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
@@ -275,8 +275,8 @@ export default function DetailedPage() {
             ) : filteredSystems.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <p className="text-gray-600 text-lg">No systems found</p>
-                  <p className="text-gray-500 text-sm mt-2">
+                  <p className="text-gray-600 dark:text-gray-300 text-lg">No systems found</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
                     {searchTerm ? 'Try adjusting your search terms' : 'No data available from Zabbix'}
                   </p>
                 </div>
@@ -284,66 +284,66 @@ export default function DetailedPage() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="w-full divide-y divide-gray-200 dark:divide-neutral-800">
+                    <thead className="bg-gray-50 dark:bg-neutral-900">
                       <tr>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           System ID
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           System Name
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           Current Status
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           Target SLA
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           Achieved SLA
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           System Type
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           System Location
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
                           Created At
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-neutral-900 divide-y divide-gray-200 dark:divide-neutral-800">
                       {paginatedSystems.map((system) => (
                       <tr 
                         key={system.id} 
-                        className="hover:bg-gray-50 cursor-pointer"
+                        className="hover:bg-gray-50 dark:hover:bg-neutral-800/60 cursor-pointer"
                         onClick={() => { selectSystem(system.id, system); router.push(`/observability/detailed/${system.id}`) }}
                         role="button"
                         aria-label={`View details for system ${system.id}`}
                       >
-                        <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate">{system.id}</div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate">{system.name}</div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <StatusBadge status={system.status} />
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate">{system.targetSla}</div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate">{system.achievedSla}</div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate">{system.type}</div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate" title={system.location}>{system.location}</div>
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
                           <div className="truncate">{system.createdAt}</div>
                         </td>
                       </tr>
@@ -354,9 +354,9 @@ export default function DetailedPage() {
                 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="mt-4 px-3 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+                  <div className="mt-4 px-3 sm:px-6 py-4 border-t border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
                         Showing {startIndex + 1} to {Math.min(endIndex, filteredSystems.length)} of {filteredSystems.length} results
                       </span>
                     </div>
@@ -366,8 +366,8 @@ export default function DetailedPage() {
                         disabled={currentPage === 1}
                         className={`px-4 py-2 text-sm font-medium rounded-md ${
                           currentPage === 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                            ? 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
                         Previous
@@ -380,8 +380,8 @@ export default function DetailedPage() {
                         disabled={currentPage === totalPages}
                         className={`px-4 py-2 text-sm font-medium rounded-md ${
                           currentPage === totalPages
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                            ? 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
                         Next
@@ -399,15 +399,15 @@ export default function DetailedPage() {
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                  <p className="text-gray-600 text-sm">Loading...</p>
-                  <p className="text-gray-500 text-xs mt-1">Converting coordinates...</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">Loading...</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Converting coordinates...</p>
                 </div>
               </div>
             ) : filteredSystems.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
-                  <p className="text-gray-600">No systems found</p>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="text-gray-600 dark:text-gray-300">No systems found</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                     {searchTerm ? 'Try adjusting your search terms' : 'No data available'}
                   </p>
                 </div>
@@ -418,15 +418,15 @@ export default function DetailedPage() {
                   {paginatedSystems.map((system) => (
                   <div 
                     key={system.id} 
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 cursor-pointer"
+                    className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-800 p-3 cursor-pointer"
                     onClick={() => { selectSystem(system.id, system); router.push(`/observability/detailed/${system.id}`) }}
                     role="button"
                     aria-label={`View details for system ${system.id}`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 text-sm truncate">{system.id}</h3>
-                        <p className="text-xs text-gray-600 truncate">{system.name}</p>
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{system.id}</h3>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 truncate">{system.name}</p>
                       </div>
                       <div className="ml-2 shrink-0">
                         <StatusBadge status={system.status} />
@@ -434,24 +434,24 @@ export default function DetailedPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-gray-500">Target SLA:</span>
+                        <span className="text-gray-500 dark:text-gray-400">Target SLA:</span>
                         <p className="font-medium truncate">{system.targetSla}</p>
                       </div>
                       <div>
-                        <span className="text-gray-500">Achieved SLA:</span>
+                        <span className="text-gray-500 dark:text-gray-400">Achieved SLA:</span>
                         <p className="font-medium truncate">{system.achievedSla}</p>
                       </div>
                       <div className="col-span-2">
-                        <span className="text-gray-500">Type:</span>
+                        <span className="text-gray-500 dark:text-gray-400">Type:</span>
                         <p className="font-medium truncate">{system.type}</p>
                       </div>
                       <div className="col-span-2">
-                        <span className="text-gray-500">Created:</span>
+                        <span className="text-gray-500 dark:text-gray-400">Created:</span>
                         <p className="font-medium text-xs">{system.createdAt}</p>
                       </div>
                     </div>
                     <div className="mt-2 pt-2 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 truncate">Location: {system.location}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Location: {system.location}</p>
                     </div>
                     </div>
                   ))}
@@ -459,8 +459,8 @@ export default function DetailedPage() {
                 
                 {/* Mobile Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="mt-4 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-sm text-gray-700">
+                  <div className="mt-4 py-4 border-t border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
                       Showing {startIndex + 1} to {Math.min(endIndex, filteredSystems.length)} of {filteredSystems.length}
                     </div>
                     <div className="flex items-center gap-2">
@@ -469,13 +469,13 @@ export default function DetailedPage() {
                         disabled={currentPage === 1}
                         className={`px-4 py-2 text-sm font-medium rounded-md ${
                           currentPage === 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                            ? 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
                         Previous
                       </button>
-                      <span className="text-sm text-gray-700 px-2">
+                      <span className="text-sm text-gray-700 dark:text-gray-300 px-2">
                         {currentPage} / {totalPages}
                       </span>
                       <button
@@ -483,8 +483,8 @@ export default function DetailedPage() {
                         disabled={currentPage === totalPages}
                         className={`px-4 py-2 text-sm font-medium rounded-md ${
                           currentPage === totalPages
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                            ? 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
                         Next

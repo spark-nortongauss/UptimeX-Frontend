@@ -14,6 +14,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarInput,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import {
   Eye,
@@ -89,6 +91,7 @@ export default function AppSidebar() {
   const { signOut } = useAuthStore()
   const [expandedGroups, setExpandedGroups] = useState(new Set())
   const { sidebarSearch, setSidebarSearch } = useUIStore()
+  const { state } = useSidebar()
 
   const handleLogout = async () => {
     try {
@@ -134,10 +137,23 @@ export default function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
-      <SidebarContent className="pt-20">
+      {/* Logo and Sidebar Trigger Header */}
+      <SidebarHeader className="!flex-row h-14 border-sidebar-border !p-2 flex items-center gap-2 shrink-0">
+        {/* Logo only when sidebar is expanded */}
+        {state === "expanded" && (
+          <Link href="/observability/overview" className="flex items-center gap-2 shrink-0">
+            <img src="/assets/observone_logo_1080p.png" alt="ObservOne logo" className="h-20 w-auto object-contain  ml-1 mt-2" />
+          </Link>
+        )}
+
+        {/* Sidebar trigger - aligned with menu items */}
+        <SidebarTrigger className="text-sidebar-foreground hover:text-sidebar-accent-foreground shrink-0 ml-auto mr-1" />
+      </SidebarHeader>
+
+      <SidebarContent>
         {/* Compact sidebar search */}
         <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
-          <div className="relative px-2">
+          <div className="relative px-2 mt-8">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <SidebarInput
               value={sidebarSearch}
