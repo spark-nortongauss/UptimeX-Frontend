@@ -36,7 +36,7 @@ const SocialIcon = ({ provider, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 social-button"
+      className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 transition-colors"
     >
       {icons[provider]}
     </button>
@@ -63,11 +63,10 @@ export default function AuthLayout({
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-white">
       {/* Left Panel - Background and Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative auth-background">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700">
         {/* Background Pattern */}
-        <div className="absolute inset-0 auth-pattern"></div>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -77,12 +76,12 @@ export default function AuthLayout({
         
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
-            <div className="text-center">
+          <div className="text-center">
             <div className="flex items-center justify-center gap-1 md:gap-1.5 mb-3 mr-12">
-                <img src="/assets/observone_icon_1080p.png" alt="ObservOne icon" className="h-12 md:h-16 lg:h-20 w-auto -mr-3 md:-mr-4 mt-3" />
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-none">ObservOne</h1>
+              <img src="/assets/observone_icon_1080p.png" alt="ObservOne icon" className="h-12 md:h-16 lg:h-20 w-auto -mr-3 md:-mr-4 mt-3" />
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-none">ObservOne</h1>
             </div>
-            <p className="text-xl text-gray-300 max-w-md">
+            <p className="text-xl text-gray-100 max-w-md">
               Unlock your project performance with advanced monitoring and analytics
             </p>
           </div>
@@ -90,15 +89,15 @@ export default function AuthLayout({
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl">
-            <CardHeader className="text-center pb-8">
+          <Card className="border-0 shadow-2xl bg-white">
+            <CardHeader className="text-center pb-8 bg-white">
               <CardTitle className="text-3xl font-bold text-gray-900">{title}</CardTitle>
               <CardDescription className="text-gray-600 text-lg">{description}</CardDescription>
             </CardHeader>
             
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 bg-white">
               {children}
 
               {showSocial && (

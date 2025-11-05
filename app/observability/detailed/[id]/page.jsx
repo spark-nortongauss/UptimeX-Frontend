@@ -11,8 +11,10 @@ import SystemTopbar from '@/components/observability/SystemTopbar'
 import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
 import { useEffect, useMemo } from 'react'
 import { zabbixService } from '@/lib/services/zabbixService'
+import { useTranslations } from 'next-intl'
 
 export default function DetailedSystemPage({ params }) {
+  const t = useTranslations('DetailedSystem.headers')
   const { id } = params || {}
   const { systemsById, selectSystem } = useSystemSelectionStore()
   const selected = systemsById[id]
@@ -77,19 +79,19 @@ export default function DetailedSystemPage({ params }) {
         <TemperatureChart />
 
         {/* 8. WAN LINK STATUS HEADER */}
-        <SectionHeader title="WAN LINK" subtitle="STATUS" />
+        <SectionHeader title={t('wanLink')} subtitle={t('status')} />
 
         {/* 9. NETWORK CONNECTIVITY CHARTS */}
         <NetworkConnectivityCharts />
 
         {/* 10. RF STATUS HEADER */}
-        <SectionHeader title="SYSTEM RF" subtitle="STATUS" />
+        <SectionHeader title={t('systemRf')} subtitle={t('status')} />
 
         {/* 11. RF POWER METRICS */}
         <RFMetrics />
 
         {/* 12. OPTICAL STATUS HEADER */}
-        <SectionHeader title="SYSTEM OPTICAL" subtitle="STATUS" />
+        <SectionHeader title={t('systemOptical')} subtitle={t('status')} />
 
         {/* 13. OPTICAL SIGNAL CHARTS */}
         <OpticalCharts />

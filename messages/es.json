@@ -1,0 +1,193 @@
+{
+  "Header": {
+    "products": "Productos",
+    "solutions": "Soluciones",
+    "pricing": "Precios",
+    "about": "Acerca de",
+    "signup": "Registrarse",
+    "platform": "Plataforma ObservOne",
+    "platform_desc": "Solución integral de monitorización y observabilidad para aplicaciones modernas.",
+    "by_industry": "Por industria",
+    "by_team_size": "Por tamaño de equipo",
+    "monitoring": "Monitorización",
+    "monitoring_desc": "Monitorización en tiempo real de aplicaciones e infraestructura.",
+    "security": "Seguridad",
+    "security_desc": "Monitorización de seguridad avanzada y detección de amenazas.",
+    "ecommerce": "Comercio electrónico",
+    "ecommerce_desc": "Supervisa el rendimiento de tu tienda y la experiencia del cliente.",
+    "fintech": "Fintech",
+    "fintech_desc": "Garantiza el cumplimiento y la seguridad para aplicaciones financieras.",
+    "startups": "Startups",
+    "startups_desc": "Monitorización escalable para empresas en crecimiento.",
+    "enterprise": "Empresas",
+    "enterprise_desc": "Monitorización de nivel empresarial con funciones avanzadas."
+  }
+  ,
+  "Topbar": {
+    "searchPlaceholder": "Buscar o ir a...",
+    "help": "Ayuda",
+    "notifications": "Notificaciones",
+    "settings": "Configuración"
+  },
+  "Overview": {
+    "hero": {
+      "titlePrefix": "ESTADO",
+      "titleHighlight": "GENERAL DE LA RED"
+    },
+    "map": {
+      "title": "Estado general de la red",
+      "loadingMap": "Cargando mapa...",
+      "loadingDevices": "Cargando ubicaciones de dispositivos...",
+      "loadError": "Error al cargar dispositivos"
+    },
+    "alarms": {
+      "title": "Alarmas activas",
+      "total": "Total",
+      "headers": ["Host", "Grupos", "Severidad", "Estado", "Problema", "Antigüedad", "Hora"],
+      "severities": { "CRITICAL": "CRÍTICO", "MAJOR": "MAYOR", "MINOR": "MENOR" }
+    },
+    "health": {
+      "overallStatus": "Estado general del sistema",
+      "up": "ARRIBA",
+      "overallAvailability": "Disponibilidad general",
+      "actions": "Acciones",
+      "openTicket": "Abrir ticket",
+      "addDevice": "+ Añadir dispositivo"
+    }
+  },
+  "Sidebar": {
+    "searchMenu": "Buscar en el menú",
+    "observability": "Observabilidad",
+    "overview": "Resumen",
+    "detailed": "Detallado",
+    "topologyMap": "Mapa de topología",
+    "events": "Eventos",
+    "incidents": "Incidentes",
+    "problems": "Problemas",
+    "services": "Servicios",
+    "reports": "Informes",
+    "support": "Soporte",
+    "tickets": "Tickets",
+    "majorIncidents": "Incidentes mayores",
+    "inventory": "Inventario",
+    "assets": "Activos",
+    "newProvisioning": "Nuevo aprovisionamiento",
+    "racks": "Racks",
+    "facilities": "Instalaciones",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  }
+  ,
+  "Detailed": {
+    "title": "SELECCIONA EL SISTEMA",
+    "searchPlaceholder": "Ingrese el nombre del sistema",
+    "found": "Se encontraron {count} sistema(s) que coinciden con \"{term}\"",
+    "noSystems": "No se encontraron sistemas",
+    "tryAdjust": "Intenta ajustar tus términos de búsqueda",
+    "noData": "No hay datos disponibles de Zabbix",
+    "columns": {
+      "systemId": "ID del sistema",
+      "systemName": "Nombre del sistema",
+      "currentStatus": "Estado actual",
+      "targetSla": "SLA objetivo",
+      "achievedSla": "SLA alcanzado",
+      "systemType": "Tipo de sistema",
+      "systemLocation": "Ubicación del sistema",
+      "createdAt": "Creado el"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "showing": "Mostrando {from} a {to} de {total} resultados",
+      "pageOf": "Página {page} de {pages}"
+    },
+    "mobile": {
+      "loading": "Cargando...",
+      "converting": "Convirtiendo coordenadas...",
+      "type": "Tipo:",
+      "created": "Creado:",
+      "location": "Ubicación:"
+    },
+    "status": {
+      "Normal": "Normal",
+      "Critical": "Crítico",
+      "Major": "Mayor",
+      "Minor": "Menor",
+      "Information": "Información"
+    }
+  },
+  "DetailedSystem": {
+    "headers": {
+      "wanLink": "ENLACE WAN",
+      "systemRf": "RF DEL SISTEMA",
+      "systemOptical": "ÓPTICA DEL SISTEMA",
+      "status": "ESTADO"
+    },
+    "temperature": {
+      "title": "Temperatura de la unidad maestra por sector",
+      "series": {
+        "biu1": "Alarma de temperatura BIU1",
+        "biu2": "Alarma de temperatura BIU2",
+        "biu3": "Alarma de temperatura BIU3"
+      }
+    },
+    "network": {
+      "icmp": "ESTADO ICMP DE RED WAN",
+      "latency": "ESTADO DE LATENCIA WAN",
+      "loss": "ESTADO DE PÉRDIDA ICMP WAN"
+    },
+    "topbar": {
+      "systemName": "Nombre del sistema",
+      "currentStatus": "Estado actual",
+      "inventory": "Inventario",
+      "download": "Descargar",
+      "export": "Exportar",
+      "report": "Informe"
+    }
+  },
+  "Auth": {
+    "signin": {
+      "title": "Bienvenido de nuevo",
+      "description": "Inicia sesión para continuar en ObservOne",
+      "noAccount": "¿No tienes una cuenta?",
+      "signup": "Regístrate",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "remember": "Recuérdame",
+      "forgot": "¿Olvidaste la contraseña?",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "or": "O continúa con",
+      "withGoogle": "Continuar con Google",
+      "withLinkedIn": "Continuar con LinkedIn",
+      "withMicrosoft": "Continuar con Microsoft",
+      "toastSuccess": "¡Inicio de sesión exitoso! Bienvenido de nuevo.",
+      "toastFail": "Error al iniciar sesión",
+      "toastGoogleFail": "Error al iniciar sesión con Google",
+      "toastLinkedInFail": "Error al iniciar sesión con LinkedIn",
+      "toastAzureFail": "Error al iniciar sesión con Azure"
+    },
+    "signup": {
+      "title": "Regístrate",
+      "description": "Crea una cuenta para empezar a usar ObservOne",
+      "already": "¿Ya estás registrado?",
+      "signin": "Iniciar sesión",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "terms": "Aceptas nuestros",
+      "termsLink": "Términos y Condiciones",
+      "and": "y",
+      "privacy": "Política de privacidad",
+      "submit": "Crear una cuenta",
+      "submitting": "Creando cuenta...",
+      "or": "O continúa con",
+      "withGoogle": "Continuar con Google",
+      "toastSuccess": "¡Cuenta creada con éxito! Por favor revisa tu correo para verificarla.",
+      "toastFail": "Error al crear la cuenta",
+      "toastGoogleFail": "Error al registrarse con Google"
+    }
+  }
+}
+
+

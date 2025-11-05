@@ -3,8 +3,10 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useZabbixStore } from '@/lib/stores/zabbixStore'
+import { useTranslations } from 'next-intl'
 
 export default function AlertSeverityCards() {
+  const t = useTranslations('Overview.alarms')
   const { problems } = useZabbixStore()
 
   // Count severity levels from the problems data
@@ -16,17 +18,17 @@ export default function AlertSeverityCards() {
 
   const severityData = [
     { 
-      label: 'CRITICAL', 
+      label: t('severities.CRITICAL'), 
       value: severityCounts.CRITICAL || 0, 
       className: 'bg-red-600 text-white' 
     },
     { 
-      label: 'MAJOR', 
+      label: t('severities.MAJOR'), 
       value: severityCounts.MAJOR || 0, 
       className: 'bg-orange-500 text-white' 
     },
     { 
-      label: 'MINOR', 
+      label: t('severities.MINOR'), 
       value: severityCounts.MINOR || 0, 
       className: 'bg-blue-600 text-white' 
     }

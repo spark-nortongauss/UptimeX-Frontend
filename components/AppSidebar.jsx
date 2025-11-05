@@ -42,56 +42,61 @@ import {
 import { useAuthStore } from "@/lib/stores/authStore"
 import { toast } from "sonner"
 import { useUIStore } from "@/lib/stores/uiStore"
+import { useTranslations } from "next-intl"
 
-const navigationItems = [
-  {
-    title: "Observability",
-    icon: Eye,
-    items: [
-      { label: "Overview", href: "/observability/overview", icon: BarChart3 },
-      { label: "Detailed", href: "/observability/detailed", icon: Search },
-      { label: "Topology Map", href: "/observability/topology", icon: Map },
-      { label: "Events", href: "/observability/events", icon: AlertTriangle },
-      { label: "Incidents", href: "/observability/incidents", icon: AlertCircle },
-      { label: "Problems", href: "/observability/problems", icon: Wrench },
-      { label: "Services", href: "/observability/services", icon: Server },
-      { label: "Reports", href: "/observability/reports", icon: FileText },
-    ]
-  },
-  {
-    title: "Support",
-    icon: Headphones,
-    items: [
-      { label: "Tickets", href: "/support/tickets", icon: Ticket },
-      { label: "Major Incidents", href: "/support/major-incidents", icon: AlertOctagon },
-      { label: "Problems", href: "/support/problems", icon: Bug },
-      { label: "Reports", href: "/support/reports", icon: FileText },
-    ]
-  },
-  {
-    title: "Inventory",
-    icon: Package,
-    items: [
-      { label: "Assets", href: "/inventory/assets", icon: Server },
-      { label: "New Provisioning", href: "/inventory/provisioning", icon: Plus },
-      { label: "Racks", href: "/inventory/racks", icon: Layers },
-      { label: "Facilities", href: "/inventory/facilities", icon: Building },
-    ]
-  },
-  {
-    title: "Settings",
-    icon: Settings,
-    items: []
-  }
-]
+function buildNavigationItems(t) {
+  return [
+    {
+      title: t("observability"),
+      icon: Eye,
+      items: [
+        { label: t("overview"), href: "/observability/overview", icon: BarChart3 },
+        { label: t("detailed"), href: "/observability/detailed", icon: Search },
+        { label: t("topologyMap"), href: "/observability/topology", icon: Map },
+        { label: t("events"), href: "/observability/events", icon: AlertTriangle },
+        { label: t("incidents"), href: "/observability/incidents", icon: AlertCircle },
+        { label: t("problems"), href: "/observability/problems", icon: Wrench },
+        { label: t("services"), href: "/observability/services", icon: Server },
+        { label: t("reports"), href: "/observability/reports", icon: FileText },
+      ]
+    },
+    {
+      title: t("support"),
+      icon: Headphones,
+      items: [
+        { label: t("tickets"), href: "/support/tickets", icon: Ticket },
+        { label: t("majorIncidents"), href: "/support/majorIncidents", icon: AlertOctagon },
+        { label: t("problems"), href: "/support/problems", icon: Bug },
+        { label: t("reports"), href: "/support/reports", icon: FileText },
+      ]
+    },
+    {
+      title: t("inventory"),
+      icon: Package,
+      items: [
+        { label: t("assets"), href: "/inventory/assets", icon: Server },
+        { label: t("newProvisioning"), href: "/inventory/provisioning", icon: Plus },
+        { label: t("racks"), href: "/inventory/racks", icon: Layers },
+        { label: t("facilities"), href: "/inventory/facilities", icon: Building },
+      ]
+    },
+    {
+      title: t("settings"),
+      icon: Settings,
+      items: []
+    }
+  ]
+}
 
 export default function AppSidebar() {
+  const t = useTranslations("Sidebar")
   const pathname = usePathname()
   const router = useRouter()
   const { signOut } = useAuthStore()
   const [expandedGroups, setExpandedGroups] = useState(new Set())
   const { sidebarSearch, setSidebarSearch } = useUIStore()
   const { state } = useSidebar()
+  const navigationItems = buildNavigationItems(t)
 
   const handleLogout = async () => {
     try {
@@ -152,13 +157,13 @@ export default function AppSidebar() {
 
       <SidebarContent>
         {/* Compact sidebar search */}
-        <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
+      <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
           <div className="relative px-2 mt-8">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <SidebarInput
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
-              placeholder="Search menu"
+              placeholder={t("searchMenu")}
               className="pl-8 h-8 text-xs"
             />
           </div>
@@ -230,7 +235,7 @@ export default function AppSidebar() {
               className="text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <LogOut />
-              <span>Logout</span>
+              <span>{t("logout")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

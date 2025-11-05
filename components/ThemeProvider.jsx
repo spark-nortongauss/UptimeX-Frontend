@@ -1,20 +1,18 @@
 "use client"
 
-import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { useEffect } from "react"
+import { useUIStore } from "@/lib/stores/uiStore"
 
 export default function ThemeProvider({ children }) {
-  return (
-    <NextThemesProvider
-      // Use a data-attribute so we can scope the real `.dark` class locally
-      // in layouts instead of applying globally on <html>
-      attribute="data-mode"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {children}
-    </NextThemesProvider>
-  )
+  const initializeTheme = useUIStore((state) => state.initializeTheme)
+
+  // Initialize theme on mount (only once)
+  useEffect(() => {
+    initializeTheme()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run once on mount
+
+  return <>{children}</>
 }
 
 

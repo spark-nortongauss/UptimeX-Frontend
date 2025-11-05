@@ -8,8 +8,10 @@ import { useState } from "react"
 import { useAuthStore } from "@/lib/stores/authStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 export default function SignUpPage() {
+  const t = useTranslations('Auth.signup')
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,11 +30,11 @@ export default function SignUpPage() {
       await signUp(formData.email, formData.password, {
         full_name: formData.name
       })
-      const successMessage = "Account created successfully! Please check your email to verify your account."
+      const successMessage = t('toastSuccess')
       toast.success(successMessage)
       // Don't redirect immediately, let user verify email first
     } catch (err) {
-      const errorMessage = err.message || "Failed to create account"
+      const errorMessage = err.message || t('toastFail')
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)
@@ -53,7 +55,7 @@ export default function SignUpPage() {
       await signInWithGoogle()
       // The redirect will be handled by the OAuth flow
     } catch (err) {
-      const errorMessage = err.message || "Failed to sign up with Google"
+      const errorMessage = err.message || t('toastGoogleFail')
       toast.error(errorMessage)
       setIsLoading(false)
     }
@@ -61,16 +63,16 @@ export default function SignUpPage() {
 
   return (
     <AuthLayout
-      title="Sign up"
-      description="Create an account to start using ObservOne"
-      linkText="Already registered?"
+      title={t('title')}
+      description={t('description')}
+      linkText={t('already')}
       linkHref="/signin"
-      linkLabel="Sign in"
+      linkLabel={t('signin')}
       showTerms={true}
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name" className="text-gray-700 font-medium">{t('name')}</Label>
           <Input 
             id="name" 
             name="name" 
@@ -78,12 +80,13 @@ export default function SignUpPage() {
             placeholder="John Doe" 
             value={formData.name}
             onChange={handleInputChange}
-            className="form-input"
+            className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+            style={{ backgroundColor: 'white', color: '#111827' }}
             required 
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-gray-700 font-medium">{t('email')}</Label>
           <Input 
             id="email" 
             name="email" 
@@ -91,12 +94,13 @@ export default function SignUpPage() {
             placeholder="you@example.com" 
             value={formData.email}
             onChange={handleInputChange}
-            className="form-input"
+            className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+            style={{ backgroundColor: 'white', color: '#111827' }}
             required 
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="text-gray-700 font-medium">{t('password')}</Label>
           <Input 
             id="password" 
             name="password" 
@@ -104,7 +108,8 @@ export default function SignUpPage() {
             placeholder="********" 
             value={formData.password}
             onChange={handleInputChange}
-            className="form-input"
+            className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+            style={{ backgroundColor: 'white', color: '#111827' }}
             required 
           />
         </div>
@@ -115,17 +120,17 @@ export default function SignUpPage() {
             type="checkbox" 
             checked={acceptTerms}
             onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 bg-white"
             required
           />
-          <Label htmlFor="terms" className="text-sm text-gray-600">
-            You Accept Our{" "}
+          <Label htmlFor="terms" className="text-sm text-gray-600 font-normal">
+            {t('terms')} {" "}
             <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
-              Terms And Conditions
+              {t('termsLink')}
             </a>{" "}
-            And{" "}
+            {t('and')} {" "}
             <a href="#" className="text-blue-600 hover:text-blue-700 hover:underline">
-              Privacy Policy
+              {t('privacy')}
             </a>
           </Label>
         </div>
@@ -135,15 +140,15 @@ export default function SignUpPage() {
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
           disabled={isLoading || !acceptTerms}
         >
-          {isLoading ? "Creating Account..." : "Create An Account"}
+          {isLoading ? t('submitting') : t('submit')}
         </Button>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+            <span className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+            <span className="bg-white px-2 text-gray-500">{t('or')}</span>
           </div>
         </div>
 
@@ -159,7 +164,7 @@ export default function SignUpPage() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          {isLoading ? "Signing up..." : "Continue with Google"}
+          {isLoading ? t('submitting') : t('withGoogle')}
         </Button>
       </form>
     </AuthLayout>

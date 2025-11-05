@@ -9,10 +9,13 @@ import { Input } from "@/components/ui/input"
 import { useSidebar } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/stores/authStore"
 import ThemeToggle from "@/components/ThemeToggle"
+import LanguageSwitcher from "@/components/LanguageSwitcher"
+import { useTranslations } from "next-intl"
 
 // Thin top navigation bar shown above the sidebar layout
 export default function Topbar() {
   const router = useRouter()
+  const t = useTranslations("Topbar")
   const { user } = useAuthStore()
   const { state, isMobile } = useSidebar()
   const [open, setOpen] = useState(false)
@@ -80,7 +83,7 @@ export default function Topbar() {
             <Input
               ref={searchInputRef}
               type="text"
-              placeholder="Search or jump to..."
+              placeholder={t("searchPlaceholder")}
               value={searchTerm}
               onChange={handleSearchChange}
               onKeyDown={handleSearchKeyDown}
@@ -89,14 +92,15 @@ export default function Topbar() {
           </form>
         </div>
 
-        {/* Right: Theme + Help + User */}
+        {/* Right: Language + Theme + Help + User */}
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <LanguageSwitcher />
           <ThemeToggle />
           {/* Help button - Hidden on very small screens */}
           <Button 
             variant="ghost" 
             size="icon" 
-            aria-label="Help" 
+            aria-label={t("help")}
             onClick={() => router.push("/help")}
             className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hidden xs:flex"
           >
@@ -125,8 +129,8 @@ export default function Topbar() {
                 </div>
                 <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
                 <div className="flex flex-col">
-                  <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => router.push("/alerts")}>Notifications</Button>
-                  <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => router.push("/settings")}>Settings</Button>
+                  <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => router.push("/alerts")}>{t("notifications")}</Button>
+                  <Button variant="ghost" className="justify-start h-8 sm:h-9 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800" onClick={() => router.push("/settings")}>{t("settings")}</Button>
                 </div>
               </div>
             )}

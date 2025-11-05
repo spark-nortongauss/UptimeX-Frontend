@@ -42,6 +42,8 @@ function DonutGauge({ value = 0 }) {
 }
 
 export default function SystemHealthCards({ availability }) {
+  const { useTranslations } = require('next-intl')
+  const t = useTranslations('Overview.health')
   const availabilityValue = typeof availability === 'number' && !Number.isNaN(availability)
     ? Math.max(0, Math.min(100, Number(availability.toFixed(2))))
     : 0
@@ -49,18 +51,18 @@ export default function SystemHealthCards({ availability }) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>Overall System Status</CardTitle>
+          <CardTitle>{t('overallStatus')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-36 grid place-items-center">
-            <div className="text-6xl font-extrabold text-primary">UP</div>
+            <div className="text-6xl font-extrabold text-primary">{t('up')}</div>
           </div>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader>
-          <CardTitle>Overall Availability</CardTitle>
+          <CardTitle>{t('overallAvailability')}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center">
           <DonutGauge value={availabilityValue} />
@@ -69,11 +71,11 @@ export default function SystemHealthCards({ availability }) {
       
       <Card>
         <CardHeader>
-          <CardTitle>Actions</CardTitle>
+          <CardTitle>{t('actions')}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center gap-3">
-          <Button>Open a Ticket</Button>
-          <Button variant="secondary">+ Add Device</Button>
+          <Button>{t('openTicket')}</Button>
+          <Button variant="secondary">{t('addDevice')}</Button>
         </CardContent>
       </Card>
     </div>

@@ -8,7 +8,9 @@ import AppLayout from "./AppLayout"
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname()
-  const { shouldShowLayout, setIsMobile } = useUIStore()
+  const shouldShowLayout = useUIStore((state) => state.shouldShowLayout)
+  const setIsMobile = useUIStore((state) => state.setIsMobile)
+  const isDark = useUIStore((state) => state.isDark)
   const { initialize, initialized } = useAuthStore()
 
   // Initialize on client side
@@ -34,12 +36,19 @@ export default function ClientLayout({ children }) {
   // Check if current route should show layout (sidebar/topbar)
   const showLayout = shouldShowLayout(pathname || "/")
 
-  if (!showLayout) {
-    // Make sure no global dark class leaks onto auth/public pages
+  // Apply theme to document root for auth pages too
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      document.documentElement.classList.remove('dark')
-      document.body?.classList?.remove('dark')
+      const root = document.documentElement
+      if (isDark) {
+        root.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+      }
     }
+  }, [isDark])
+
+  if (!showLayout) {
     return children
   }
 

@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { Toaster } from "@/components/ui/sonner";
 import ClientLayout from "@/components/ClientLayout";
 import ThemeProvider from "@/components/ThemeProvider";
+import IntlProvider from "@/components/IntlProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,13 +23,46 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const stored = localStorage.getItem('ui-store');
+                  if (stored) {
+                    const parsed = JSON.parse(stored);
+                    // Zustand persist stores as { state: {...}, version: 0 }
+                    const theme = parsed?.state?.theme || parsed?.theme;
+                    if (theme === 'dark') {
+                      document.documentElement.classList.add('dark');
+                    } else if (theme === 'light') {
+                      document.documentElement.classList.remove('dark');
+                    }
+                  } else {
+                    // Check system preference if no stored theme
+                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                      document.documentElement.classList.add('dark');
+                    }
+                  }
+                } catch (e) {
+                  // Ignore errors
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </ThemeProvider>
+        <IntlProvider>
+          <ThemeProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </ThemeProvider>
+        </IntlProvider>
         <Toaster />
       </body>
     </html>

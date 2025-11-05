@@ -1,0 +1,193 @@
+{
+  "Header": {
+    "products": "Produtos",
+    "solutions": "Soluções",
+    "pricing": "Preços",
+    "about": "Sobre",
+    "signup": "Cadastrar",
+    "platform": "Plataforma ObservOne",
+    "platform_desc": "Solução completa de monitoramento e observabilidade para aplicações modernas.",
+    "by_industry": "Por indústria",
+    "by_team_size": "Por tamanho da equipe",
+    "monitoring": "Monitoramento",
+    "monitoring_desc": "Monitoramento em tempo real de aplicações e infraestrutura.",
+    "security": "Segurança",
+    "security_desc": "Monitoramento de segurança avançado e detecção de ameaças.",
+    "ecommerce": "E-commerce",
+    "ecommerce_desc": "Monitore o desempenho da sua loja e a experiência do cliente.",
+    "fintech": "Fintech",
+    "fintech_desc": "Garanta conformidade e segurança para aplicações financeiras.",
+    "startups": "Startups",
+    "startups_desc": "Monitoramento escalável para empresas em crescimento.",
+    "enterprise": "Empresarial",
+    "enterprise_desc": "Monitoramento de nível empresarial com recursos avançados."
+  }
+  ,
+  "Topbar": {
+    "searchPlaceholder": "Pesquisar ou ir para...",
+    "help": "Ajuda",
+    "notifications": "Notificações",
+    "settings": "Configurações"
+  },
+  "Overview": {
+    "hero": {
+      "titlePrefix": "VISÃO",
+      "titleHighlight": "GERAL DA REDE"
+    },
+    "map": {
+      "title": "Status geral da rede",
+      "loadingMap": "Carregando mapa...",
+      "loadingDevices": "Carregando localizações dos dispositivos...",
+      "loadError": "Falha ao carregar dispositivos"
+    },
+    "alarms": {
+      "title": "Alarmes ativos",
+      "total": "Total",
+      "headers": ["Host", "Grupos", "Severidade", "Status", "Problema", "Idade", "Hora"],
+      "severities": { "CRITICAL": "CRÍTICO", "MAJOR": "MAIOR", "MINOR": "MENOR" }
+    },
+    "health": {
+      "overallStatus": "Status geral do sistema",
+      "up": "ATIVO",
+      "overallAvailability": "Disponibilidade geral",
+      "actions": "Ações",
+      "openTicket": "Abrir ticket",
+      "addDevice": "+ Adicionar dispositivo"
+    }
+  },
+  "Sidebar": {
+    "searchMenu": "Pesquisar no menu",
+    "observability": "Observabilidade",
+    "overview": "Visão geral",
+    "detailed": "Detalhado",
+    "topologyMap": "Mapa de topologia",
+    "events": "Eventos",
+    "incidents": "Incidentes",
+    "problems": "Problemas",
+    "services": "Serviços",
+    "reports": "Relatórios",
+    "support": "Suporte",
+    "tickets": "Tickets",
+    "majorIncidents": "Incidentes maiores",
+    "inventory": "Inventário",
+    "assets": "Ativos",
+    "newProvisioning": "Novo provisionamento",
+    "racks": "Racks",
+    "facilities": "Instalações",
+    "settings": "Configurações",
+    "logout": "Sair"
+  }
+  ,
+  "Detailed": {
+    "title": "SELECIONE O SISTEMA",
+    "searchPlaceholder": "Digite o nome do sistema",
+    "found": "Foram encontrados {count} sistema(s) que correspondem a \"{term}\"",
+    "noSystems": "Nenhum sistema encontrado",
+    "tryAdjust": "Tente ajustar seus termos de pesquisa",
+    "noData": "Sem dados disponíveis do Zabbix",
+    "columns": {
+      "systemId": "ID do sistema",
+      "systemName": "Nome do sistema",
+      "currentStatus": "Status atual",
+      "targetSla": "SLA alvo",
+      "achievedSla": "SLA alcançado",
+      "systemType": "Tipo de sistema",
+      "systemLocation": "Localização do sistema",
+      "createdAt": "Criado em"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Próximo",
+      "showing": "Mostrando {from} a {to} de {total} resultados",
+      "pageOf": "Página {page} de {pages}"
+    },
+    "mobile": {
+      "loading": "Carregando...",
+      "converting": "Convertendo coordenadas...",
+      "type": "Tipo:",
+      "created": "Criado:",
+      "location": "Localização:"
+    },
+    "status": {
+      "Normal": "Normal",
+      "Critical": "Crítico",
+      "Major": "Maior",
+      "Minor": "Menor",
+      "Information": "Informação"
+    }
+  },
+  "DetailedSystem": {
+    "headers": {
+      "wanLink": "LINK WAN",
+      "systemRf": "RF DO SISTEMA",
+      "systemOptical": "ÓPTICO DO SISTEMA",
+      "status": "STATUS"
+    },
+    "temperature": {
+      "title": "Temperatura da unidade mestre por setor",
+      "series": {
+        "biu1": "Alarme de temperatura BIU1",
+        "biu2": "Alarme de temperatura BIU2",
+        "biu3": "Alarme de temperatura BIU3"
+      }
+    },
+    "network": {
+      "icmp": "STATUS ICMP DA REDE WAN",
+      "latency": "STATUS DE LATÊNCIA WAN",
+      "loss": "STATUS DE PERDA ICMP WAN"
+    },
+    "topbar": {
+      "systemName": "Nome do sistema",
+      "currentStatus": "Status atual",
+      "inventory": "Inventário",
+      "download": "Baixar",
+      "export": "Exportar",
+      "report": "Relatório"
+    }
+  },
+  "Auth": {
+    "signin": {
+      "title": "Bem-vindo de volta",
+      "description": "Entre para continuar no ObservOne",
+      "noAccount": "Não tem uma conta?",
+      "signup": "Cadastrar",
+      "email": "E-mail",
+      "password": "Senha",
+      "remember": "Lembrar-me",
+      "forgot": "Esqueceu a senha?",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "or": "Ou continue com",
+      "withGoogle": "Continuar com o Google",
+      "withLinkedIn": "Continuar com o LinkedIn",
+      "withMicrosoft": "Continuar com a Microsoft",
+      "toastSuccess": "Login realizado com sucesso! Bem-vindo de volta.",
+      "toastFail": "Falha ao entrar",
+      "toastGoogleFail": "Falha ao entrar com o Google",
+      "toastLinkedInFail": "Falha ao entrar com o LinkedIn",
+      "toastAzureFail": "Falha ao entrar com o Azure"
+    },
+    "signup": {
+      "title": "Cadastrar",
+      "description": "Crie uma conta para começar a usar o ObservOne",
+      "already": "Já possui cadastro?",
+      "signin": "Entrar",
+      "name": "Nome",
+      "email": "E-mail",
+      "password": "Senha",
+      "terms": "Você aceita nossos",
+      "termsLink": "Termos e Condições",
+      "and": "e",
+      "privacy": "Política de Privacidade",
+      "submit": "Criar uma conta",
+      "submitting": "Criando conta...",
+      "or": "Ou continue com",
+      "withGoogle": "Continuar com o Google",
+      "toastSuccess": "Conta criada com sucesso! Verifique seu e-mail para confirmar.",
+      "toastFail": "Falha ao criar conta",
+      "toastGoogleFail": "Falha ao cadastrar com o Google"
+    }
+  }
+}
+
+

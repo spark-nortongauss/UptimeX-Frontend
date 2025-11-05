@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { useEffect, useMemo, useState } from 'react'
 import zabbixService from '@/lib/services/zabbixService'
+import { useTranslations } from 'next-intl'
 
 // Dynamically import the map with SSR disabled and proper error handling
 const DeviceMap = dynamic(() => import('./DeviceMap'), { 
@@ -12,13 +13,14 @@ const DeviceMap = dynamic(() => import('./DeviceMap'), {
     <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">Loading map...</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
       </div>
     </div>
   )
 })
 
 export default function GeographicMapPanel() {
+  const t = useTranslations('Overview.map')
   const [zoom, setZoom] = useState(2)
   const [devices, setDevices] = useState([])
   const [loading, setLoading] = useState(true)
@@ -67,7 +69,7 @@ export default function GeographicMapPanel() {
           .filter(Boolean)
         if (isMounted) setDevices(mapped)
       } catch (e) {
-        if (isMounted) setError(e?.message || 'Failed to load devices')
+        if (isMounted) setError(e?.message || t('loadError'))
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -79,7 +81,7 @@ export default function GeographicMapPanel() {
   return (
     <div className="relative overflow-hidden rounded-xl border bg-background">
       <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="font-semibold">Overall Network Status</h3>
+        <h3 className="font-semibold">{t('title')}</h3>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.max(2, z - 1))}>-</Button>
           <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.min(12, z + 1))}>+</Button>
@@ -90,7 +92,7 @@ export default function GeographicMapPanel() {
           <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Loading device locations...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('loadingDevices')}</p>
             </div>
           </div>
         ) : error ? (

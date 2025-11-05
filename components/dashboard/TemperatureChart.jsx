@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { useTranslations } from 'next-intl'
 
 const temperatureData = [
   { time: '00:00', BIU1: 34.8, BIU2: 47.0, BIU3: 51.0 },
@@ -13,10 +14,11 @@ const temperatureData = [
 ]
 
 export default function TemperatureChart() {
+  const t = useTranslations('DetailedSystem.temperature')
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Master Unit Temperature per Sector</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-80">
@@ -47,7 +49,7 @@ export default function TemperatureChart() {
                 dataKey="BIU1" 
                 stroke="#eab308" 
                 strokeWidth={2}
-                name="BIU1 Alarm de Temperatura"
+                name={t('series.biu1')}
                 dot={{ fill: '#eab308', strokeWidth: 2, r: 4 }}
               />
               <Line 
@@ -55,7 +57,7 @@ export default function TemperatureChart() {
                 dataKey="BIU2" 
                 stroke="#60a5fa" 
                 strokeWidth={2}
-                name="BIU2 Alarm de Temperatura"
+                name={t('series.biu2')}
                 dot={{ fill: '#60a5fa', strokeWidth: 2, r: 4 }}
               />
               <Line 
@@ -63,7 +65,7 @@ export default function TemperatureChart() {
                 dataKey="BIU3" 
                 stroke="#10b981" 
                 strokeWidth={2}
-                name="BIU3 Alarm de Temperatura"
+                name={t('series.biu3')}
                 dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
               />
             </LineChart>

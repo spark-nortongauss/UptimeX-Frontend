@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu"
 import { Menu, X, Monitor, Shield, BarChart3, Users } from "lucide-react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const t = useTranslations("Header")
 
   return (
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 z-50">
@@ -28,11 +30,13 @@ export default function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <NavigationMenu>
-              <NavigationMenuList>
+              <NavigationMenuList className="bg-white">
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>Products</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                  <NavigationMenuTrigger className="bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900 data-[state=open]:bg-gray-50">
+                    {t("products")}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="bg-white border border-gray-200">
+                    <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white">
                       <div className="row-span-3">
                         <NavigationMenuLink asChild>
                           <div
@@ -43,34 +47,34 @@ export default function Header() {
                           >
                             <Monitor className="h-6 w-6 text-white" />
                             <div className="mb-2 mt-4 text-lg font-medium text-white">
-                              ObservOne Platform
+                              {t("platform")}
                             </div>
                             <p className="text-sm leading-tight text-white/90">
-                              Comprehensive monitoring and observability solution for modern applications.
+                              {t("platform_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
                       </div>
                       <div className="grid gap-3">
                         <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-not-allowed pointer-events-none" aria-disabled="true" role="link" tabIndex={-1}>
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
                             <div className="flex items-center space-x-2">
-                              <BarChart3 className="h-4 w-4" />
-                              <div className="text-sm font-medium leading-none">Monitoring</div>
+                              <BarChart3 className="h-4 w-4 text-gray-700" />
+                            <div className="text-sm font-medium leading-none text-gray-900">{t("monitoring")}</div>
                             </div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Real-time application and infrastructure monitoring.
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
+                              {t("monitoring_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-not-allowed pointer-events-none" aria-disabled="true" role="link" tabIndex={-1}>
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
                             <div className="flex items-center space-x-2">
-                              <Shield className="h-4 w-4" />
-                              <div className="text-sm font-medium leading-none">Security</div>
+                              <Shield className="h-4 w-4 text-gray-700" />
+                            <div className="text-sm font-medium leading-none text-gray-900">{t("security")}</div>
                             </div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Advanced security monitoring and threat detection.
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
+                              {t("security_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
@@ -79,43 +83,45 @@ export default function Header() {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  <NavigationMenuTrigger className="bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900 data-[state=open]:bg-gray-50">
+                    {t("solutions")}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="bg-white border border-gray-200">
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white">
                       <div className="space-y-3">
-                        <h4 className="text-sm font-medium leading-none">By Industry</h4>
+                        <h4 className="text-sm font-medium leading-none text-gray-900">{t("by_industry")}</h4>
                         <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-not-allowed pointer-events-none" aria-disabled="true" role="link" tabIndex={-1}>
-                            <div className="text-sm font-medium leading-none">E-commerce</div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Monitor your online store performance and customer experience.
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
+                            <div className="text-sm font-medium leading-none text-gray-900">{t("ecommerce")}</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
+                              {t("ecommerce_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-not-allowed pointer-events-none" aria-disabled="true" role="link" tabIndex={-1}>
-                            <div className="text-sm font-medium leading-none">Fintech</div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Ensure compliance and security for financial applications.
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
+                            <div className="text-sm font-medium leading-none text-gray-900">{t("fintech")}</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
+                              {t("fintech_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
                       </div>
                       <div className="space-y-3">
-                        <h4 className="text-sm font-medium leading-none">By Team Size</h4>
+                        <h4 className="text-sm font-medium leading-none text-gray-900">{t("by_team_size")}</h4>
                         <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-not-allowed pointer-events-none" aria-disabled="true" role="link" tabIndex={-1}>
-                            <div className="text-sm font-medium leading-none">Startups</div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Scale-friendly monitoring for growing companies.
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
+                            <div className="text-sm font-medium leading-none text-gray-900">{t("startups")}</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
+                              {t("startups_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
                         <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-not-allowed pointer-events-none" aria-disabled="true" role="link" tabIndex={-1}>
-                            <div className="text-sm font-medium leading-none">Enterprise</div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Enterprise-grade monitoring with advanced features.
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
+                            <div className="text-sm font-medium leading-none text-gray-900">{t("enterprise")}</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-gray-600">
+                              {t("enterprise_desc")}
                             </p>
                           </div>
                         </NavigationMenuLink>
@@ -124,13 +130,13 @@ export default function Header() {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <span className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed select-none">
-                    Pricing
+                  <span className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed select-none">
+                    {t("pricing")}
                   </span>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <span className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed select-none">
-                    About
+                  <span className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed select-none">
+                    {t("about")}
                   </span>
                 </NavigationMenuItem>
               </NavigationMenuList>
@@ -145,7 +151,7 @@ export default function Header() {
             transition={{ duration: 0.5 }}
           >
             <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
-              <Link href="/signup">Sign Up</Link>
+              <Link href="/signup">{t("signup")}</Link>
             </Button>
           </motion.div>
 
@@ -155,6 +161,7 @@ export default function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>

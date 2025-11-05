@@ -1,0 +1,193 @@
+{
+  "Header": {
+    "products": "Produkte",
+    "solutions": "Lösungen",
+    "pricing": "Preise",
+    "about": "Über uns",
+    "signup": "Registrieren",
+    "platform": "ObservOne Plattform",
+    "platform_desc": "Umfassende Monitoring- und Observability-Lösung für moderne Anwendungen.",
+    "by_industry": "Nach Branche",
+    "by_team_size": "Nach Teamgröße",
+    "monitoring": "Monitoring",
+    "monitoring_desc": "Echtzeitüberwachung von Anwendungen und Infrastruktur.",
+    "security": "Sicherheit",
+    "security_desc": "Erweiterte Sicherheitsüberwachung und Bedrohungserkennung.",
+    "ecommerce": "E-Commerce",
+    "ecommerce_desc": "Überwachen Sie die Leistung Ihres Shops und die Kundenerfahrung.",
+    "fintech": "Fintech",
+    "fintech_desc": "Sorgen Sie für Compliance und Sicherheit bei Finanzanwendungen.",
+    "startups": "Start-ups",
+    "startups_desc": "Skalierbares Monitoring für wachsende Unternehmen.",
+    "enterprise": "Unternehmen",
+    "enterprise_desc": "Unternehmensweites Monitoring mit erweiterten Funktionen."
+  }
+  ,
+  "Topbar": {
+    "searchPlaceholder": "Suchen oder springen zu...",
+    "help": "Hilfe",
+    "notifications": "Benachrichtigungen",
+    "settings": "Einstellungen"
+  },
+  "Overview": {
+    "hero": {
+      "titlePrefix": "GESAMT",
+      "titleHighlight": "NETZWERKSTATUS"
+    },
+    "map": {
+      "title": "Gesamter Netzwerkstatus",
+      "loadingMap": "Karte wird geladen...",
+      "loadingDevices": "Gerätestandorte werden geladen...",
+      "loadError": "Geräte konnten nicht geladen werden"
+    },
+    "alarms": {
+      "title": "Aktive Alarme",
+      "total": "Gesamt",
+      "headers": ["Host", "Host-Gruppen", "Schweregrad", "Status", "Problem", "Alter", "Zeit"],
+      "severities": { "CRITICAL": "KRITISCH", "MAJOR": "SCHWER", "MINOR": "GERING" }
+    },
+    "health": {
+      "overallStatus": "Gesamtstatus des Systems",
+      "up": "AKTIV",
+      "overallAvailability": "Gesamtverfügbarkeit",
+      "actions": "Aktionen",
+      "openTicket": "Ticket eröffnen",
+      "addDevice": "+ Gerät hinzufügen"
+    }
+  },
+  "Sidebar": {
+    "searchMenu": "Menü durchsuchen",
+    "observability": "Observability",
+    "overview": "Übersicht",
+    "detailed": "Detailansicht",
+    "topologyMap": "Topologiekarte",
+    "events": "Ereignisse",
+    "incidents": "Incidents",
+    "problems": "Probleme",
+    "services": "Services",
+    "reports": "Berichte",
+    "support": "Support",
+    "tickets": "Tickets",
+    "majorIncidents": "Großstörungen",
+    "inventory": "Inventar",
+    "assets": "Assets",
+    "newProvisioning": "Neue Bereitstellung",
+    "racks": "Racks",
+    "facilities": "Einrichtungen",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  }
+  ,
+  "Detailed": {
+    "title": "SYSTEM AUSWÄHLEN",
+    "searchPlaceholder": "Geben Sie den Systemnamen ein",
+    "found": "{count} System(e) gefunden passend zu \"{term}\"",
+    "noSystems": "Keine Systeme gefunden",
+    "tryAdjust": "Passen Sie Ihre Suchbegriffe an",
+    "noData": "Keine Daten von Zabbix verfügbar",
+    "columns": {
+      "systemId": "System-ID",
+      "systemName": "Systemname",
+      "currentStatus": "Aktueller Status",
+      "targetSla": "Ziel-SLA",
+      "achievedSla": "Erreichte SLA",
+      "systemType": "Systemtyp",
+      "systemLocation": "Systemstandort",
+      "createdAt": "Erstellt am"
+    },
+    "pagination": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "showing": "Anzeige {from} bis {to} von {total} Ergebnissen",
+      "pageOf": "Seite {page} von {pages}"
+    },
+    "mobile": {
+      "loading": "Laden...",
+      "converting": "Konvertiere Koordinaten...",
+      "type": "Typ:",
+      "created": "Erstellt:",
+      "location": "Ort:"
+    },
+    "status": {
+      "Normal": "Normal",
+      "Critical": "Kritisch",
+      "Major": "Schwer",
+      "Minor": "Gering",
+      "Information": "Information"
+    }
+  },
+  "DetailedSystem": {
+    "headers": {
+      "wanLink": "WAN-LINK",
+      "systemRf": "SYSTEM-RF",
+      "systemOptical": "SYSTEM-OPTIK",
+      "status": "STATUS"
+    },
+    "temperature": {
+      "title": "Temperatur der Master-Einheit pro Sektor",
+      "series": {
+        "biu1": "BIU1 Temperaturalarm",
+        "biu2": "BIU2 Temperaturalarm",
+        "biu3": "BIU3 Temperaturalarm"
+      }
+    },
+    "network": {
+      "icmp": "WAN-NETZWERK ICMP-STATUS",
+      "latency": "WAN-LATENZ-STATUS",
+      "loss": "WAN ICMP-VERLUST-STATUS"
+    },
+    "topbar": {
+      "systemName": "Systemname",
+      "currentStatus": "Aktueller Status",
+      "inventory": "Inventar",
+      "download": "Download",
+      "export": "Export",
+      "report": "Bericht"
+    }
+  },
+  "Auth": {
+    "signin": {
+      "title": "Willkommen zurück",
+      "description": "Melden Sie sich an, um mit ObservOne fortzufahren",
+      "noAccount": "Noch kein Konto?",
+      "signup": "Registrieren",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "remember": "Angemeldet bleiben",
+      "forgot": "Passwort vergessen?",
+      "submit": "Anmelden",
+      "submitting": "Anmeldung...",
+      "or": "Oder fortfahren mit",
+      "withGoogle": "Mit Google fortfahren",
+      "withLinkedIn": "Mit LinkedIn fortfahren",
+      "withMicrosoft": "Mit Microsoft fortfahren",
+      "toastSuccess": "Erfolgreich angemeldet! Willkommen zurück.",
+      "toastFail": "Anmeldung fehlgeschlagen",
+      "toastGoogleFail": "Anmeldung mit Google fehlgeschlagen",
+      "toastLinkedInFail": "Anmeldung mit LinkedIn fehlgeschlagen",
+      "toastAzureFail": "Anmeldung mit Azure fehlgeschlagen"
+    },
+    "signup": {
+      "title": "Registrieren",
+      "description": "Erstellen Sie ein Konto, um ObservOne zu nutzen",
+      "already": "Bereits registriert?",
+      "signin": "Anmelden",
+      "name": "Name",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "terms": "Sie akzeptieren unsere",
+      "termsLink": "Allgemeinen Geschäftsbedingungen",
+      "and": "und",
+      "privacy": "Datenschutzerklärung",
+      "submit": "Konto erstellen",
+      "submitting": "Konto wird erstellt...",
+      "or": "Oder fortfahren mit",
+      "withGoogle": "Mit Google fortfahren",
+      "toastSuccess": "Konto erfolgreich erstellt! Bitte prüfen Sie Ihre E-Mail zur Bestätigung.",
+      "toastFail": "Kontoerstellung fehlgeschlagen",
+      "toastGoogleFail": "Registrierung mit Google fehlgeschlagen"
+    }
+  }
+}
+
+

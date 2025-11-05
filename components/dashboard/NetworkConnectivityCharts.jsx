@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useTranslations } from 'next-intl'
 
 const icmpData = [
   { time: '00:00', status: 1 },
@@ -35,11 +36,12 @@ const lossData = [
 ]
 
 export default function NetworkConnectivityCharts() {
+  const t = useTranslations('DetailedSystem.network')
   return (
     <div className="grid grid-cols-1 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>WAN NETWORK ICMP STATUS</CardTitle>
+          <CardTitle>{t('icmp')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64">
@@ -80,7 +82,7 @@ export default function NetworkConnectivityCharts() {
 
       <Card>
         <CardHeader>
-          <CardTitle>WAN LATENCY STATUS</CardTitle>
+          <CardTitle>{t('latency')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64">
@@ -120,7 +122,7 @@ export default function NetworkConnectivityCharts() {
 
       <Card>
         <CardHeader>
-          <CardTitle>WAN ICMP LOSS STATUS</CardTitle>
+          <CardTitle>{t('loss')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64">

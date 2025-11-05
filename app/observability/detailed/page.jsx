@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import AuthGuard from '@/components/AuthGuard'
 import { zabbixService } from '@/lib/services/zabbixService'
@@ -36,6 +37,7 @@ const StatusBadge = ({ status }) => {
 
 export default function DetailedPage() {
   const router = useRouter()
+  const t = useTranslations('Detailed')
   const [searchTerm, setSearchTerm] = useState('')
   const [systems, setSystems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -186,11 +188,11 @@ export default function DetailedPage() {
     if (systems.length > 0) {
       const updatedSystems = systems.map(system => ({
         ...system,
-        status: hostIdToStatus.get(system.id) || 'Normal'
+        status: t(`status.${hostIdToStatus.get(system.id) || 'Normal'}`)
       }))
       setSystems(updatedSystems)
     }
-  }, [hostIdToStatus])
+  }, [hostIdToStatus, t])
 
   // Filter by System Name only (not ID)
   const filteredSystems = useMemo(() => {
@@ -243,7 +245,7 @@ export default function DetailedPage() {
         <div className="">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">SELECT THE SYSTEM</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('title')}</h1>
           </div>
 
           {/* Search Bar */}
@@ -251,7 +253,7 @@ export default function DetailedPage() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Enter the system name"
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearch}
                 className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 dark:border-neutral-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
@@ -259,7 +261,7 @@ export default function DetailedPage() {
             </div>
             {searchTerm && (
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Found {filteredSystems.length} system{filteredSystems.length !== 1 ? 's' : ''} matching "{searchTerm}"
+                {t('found', { count: filteredSystems.length, term: searchTerm })}
               </p>
             )}
           </div>
@@ -275,9 +277,9 @@ export default function DetailedPage() {
             ) : filteredSystems.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <p className="text-gray-600 dark:text-gray-300 text-lg">No systems found</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-lg">{t('noSystems')}</p>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-                    {searchTerm ? 'Try adjusting your search terms' : 'No data available from Zabbix'}
+                    {searchTerm ? t('tryAdjust') : t('noData')}
                   </p>
                 </div>
               </div>
@@ -288,28 +290,28 @@ export default function DetailedPage() {
                     <thead className="bg-gray-50 dark:bg-neutral-900">
                       <tr>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          System ID
+                          {t('columns.systemId')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          System Name
+                          {t('columns.systemName')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          Current Status
+                          {t('columns.currentStatus')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          Target SLA
+                          {t('columns.targetSla')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          Achieved SLA
+                          {t('columns.achievedSla')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          System Type
+                          {t('columns.systemType')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          System Location
+                          {t('columns.systemLocation')}
                         </th>
                         <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          Created At
+                          {t('columns.createdAt')}
                         </th>
                       </tr>
                     </thead>
@@ -357,7 +359,7 @@ export default function DetailedPage() {
                   <div className="mt-4 px-3 sm:px-6 py-4 border-t border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
-                        Showing {startIndex + 1} to {Math.min(endIndex, filteredSystems.length)} of {filteredSystems.length} results
+                        {t('pagination.showing', { from: startIndex + 1, to: Math.min(endIndex, filteredSystems.length), total: filteredSystems.length })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -370,10 +372,10 @@ export default function DetailedPage() {
                             : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
-                        Previous
+                        {t('pagination.previous')}
                       </button>
                       <span className="text-sm text-gray-700 px-2">
-                        Page {currentPage} of {totalPages}
+                        {t('pagination.pageOf', { page: currentPage, pages: totalPages })}
                       </span>
                       <button
                         onClick={handleNextPage}
@@ -384,7 +386,7 @@ export default function DetailedPage() {
                             : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
-                        Next
+                        {t('pagination.next')}
                       </button>
                     </div>
                   </div>
@@ -399,16 +401,16 @@ export default function DetailedPage() {
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">Loading...</p>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">Converting coordinates...</p>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">{t('mobile.loading')}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">{t('mobile.converting')}</p>
                 </div>
               </div>
             ) : filteredSystems.length === 0 ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
-                  <p className="text-gray-600 dark:text-gray-300">No systems found</p>
+                  <p className="text-gray-600 dark:text-gray-300">{t('noSystems')}</p>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                    {searchTerm ? 'Try adjusting your search terms' : 'No data available'}
+                    {searchTerm ? t('tryAdjust') : t('noData')}
                   </p>
                 </div>
               </div>
@@ -434,24 +436,24 @@ export default function DetailedPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Target SLA:</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('columns.targetSla')}:</span>
                         <p className="font-medium truncate">{system.targetSla}</p>
                       </div>
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Achieved SLA:</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('columns.achievedSla')}:</span>
                         <p className="font-medium truncate">{system.achievedSla}</p>
                       </div>
                       <div className="col-span-2">
-                        <span className="text-gray-500 dark:text-gray-400">Type:</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('mobile.type')}</span>
                         <p className="font-medium truncate">{system.type}</p>
                       </div>
                       <div className="col-span-2">
-                        <span className="text-gray-500 dark:text-gray-400">Created:</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('mobile.created')}</span>
                         <p className="font-medium text-xs">{system.createdAt}</p>
                       </div>
                     </div>
                     <div className="mt-2 pt-2 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Location: {system.location}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{t('mobile.location')} {system.location}</p>
                     </div>
                     </div>
                   ))}
@@ -473,7 +475,7 @@ export default function DetailedPage() {
                             : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
-                        Previous
+                        {t('pagination.previous')}
                       </button>
                       <span className="text-sm text-gray-700 dark:text-gray-300 px-2">
                         {currentPage} / {totalPages}
@@ -487,7 +489,7 @@ export default function DetailedPage() {
                             : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
-                        Next
+                        {t('pagination.next')}
                       </button>
                     </div>
                   </div>

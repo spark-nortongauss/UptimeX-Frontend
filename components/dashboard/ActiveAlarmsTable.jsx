@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useZabbixStore } from '@/lib/stores/zabbixStore'
+import { useTranslations } from 'next-intl'
 import { AlertTriangle, CircleDot, ChevronLeft, ChevronRight, Activity, Server, Tag, Clock } from 'lucide-react'
 
 export default function ActiveAlarmsTable() {
+  const t = useTranslations('Overview.alarms')
   const {
     problems,
     loading,
@@ -187,10 +189,10 @@ export default function ActiveAlarmsTable() {
           <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 transition-all duration-300 hover:bg-blue-500/20 hover:scale-110">
             <Server className="h-6 w-6" />
           </div>
-          <span className="animate-fade-in-up">Active Alarms</span>
+          <span className="animate-fade-in-up">{t('title')}</span>
           <div className="ml-auto">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 dark:from-blue-950 dark:to-blue-900 dark:text-blue-200 animate-fade-in-left shadow-sm hover:shadow-md transition-all duration-300">
-              {problems.length} Total
+              {problems.length} {t('total')}
             </span>
           </div>
         </CardTitle>
@@ -200,7 +202,7 @@ export default function ActiveAlarmsTable() {
           <table className="min-w-full text-sm">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100/80 dark:from-neutral-900 dark:to-neutral-900/80 border-b border-gray-200/60 dark:border-neutral-800">
               <tr className="text-left">
-                {['Host', 'Host Groups', 'Severity', 'Status', 'Problem', 'Age', 'Time'].map((header, index) => (
+                {t.raw('headers').map((header, index) => (
                   <th 
                     key={header} 
                     className={cn(

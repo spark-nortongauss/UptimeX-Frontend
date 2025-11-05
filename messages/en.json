@@ -1,0 +1,193 @@
+{
+  "Header": {
+    "products": "Products",
+    "solutions": "Solutions",
+    "pricing": "Pricing",
+    "about": "About",
+    "signup": "Sign Up",
+    "platform": "ObservOne Platform",
+    "platform_desc": "Comprehensive monitoring and observability solution for modern applications.",
+    "by_industry": "By Industry",
+    "by_team_size": "By Team Size",
+    "monitoring": "Monitoring",
+    "monitoring_desc": "Real-time application and infrastructure monitoring.",
+    "security": "Security",
+    "security_desc": "Advanced security monitoring and threat detection.",
+    "ecommerce": "E-commerce",
+    "ecommerce_desc": "Monitor your online store performance and customer experience.",
+    "fintech": "Fintech",
+    "fintech_desc": "Ensure compliance and security for financial applications.",
+    "startups": "Startups",
+    "startups_desc": "Scale-friendly monitoring for growing companies.",
+    "enterprise": "Enterprise",
+    "enterprise_desc": "Enterprise-grade monitoring with advanced features."
+  }
+  ,
+  "Topbar": {
+    "searchPlaceholder": "Search or jump to...",
+    "help": "Help",
+    "notifications": "Notifications",
+    "settings": "Settings"
+  },
+  "Overview": {
+    "hero": {
+      "titlePrefix": "OVERALL",
+      "titleHighlight": "NETWORK STATUS"
+    },
+    "map": {
+      "title": "Overall Network Status",
+      "loadingMap": "Loading map...",
+      "loadingDevices": "Loading device locations...",
+      "loadError": "Failed to load devices"
+    },
+    "alarms": {
+      "title": "Active Alarms",
+      "total": "Total",
+      "headers": ["Host", "Host Groups", "Severity", "Status", "Problem", "Age", "Time"],
+      "severities": { "CRITICAL": "CRITICAL", "MAJOR": "MAJOR", "MINOR": "MINOR" }
+    },
+    "health": {
+      "overallStatus": "Overall System Status",
+      "up": "UP",
+      "overallAvailability": "Overall Availability",
+      "actions": "Actions",
+      "openTicket": "Open a Ticket",
+      "addDevice": "+ Add Device"
+    }
+  },
+  "Sidebar": {
+    "searchMenu": "Search menu",
+    "observability": "Observability",
+    "overview": "Overview",
+    "detailed": "Detailed",
+    "topologyMap": "Topology Map",
+    "events": "Events",
+    "incidents": "Incidents",
+    "problems": "Problems",
+    "services": "Services",
+    "reports": "Reports",
+    "support": "Support",
+    "tickets": "Tickets",
+    "majorIncidents": "Major Incidents",
+    "inventory": "Inventory",
+    "assets": "Assets",
+    "newProvisioning": "New Provisioning",
+    "racks": "Racks",
+    "facilities": "Facilities",
+    "settings": "Settings",
+    "logout": "Logout"
+  }
+  ,
+  "Detailed": {
+    "title": "SELECT THE SYSTEM",
+    "searchPlaceholder": "Enter the system name",
+    "found": "Found {count} system(s) matching \"{term}\"",
+    "noSystems": "No systems found",
+    "tryAdjust": "Try adjusting your search terms",
+    "noData": "No data available from Zabbix",
+    "columns": {
+      "systemId": "System ID",
+      "systemName": "System Name",
+      "currentStatus": "Current Status",
+      "targetSla": "Target SLA",
+      "achievedSla": "Achieved SLA",
+      "systemType": "System Type",
+      "systemLocation": "System Location",
+      "createdAt": "Created At"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing {from} to {to} of {total} results",
+      "pageOf": "Page {page} of {pages}"
+    },
+    "mobile": {
+      "loading": "Loading...",
+      "converting": "Converting coordinates...",
+      "type": "Type:",
+      "created": "Created:",
+      "location": "Location:"
+    },
+    "status": {
+      "Normal": "Normal",
+      "Critical": "Critical",
+      "Major": "Major",
+      "Minor": "Minor",
+      "Information": "Information"
+    }
+  },
+  "DetailedSystem": {
+    "headers": {
+      "wanLink": "WAN LINK",
+      "systemRf": "SYSTEM RF",
+      "systemOptical": "SYSTEM OPTICAL",
+      "status": "STATUS"
+    },
+    "temperature": {
+      "title": "Master Unit Temperature per Sector",
+      "series": {
+        "biu1": "BIU1 Temperature Alarm",
+        "biu2": "BIU2 Temperature Alarm",
+        "biu3": "BIU3 Temperature Alarm"
+      }
+    },
+    "network": {
+      "icmp": "WAN NETWORK ICMP STATUS",
+      "latency": "WAN LATENCY STATUS",
+      "loss": "WAN ICMP LOSS STATUS"
+    },
+    "topbar": {
+      "systemName": "System Name",
+      "currentStatus": "Current Status",
+      "inventory": "Inventory",
+      "download": "Download",
+      "export": "Export",
+      "report": "Report"
+    }
+  },
+  "Auth": {
+    "signin": {
+      "title": "Welcome back",
+      "description": "Sign in to continue to ObservOne",
+      "noAccount": "Don't have an account?",
+      "signup": "Sign up",
+      "email": "Email",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot password?",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "or": "Or continue with",
+      "withGoogle": "Continue with Google",
+      "withLinkedIn": "Continue with LinkedIn",
+      "withMicrosoft": "Continue with Microsoft",
+      "toastSuccess": "Successfully signed in! Welcome back.",
+      "toastFail": "Failed to sign in",
+      "toastGoogleFail": "Failed to sign in with Google",
+      "toastLinkedInFail": "Failed to sign in with LinkedIn",
+      "toastAzureFail": "Failed to sign in with Azure"
+    },
+    "signup": {
+      "title": "Sign up",
+      "description": "Create an account to start using ObservOne",
+      "already": "Already registered?",
+      "signin": "Sign in",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "terms": "You Accept Our",
+      "termsLink": "Terms And Conditions",
+      "and": "And",
+      "privacy": "Privacy Policy",
+      "submit": "Create An Account",
+      "submitting": "Creating Account...",
+      "or": "Or continue with",
+      "withGoogle": "Continue with Google",
+      "toastSuccess": "Account created successfully! Please check your email to verify your account.",
+      "toastFail": "Failed to create account",
+      "toastGoogleFail": "Failed to sign up with Google"
+    }
+  }
+}
+
+
