@@ -82,10 +82,6 @@ export default function GeographicMapPanel() {
     <div className="relative overflow-hidden rounded-xl border bg-background">
       <div className="flex items-center justify-between p-4 border-b">
         <h3 className="font-semibold">{t('title')}</h3>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.max(2, z - 1))}>-</Button>
-          <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.min(12, z + 1))}>+</Button>
-        </div>
       </div>
       <div className="relative" style={{ height: 420 }}>
         {loading ? (

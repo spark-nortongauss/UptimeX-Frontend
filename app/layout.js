@@ -19,12 +19,17 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "ObservOne - Monitor Your Services",
   description: "Professional uptime monitoring for your web services",
+  icons: {
+    icon: "/assets/favicon.ico?v=1",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/assets/favicon.ico?v=1" sizes="any" />
+        <link rel="shortcut icon" href="/assets/favicon.ico?v=1" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
