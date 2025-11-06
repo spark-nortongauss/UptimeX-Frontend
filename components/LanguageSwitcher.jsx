@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from "react"
 import { useLocaleController } from "./IntlProvider"
 import { Button } from "@/components/ui/button"
 import { ChevronDown } from "lucide-react"
+import ReactCountryFlag from "react-country-flag"
 
-const FLAGS = {
-  en: "🇬🇧",
-  es: "🇪🇸",
-  pt: "🇵🇹",
-  fr: "🇫🇷",
-  de: "🇩🇪",
+// Map language codes to country codes for flags
+const COUNTRY_CODES = {
+  en: "GB",
+  es: "ES",
+  pt: "PT",
+  fr: "FR",
+  de: "DE",
 }
 
 const LABELS = {
@@ -44,7 +46,15 @@ export default function LanguageSwitcher() {
         onClick={() => setOpen((v) => !v)}
         className="h-8 px-2 text-gray-700 dark:text-gray-200 rounded-md border border-transparent hover:border-gray-200 dark:hover:border-neutral-800"
       >
-        <span className="mr-2 text-base leading-none">{FLAGS[locale] ?? "🌐"}</span>
+        <ReactCountryFlag
+          countryCode={COUNTRY_CODES[locale] || COUNTRY_CODES.en}
+          svg
+          style={{
+            width: '1.2em',
+            height: '1.2em',
+          }}
+          className="mr-2"
+        />
         <span className="text-sm font-medium">{(locale || 'en').slice(0,2).toUpperCase()}</span>
         <ChevronDown className="ml-1 h-3.5 w-3.5" />
       </Button>
@@ -62,7 +72,14 @@ export default function LanguageSwitcher() {
                 locale === code ? "bg-gray-50 dark:bg-neutral-800" : ""
               }`}
             >
-              <span className="text-base leading-none">{FLAGS[code]}</span>
+              <ReactCountryFlag
+                countryCode={COUNTRY_CODES[code]}
+                svg
+                style={{
+                  width: '1.2em',
+                  height: '1.2em',
+                }}
+              />
               <span className="flex-1">{LABELS[code]}</span>
               <span className="ml-auto inline-flex items-center justify-center rounded-sm bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 text-[10px] font-semibold px-1.5 py-0.5">
                 {code.toUpperCase()}
