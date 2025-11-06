@@ -164,18 +164,17 @@ export default function GeographicMapPanel() {
           }
         }}
       >
-        {/* Map controls overlay (placed below Leaflet zoom controls at top-right) */}
-        <div className="absolute right-3 top-16 md:top-[84px] z-10 flex items-center gap-2">
+        {/* Map fullscreen control (aligned with Leaflet zoom controls in top-right) */}
+        <div className="map-fullscreen-control absolute z-10">
           <Button
             type="button"
-            variant="outline"
             size="icon"
             onClick={handleToggleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen map' : 'Enter fullscreen map'}
             aria-pressed={isFullscreen}
             aria-keyshortcuts="F"
             title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            className="focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:outline-none"
+            className="p-0 rounded-[4px] border border-[hsl(var(--border))] bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))] shadow-none"
           >
             {/* Simple inline icon to avoid extra dependencies */}
             {isFullscreen ? (
@@ -184,7 +183,7 @@ export default function GeographicMapPanel() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                className="h-4 w-4"
+                className="h-[14px] w-[14px]"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 9l-5-5m0 0v4m0-4h4M15 9l5-5m0 0v4m0-4h-4M9 15l-5 5m0 0h4m-4 0v-4M15 15l5 5m0 0h-4m4 0v-4" />
               </svg>
@@ -194,7 +193,7 @@ export default function GeographicMapPanel() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                className="h-4 w-4"
+                className="h-[14px] w-[14px]"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4M8 8H4m12 0h4M8 16H4m12 0h4M8 8v-4m8 4v-4M8 16v4m8-4v4" />
               </svg>
