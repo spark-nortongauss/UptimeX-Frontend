@@ -117,7 +117,6 @@ export default function Topbar() {
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-gradient-to-br from-blue-600 to-purple-600 text-white flex items-center justify-center text-xs font-semibold">
                 {displayName?.slice(0, 2)?.toUpperCase()}
               </div>
-              <span className="hidden sm:block max-w-[100px] lg:max-w-[140px] truncate text-sm font-medium">{displayName}</span>
               <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 dark:text-gray-400" />
             </Button>
 
