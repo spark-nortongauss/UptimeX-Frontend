@@ -41,9 +41,9 @@
       "loadError": "Failed to load devices"
     },
     "alarms": {
-      "title": "Active Alarms",
+      "title": "Latest 10 Active Alarms",
       "total": "Total",
-      "headers": ["Host", "Host Groups", "Severity", "Status", "Problem", "Age", "Time"],
+      "headers": ["Host Name", "Host Groups", "Severity", "Status", "Problem", "Age", "Timestamp", "Actions"],
       "severities": { "CRITICAL": "CRITICAL", "MAJOR": "MAJOR", "MINOR": "MINOR" }
     },
     "health": {
