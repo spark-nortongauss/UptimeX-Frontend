@@ -319,3 +319,35 @@ html {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+/* ApexCharts toolbar menu theming */
+.apexcharts-menu {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.apexcharts-menu-item {
+  color: hsl(var(--foreground));
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.apexcharts-menu-item:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.dark .apexcharts-menu {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.dark .apexcharts-menu-item {
+  color: hsl(var(--foreground));
+}
+
+.dark .apexcharts-menu-item:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}

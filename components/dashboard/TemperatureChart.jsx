@@ -1,16 +1,31 @@
 "use client"
 
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo } from 'react'
 import { useMonitoringDataStore } from '@/lib/stores/monitoringDataStore'
 import { useParams } from 'next/navigation'
 
-export default function TemperatureChart({ hostId: propHostId }) {
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
+
+const SENSOR_COLORS = {
+  BIU1: '#eab308',
+  BIU2: '#60a5fa',
+  BIU3: '#10b981',
+}
+
+const parseTimeStringToMillis = (time) => {
+  if (!time) return undefined
+  const [hours, minutes] = String(time).split(':').map(Number)
+  if (Number.isNaN(hours)) return undefined
+  return Date.UTC(1970, 0, 1, hours, minutes || 0)
+}
+
+export default function TemperatureChart({ hostId: propHostId, showTitle = true }) {
   const t = useTranslations('DetailedSystem.temperature')
   const params = useParams()
-  
+
   // Get hostId from prop, params, or fallback
   const hostId = propHostId || params?.id || null
 
@@ -19,7 +34,6 @@ export default function TemperatureChart({ hostId: propHostId }) {
     error,
     monitoringData,
     currentHostId,
-    fetchMonitoringData,
     getTemperatureChartData,
     getAggregatedTemperatureData,
     refreshIfStale,
@@ -29,7 +43,6 @@ export default function TemperatureChart({ hostId: propHostId }) {
   useEffect(() => {
     if (!hostId) return
 
-    // Fetch data with 24 hours history
     const now = Math.floor(Date.now() / 1000)
     const time_from = now - 24 * 60 * 60 // 24 hours ago
 
@@ -42,30 +55,24 @@ export default function TemperatureChart({ hostId: propHostId }) {
 
   // Get temperature chart data
   const chartData = useMemo(() => {
-    // Only use monitoringData if it's for the current hostId
     if (!monitoringData || !hostId || currentHostId !== hostId) {
       return []
     }
 
-    // Get aggregated data (hourly averages)
     const aggregated = getAggregatedTemperatureData()
-
-    // If we have data, return it. Otherwise try raw data.
     if (aggregated.length > 0) {
       return aggregated
     }
 
-    // Fallback to raw chart data
     const rawData = getTemperatureChartData()
-    
-    // If we have too many data points, sample them for better visualization
+
     if (rawData.length > 100) {
-      const step = Math.ceil(rawData.length / 50) // Sample to ~50 points
+      const step = Math.ceil(rawData.length / 50)
       return rawData.filter((_, index) => index % step === 0)
     }
 
     return rawData
-  }, [monitoringData, hostId, getTemperatureChartData, getAggregatedTemperatureData])
+  }, [monitoringData, hostId, currentHostId, getTemperatureChartData, getAggregatedTemperatureData])
 
   // Determine which BIU sensors are available
   const availableSensors = useMemo(() => {
@@ -84,16 +91,109 @@ export default function TemperatureChart({ hostId: propHostId }) {
     return sensors
   }, [chartData])
 
+  const activeSensorKeys = useMemo(
+    () => Object.entries(availableSensors).filter(([, isActive]) => isActive).map(([key]) => key),
+    [availableSensors]
+  )
+
+  const sensorLabels = useMemo(
+    () => ({
+      BIU1: t('series.biu1'),
+      BIU2: t('series.biu2'),
+      BIU3: t('series.biu3'),
+    }),
+    [t]
+  )
+
+  const series = useMemo(
+    () =>
+      activeSensorKeys.map((sensorKey) => ({
+        name: sensorLabels[sensorKey],
+        data: chartData.map((point) => ({
+          x: point.timestamp ? point.timestamp * 1000 : parseTimeStringToMillis(point.time),
+          y:
+            point[sensorKey] !== null && point[sensorKey] !== undefined
+              ? Number(point[sensorKey])
+              : null,
+        })),
+      })),
+    [activeSensorKeys, chartData, sensorLabels]
+  )
+
+  const options = useMemo(
+    () => ({
+      chart: {
+        type: 'line',
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true,
+          },
+        },
+        zoom: {
+          enabled: true,
+          type: 'x',
+          autoScaleYaxis: true,
+        },
+      },
+      dataLabels: { enabled: false },
+      stroke: {
+        curve: 'smooth',
+        width: 2,
+      },
+      markers: {
+        size: 3,
+      },
+      colors: activeSensorKeys.map((key) => SENSOR_COLORS[key]),
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          datetimeUTC: false,
+          datetimeFormatter: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+          },
+        },
+      },
+      yaxis: {
+        title: {
+          text: '°C',
+        },
+      },
+      grid: {
+        borderColor: '#e5e7eb',
+      },
+      tooltip: {
+        shared: true,
+        x: {
+          format: 'dd MMM HH:mm',
+        },
+      },
+      legend: {
+        position: 'top',
+      },
+    }),
+    [activeSensorKeys]
+  )
+
   // Show loading state
   if (loading && !monitoringData) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 flex items-center justify-center">
-            <p className="text-gray-500">Loading temperature data...</p>
+        {showTitle ? (
+          <CardHeader>
+            <CardTitle>{t('title')}</CardTitle>
+          </CardHeader>
+        ) : null}
+        <CardContent className={showTitle ? undefined : 'p-6'}>
+          <div className="flex h-80 items-center justify-center">
+            <p className="text-muted-foreground">Loading temperature data...</p>
           </div>
         </CardContent>
       </Card>
@@ -104,12 +204,14 @@ export default function TemperatureChart({ hostId: propHostId }) {
   if (error && !monitoringData) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 flex items-center justify-center">
-            <p className="text-red-500">Error loading temperature data: {error}</p>
+        {showTitle ? (
+          <CardHeader>
+            <CardTitle>{t('title')}</CardTitle>
+          </CardHeader>
+        ) : null}
+        <CardContent className={showTitle ? undefined : 'p-6'}>
+          <div className="flex h-80 items-center justify-center">
+            <p className="text-destructive">Error loading temperature data: {error}</p>
           </div>
         </CardContent>
       </Card>
@@ -117,15 +219,17 @@ export default function TemperatureChart({ hostId: propHostId }) {
   }
 
   // Show no data state
-  if (!chartData || chartData.length === 0) {
+  if (!chartData || chartData.length === 0 || activeSensorKeys.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 flex items-center justify-center">
-            <p className="text-gray-500">No temperature data available</p>
+        {showTitle ? (
+          <CardHeader>
+            <CardTitle>{t('title')}</CardTitle>
+          </CardHeader>
+        ) : null}
+        <CardContent className={showTitle ? undefined : 'p-6'}>
+          <div className="flex h-80 items-center justify-center">
+            <p className="text-muted-foreground">No temperature data available</p>
           </div>
         </CardContent>
       </Card>
@@ -134,72 +238,13 @@ export default function TemperatureChart({ hostId: propHostId }) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis 
-                dataKey="time" 
-                stroke="#6b7280"
-                fontSize={12}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis 
-                stroke="#6b7280"
-                fontSize={12}
-                label={{ value: '°C', angle: -90, position: 'insideLeft' }}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1f2937', 
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#f9fafb'
-                }}
-              />
-              <Legend />
-              {availableSensors.BIU1 && (
-                <Line 
-                  type="monotone" 
-                  dataKey="BIU1" 
-                  stroke="#eab308" 
-                  strokeWidth={2}
-                  name={t('series.biu1')}
-                  dot={{ fill: '#eab308', strokeWidth: 2, r: 4 }}
-                  connectNulls={false}
-                />
-              )}
-              {availableSensors.BIU2 && (
-                <Line 
-                  type="monotone" 
-                  dataKey="BIU2" 
-                  stroke="#60a5fa" 
-                  strokeWidth={2}
-                  name={t('series.biu2')}
-                  dot={{ fill: '#60a5fa', strokeWidth: 2, r: 4 }}
-                  connectNulls={false}
-                />
-              )}
-              {availableSensors.BIU3 && (
-                <Line 
-                  type="monotone" 
-                  dataKey="BIU3" 
-                  stroke="#10b981" 
-                  strokeWidth={2}
-                  name={t('series.biu3')}
-                  dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                  connectNulls={false}
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+      {showTitle ? (
+        <CardHeader>
+          <CardTitle>{t('title')}</CardTitle>
+        </CardHeader>
+      ) : null}
+      <CardContent className={showTitle ? undefined : 'p-6'}>
+        <ReactApexChart options={options} series={series} type="line" height={320} />
       </CardContent>
     </Card>
   )

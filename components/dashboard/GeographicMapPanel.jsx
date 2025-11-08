@@ -105,6 +105,8 @@ export default function GeographicMapPanel() {
                 type: inv.type || 'N/A',
                 type_full: inv.type_full || 'N/A',
                 vendor: inv.vendor || 'N/A',
+                property_type: inv.property_type || inv.type || 'N/A',
+                oem: inv.oem || inv.manufacturer || inv.hardware || inv.model || 'N/A',
                 available: iface?.available || '0',
               }
             }

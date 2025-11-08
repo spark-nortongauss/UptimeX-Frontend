@@ -1,6 +1,11 @@
+"use client"
+
+import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useTranslations } from 'next-intl'
+
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const icmpData = [
   { time: '00:00', status: 1 },
@@ -35,8 +40,146 @@ const lossData = [
   { time: '21:00', loss: 0 },
 ]
 
+const parseTimeToMillis = (time) => {
+  const [hours, minutes] = String(time).split(':').map(Number)
+  if (Number.isNaN(hours)) return undefined
+  return Date.UTC(1970, 0, 1, hours, minutes || 0)
+}
+
+const createSeries = (data, key) =>
+  data.map((point) => ({
+    x: parseTimeToMillis(point.time),
+    y: point[key] ?? null,
+  }))
+
 export default function NetworkConnectivityCharts() {
   const t = useTranslations('DetailedSystem.network')
+
+  const baseOptions = useMemo(
+    () => ({
+      chart: {
+        type: 'line',
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true,
+          },
+        },
+        zoom: {
+          enabled: true,
+          type: 'x',
+          autoScaleYaxis: true,
+        },
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
+      markers: { size: 3 },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          datetimeUTC: false,
+          datetimeFormatter: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+          },
+        },
+      },
+      grid: { borderColor: '#e5e7eb' },
+      tooltip: {
+        x: { format: 'HH:mm' },
+      },
+    }),
+    []
+  )
+
+  const buildOptions = useMemo(
+    () =>
+      (overrides = {}) => ({
+        ...baseOptions,
+        ...overrides,
+        chart: { ...baseOptions.chart, ...overrides.chart },
+        xaxis: { ...baseOptions.xaxis, ...overrides.xaxis },
+        tooltip: { ...baseOptions.tooltip, ...overrides.tooltip },
+        yaxis: overrides.yaxis ? { ...overrides.yaxis } : undefined,
+      }),
+    [baseOptions]
+  )
+
+  const icmpSeries = useMemo(
+    () => [
+      {
+        name: t('icmp'),
+        data: createSeries(icmpData, 'status'),
+      },
+    ],
+    [t]
+  )
+
+  const latencySeries = useMemo(
+    () => [
+      {
+        name: t('latency'),
+        data: createSeries(latencyData, 'latency'),
+      },
+    ],
+    [t]
+  )
+
+  const lossSeries = useMemo(
+    () => [
+      {
+        name: t('loss'),
+        data: createSeries(lossData, 'loss'),
+      },
+    ],
+    [t]
+  )
+
+  const icmpOptions = useMemo(
+    () =>
+      buildOptions({
+        colors: ['#0ea5e9'],
+        yaxis: {
+          min: 0,
+          max: 1,
+          tickAmount: 2,
+          labels: {
+            formatter: (value) => Number(value).toFixed(0),
+          },
+        },
+      }),
+    [buildOptions]
+  )
+
+  const latencyOptions = useMemo(
+    () =>
+      buildOptions({
+        colors: ['#f59e0b'],
+        yaxis: {
+          title: { text: 'ms' },
+        },
+      }),
+    [buildOptions]
+  )
+
+  const lossOptions = useMemo(
+    () =>
+      buildOptions({
+        colors: ['#22c55e'],
+        yaxis: {
+          min: 0,
+          title: { text: '%' },
+        },
+      }),
+    [buildOptions]
+  )
+
   return (
     <div className="grid grid-cols-1 gap-4">
       <Card>
@@ -44,39 +187,7 @@ export default function NetworkConnectivityCharts() {
           <CardTitle>{t('icmp')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={icmpData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  domain={[0, 1]}
-                  ticks={[0, 1]}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="status" 
-                  stroke="#eab308" 
-                  strokeWidth={3}
-                  dot={{ fill: '#eab308', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ReactApexChart options={icmpOptions} series={icmpSeries} type="line" height={260} />
         </CardContent>
       </Card>
 
@@ -85,38 +196,7 @@ export default function NetworkConnectivityCharts() {
           <CardTitle>{t('latency')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={latencyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  label={{ value: 'ms', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="latency" 
-                  stroke="#eab308" 
-                  strokeWidth={2}
-                  dot={{ fill: '#eab308', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ReactApexChart options={latencyOptions} series={latencySeries} type="line" height={260} />
         </CardContent>
       </Card>
 
@@ -125,38 +205,7 @@ export default function NetworkConnectivityCharts() {
           <CardTitle>{t('loss')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lossData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  label={{ value: '%', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="loss" 
-                  stroke="#22c55e" 
-                  strokeWidth={2}
-                  dot={{ fill: '#22c55e', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ReactApexChart options={lossOptions} series={lossSeries} type="line" height={260} />
         </CardContent>
       </Card>
     </div>

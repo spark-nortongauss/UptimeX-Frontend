@@ -1,5 +1,10 @@
+"use client"
+
+import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const rfTxData = [
   { time: '00:00', sector1: 34.6, sector2: 34.2, sector3: 33.2 },
@@ -29,106 +34,140 @@ const sectorData = [
   { avg: 33.4, sector: 3 }
 ]
 
+const parseTimeToMillis = (time) => {
+  const [hours, minutes] = String(time).split(':').map(Number)
+  if (Number.isNaN(hours)) return undefined
+  return Date.UTC(1970, 0, 1, hours, minutes || 0)
+}
+
+const createSeries = (data, key) =>
+  data.map((point) => ({
+    x: parseTimeToMillis(point.time),
+    y: point[key] ?? null,
+  }))
+
 export default function RFMetrics() {
+  const baseOptions = useMemo(
+    () => ({
+      chart: {
+        type: 'line',
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true,
+          },
+        },
+        zoom: {
+          enabled: true,
+          type: 'x',
+          autoScaleYaxis: true,
+        },
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
+      markers: { size: 2 },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          datetimeUTC: false,
+          datetimeFormatter: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+          },
+        },
+      },
+      grid: { borderColor: '#e5e7eb' },
+      tooltip: {
+        x: { format: 'HH:mm' },
+      },
+    }),
+    []
+  )
+
+  const buildOptions = useMemo(
+    () =>
+      (color, yTitle) => ({
+        ...baseOptions,
+        chart: { ...baseOptions.chart },
+        dataLabels: { ...baseOptions.dataLabels },
+        stroke: { ...baseOptions.stroke },
+        markers: { ...baseOptions.markers },
+        xaxis: { ...baseOptions.xaxis },
+        grid: { ...baseOptions.grid },
+        tooltip: { ...baseOptions.tooltip },
+        colors: [color],
+        yaxis: {
+          title: { text: yTitle },
+        },
+      }),
+    [baseOptions]
+  )
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {sectorData.map((sector) => (
-        <div key={sector.sector} className="space-y-4">
-          {/* Average Power Card */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-sm text-muted-foreground">
-                Avg. Sector {sector.sector} RF TX IN Power
-              </div>
-              <div className="text-4xl font-extrabold mt-1">
-                {sector.avg} dBm
-              </div>
-            </CardContent>
-          </Card>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      {sectorData.map((sector) => {
+        const txSeries = [
+          {
+            name: `Sector ${sector.sector} MU RF TX IN`,
+            data: createSeries(rfTxData, `sector${sector.sector}`),
+          },
+        ]
+        const rxSeries = [
+          {
+            name: `Sector ${sector.sector} RU RX Out`,
+            data: createSeries(rfRxData, `sector${sector.sector}`),
+          },
+        ]
 
-          {/* TX Power Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Sector {sector.sector} MU RF TX IN</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={rfTxData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="time" 
-                      stroke="#6b7280"
-                      fontSize={10}
-                    />
-                    <YAxis 
-                      stroke="#6b7280"
-                      fontSize={10}
-                      label={{ value: 'dBm', angle: -90, position: 'insideLeft' }}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1f2937', 
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: '#f9fafb'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey={`sector${sector.sector}`}
-                      stroke="#eab308" 
-                      strokeWidth={2}
-                      dot={{ fill: '#eab308', strokeWidth: 2, r: 3 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+        return (
+          <div key={sector.sector} className="space-y-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-sm text-muted-foreground">
+                  Avg. Sector {sector.sector} RF TX IN Power
+                </div>
+                <div className="mt-1 text-4xl font-extrabold">
+                  {sector.avg} dBm
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* RX Power Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Sector {sector.sector} RU RX Out</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={rfRxData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="time" 
-                      stroke="#6b7280"
-                      fontSize={10}
-                    />
-                    <YAxis 
-                      stroke="#6b7280"
-                      fontSize={10}
-                      label={{ value: 'dBm', angle: -90, position: 'insideLeft' }}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1f2937', 
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: '#f9fafb'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey={`sector${sector.sector}`}
-                      stroke="#60a5fa" 
-                      strokeWidth={2}
-                      dot={{ fill: '#60a5fa', strokeWidth: 2, r: 3 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      ))}
+            <Card>
+              <CardHeader>
+                <CardTitle>Sector {sector.sector} MU RF TX IN</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReactApexChart
+                  options={buildOptions('#eab308', 'dBm')}
+                  series={txSeries}
+                  type="line"
+                  height={220}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Sector {sector.sector} RU RX Out</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReactApexChart
+                  options={buildOptions('#60a5fa', 'dBm')}
+                  series={rxSeries}
+                  type="line"
+                  height={220}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )
+      })}
     </div>
   )
 }

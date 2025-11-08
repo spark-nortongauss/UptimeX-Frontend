@@ -92,7 +92,7 @@ export default function DeviceMap({ devices, zoom = 2 }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Type:</span>
-                    <span>{d.type}</span>
+                    <span>{d.property_type || d.type}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Type_Full:</span>
@@ -102,6 +102,12 @@ export default function DeviceMap({ devices, zoom = 2 }) {
                     <span className="text-muted-foreground">Vendor:</span>
                     <span>{d.vendor}</span>
                   </div>
+                  {d.oem && d.oem !== 'N/A' && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">OEM:</span>
+                      <span>{d.oem}</span>
+                    </div>
+                  )}
                   {/* {d.description && (
                     <div className="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
                       <span className="text-muted-foreground">{d.description}</span>

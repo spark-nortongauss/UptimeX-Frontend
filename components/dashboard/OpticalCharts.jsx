@@ -1,5 +1,10 @@
+"use client"
+
+import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const pdData = [
   { time: '00:00', sector1: 1.6, sector2: 3.1, sector3: 0 },
@@ -23,250 +28,126 @@ const ldData = [
   { time: '21:00', sector1: 6.8, sector2: 6.7, sector3: 6.75 },
 ]
 
+const parseTimeToMillis = (time) => {
+  const [hours, minutes] = String(time).split(':').map(Number)
+  if (Number.isNaN(hours)) return undefined
+  return Date.UTC(1970, 0, 1, hours, minutes || 0)
+}
+
+const createSeries = (data, key) =>
+  data.map((point) => ({
+    x: parseTimeToMillis(point.time),
+    y: point[key] ?? null,
+  }))
+
 export default function OpticalCharts() {
+  const sectors = [1, 2, 3]
+
+  const baseOptions = useMemo(
+    () => ({
+      chart: {
+        type: 'line',
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true,
+          },
+        },
+        zoom: {
+          enabled: true,
+          type: 'x',
+          autoScaleYaxis: true,
+        },
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
+      markers: { size: 2 },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          datetimeUTC: false,
+          datetimeFormatter: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+          },
+        },
+      },
+      grid: { borderColor: '#e5e7eb' },
+      tooltip: {
+        x: { format: 'HH:mm' },
+      },
+    }),
+    []
+  )
+
+  const buildOptions = useMemo(
+    () =>
+      (color, yTitle) => ({
+        ...baseOptions,
+        chart: { ...baseOptions.chart },
+        dataLabels: { ...baseOptions.dataLabels },
+        stroke: { ...baseOptions.stroke },
+        markers: { ...baseOptions.markers },
+        xaxis: { ...baseOptions.xaxis },
+        grid: { ...baseOptions.grid },
+        tooltip: { ...baseOptions.tooltip },
+        colors: [color],
+        yaxis: {
+          title: { text: yTitle },
+        },
+      }),
+    [baseOptions]
+  )
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* PD Level Charts */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Sector 1 RU1 PD Level</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={pdData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={10}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={10}
-                  label={{ value: 'V', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sector1"
-                  stroke="#22c55e" 
-                  strokeWidth={2}
-                  dot={{ fill: '#22c55e', strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {sectors.map((sector) => (
+        <Card key={`pd-${sector}`}>
+          <CardHeader>
+            <CardTitle>Sector {sector} RU{sector} PD Level</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ReactApexChart
+              options={buildOptions('#22c55e', 'V')}
+              series={[
+                {
+                  name: `Sector ${sector} PD Level`,
+                  data: createSeries(pdData, `sector${sector}`),
+                },
+              ]}
+              type="line"
+              height={200}
+            />
+          </CardContent>
+        </Card>
+      ))}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Sector 2 RU2 PD Level</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={pdData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={10}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={10}
-                  label={{ value: 'V', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sector2"
-                  stroke="#22c55e" 
-                  strokeWidth={2}
-                  dot={{ fill: '#22c55e', strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Sector 3 RU3 PD Level</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={pdData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={10}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={10}
-                  label={{ value: 'V', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sector3"
-                  stroke="#22c55e" 
-                  strokeWidth={2}
-                  dot={{ fill: '#22c55e', strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* LD Level Charts */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Sector 1 RU1 LD Level</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={ldData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={10}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={10}
-                  label={{ value: 'mA', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sector1"
-                  stroke="#a78bfa" 
-                  strokeWidth={2}
-                  dot={{ fill: '#a78bfa', strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Sector 2 RU2 LD Level</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={ldData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={10}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={10}
-                  label={{ value: 'mA', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sector2"
-                  stroke="#a78bfa" 
-                  strokeWidth={2}
-                  dot={{ fill: '#a78bfa', strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Sector 3 RU3 LD Level</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={ldData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#6b7280"
-                  fontSize={10}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={10}
-                  label={{ value: 'mA', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1f2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#f9fafb'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sector3"
-                  stroke="#a78bfa" 
-                  strokeWidth={2}
-                  dot={{ fill: '#a78bfa', strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {sectors.map((sector) => (
+        <Card key={`ld-${sector}`}>
+          <CardHeader>
+            <CardTitle>Sector {sector} RU{sector} LD Level</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ReactApexChart
+              options={buildOptions('#a78bfa', 'mA')}
+              series={[
+                {
+                  name: `Sector ${sector} LD Level`,
+                  data: createSeries(ldData, `sector${sector}`),
+                },
+              ]}
+              type="line"
+              height={200}
+            />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }
