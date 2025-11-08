@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -47,6 +48,34 @@ const createSeries = (data, key) =>
   }))
 
 export default function RFMetrics() {
+  // Use individual selectors to avoid creating new objects on every render
+  const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
+  const dateTo = useTimeframeFilterStore((state) => state.dateTo)
+  const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
+  const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+
+  // Filter data based on timeframe
+  const filterDataByTimeframe = useMemo(() => {
+    return (data) => {
+      return data.filter((point) => {
+        const pointTime = point.time
+        if (!pointTime) return false
+        
+        // Check if time is within the time range
+        // For same date range, check both time bounds
+        if (dateFrom === dateTo) {
+          return pointTime >= timeFrom && pointTime <= timeTo
+        }
+        
+        // For different dates, include all times (they represent data points across the date range)
+        return true
+      })
+    }
+  }, [dateFrom, dateTo, timeFrom, timeTo])
+
+  const filteredRfTxData = useMemo(() => filterDataByTimeframe(rfTxData), [filterDataByTimeframe])
+  const filteredRfRxData = useMemo(() => filterDataByTimeframe(rfRxData), [filterDataByTimeframe])
+
   const baseOptions = useMemo(
     () => ({
       chart: {
@@ -115,13 +144,13 @@ export default function RFMetrics() {
         const txSeries = [
           {
             name: `Sector ${sector.sector} MU RF TX IN`,
-            data: createSeries(rfTxData, `sector${sector.sector}`),
+            data: createSeries(filteredRfTxData, `sector${sector.sector}`),
           },
         ]
         const rxSeries = [
           {
             name: `Sector ${sector.sector} RU RX Out`,
-            data: createSeries(rfRxData, `sector${sector.sector}`),
+            data: createSeries(filteredRfRxData, `sector${sector.sector}`),
           },
         ]
 

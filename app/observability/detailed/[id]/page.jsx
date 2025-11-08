@@ -8,8 +8,9 @@ import RFMetrics from '@/components/dashboard/RFMetrics'
 import OpticalCharts from '@/components/dashboard/OpticalCharts'
 import CollapsibleSection from '@/components/dashboard/CollapsibleSection'
 import SystemTopbar from '@/components/observability/SystemTopbar'
+import TimeframeFilter from '@/components/observability/TimeframeFilter'
 import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, use } from 'react'
 import { zabbixService } from '@/lib/services/zabbixService'
 import { useTranslations } from 'next-intl'
 import geocodingService from '@/lib/services/geocodingService'
@@ -18,7 +19,8 @@ export default function DetailedSystemPage({ params }) {
   const headerTranslations = useTranslations('DetailedSystem.headers')
   const tempTranslations = useTranslations('DetailedSystem.temperature')
   const healthTranslations = useTranslations('Overview.health')
-  const { id } = params || {}
+  const resolvedParams = use(params)
+  const { id } = resolvedParams || {}
   const { systemsById, selectSystem } = useSystemSelectionStore()
   const selected = systemsById[id]
 
@@ -91,6 +93,9 @@ export default function DetailedSystemPage({ params }) {
 
         {/* Top bar with system name, status and quick actions */}
         <SystemTopbar systemId={id} />
+
+        {/* Timeframe Filter */}
+        <TimeframeFilter />
 
         {/* 6. SYSTEM HEALTH CARDS */}
         <CollapsibleSection

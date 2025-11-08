@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo } from 'react'
 import { useMonitoringDataStore } from '@/lib/stores/monitoringDataStore'
+import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 import { useParams } from 'next/navigation'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
@@ -39,40 +40,62 @@ export default function TemperatureChart({ hostId: propHostId, showTitle = true 
     refreshIfStale,
   } = useMonitoringDataStore()
 
-  // Fetch monitoring data when hostId is available
+  // Use individual selectors to avoid creating new objects on every render
+  const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
+  const dateTo = useTimeframeFilterStore((state) => state.dateTo)
+  const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
+  const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+  const getTimeRange = useTimeframeFilterStore((state) => state.getTimeRange)
+
+  // Fetch monitoring data when hostId or timeframe changes
   useEffect(() => {
     if (!hostId) return
 
-    const now = Math.floor(Date.now() / 1000)
-    const time_from = now - 24 * 60 * 60 // 24 hours ago
+    const { time_from, time_till } = getTimeRange()
 
     refreshIfStale(hostId, {
       time_from,
-      time_till: now,
+      time_till,
       include_history: true,
     })
-  }, [hostId, refreshIfStale])
+  }, [hostId, refreshIfStale, dateFrom, dateTo, timeFrom, timeTo, getTimeRange])
 
-  // Get temperature chart data
+  // Get temperature chart data filtered by timeframe
   const chartData = useMemo(() => {
     if (!monitoringData || !hostId || currentHostId !== hostId) {
       return []
     }
 
     const aggregated = getAggregatedTemperatureData()
-    if (aggregated.length > 0) {
-      return aggregated
+    let data = aggregated.length > 0 ? aggregated : getTemperatureChartData()
+
+    // Filter data by timeframe
+    const { isInRange } = useTimeframeFilterStore.getState()
+    data = data.filter((point) => {
+      if (point.timestamp) {
+        return isInRange(point.timestamp)
+      }
+      // If no timestamp, try to parse from time string
+      if (point.time) {
+        const [hours, minutes] = point.time.split(':').map(Number)
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          // Create a date from the current date with the time
+          const now = new Date()
+          const checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+          const timestamp = Math.floor(checkDate.getTime() / 1000)
+          return isInRange(timestamp)
+        }
+      }
+      return false
+    })
+
+    if (data.length > 100) {
+      const step = Math.ceil(data.length / 50)
+      return data.filter((_, index) => index % step === 0)
     }
 
-    const rawData = getTemperatureChartData()
-
-    if (rawData.length > 100) {
-      const step = Math.ceil(rawData.length / 50)
-      return rawData.filter((_, index) => index % step === 0)
-    }
-
-    return rawData
-  }, [monitoringData, hostId, currentHostId, getTemperatureChartData, getAggregatedTemperatureData])
+    return data
+  }, [monitoringData, hostId, currentHostId, getTemperatureChartData, getAggregatedTemperatureData, dateFrom, dateTo, timeFrom, timeTo])
 
   // Determine which BIU sensors are available
   const availableSensors = useMemo(() => {

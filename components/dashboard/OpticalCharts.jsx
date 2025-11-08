@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -42,6 +43,33 @@ const createSeries = (data, key) =>
 
 export default function OpticalCharts() {
   const sectors = [1, 2, 3]
+  // Use individual selectors to avoid creating new objects on every render
+  const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
+  const dateTo = useTimeframeFilterStore((state) => state.dateTo)
+  const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
+  const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+
+  // Filter data based on timeframe
+  const filterDataByTimeframe = useMemo(() => {
+    return (data) => {
+      return data.filter((point) => {
+        const pointTime = point.time
+        if (!pointTime) return false
+        
+        // Check if time is within the time range
+        // For same date range, check both time bounds
+        if (dateFrom === dateTo) {
+          return pointTime >= timeFrom && pointTime <= timeTo
+        }
+        
+        // For different dates, include all times (they represent data points across the date range)
+        return true
+      })
+    }
+  }, [dateFrom, dateTo, timeFrom, timeTo])
+
+  const filteredPdData = useMemo(() => filterDataByTimeframe(pdData), [filterDataByTimeframe])
+  const filteredLdData = useMemo(() => filterDataByTimeframe(ldData), [filterDataByTimeframe])
 
   const baseOptions = useMemo(
     () => ({
@@ -118,7 +146,7 @@ export default function OpticalCharts() {
               series={[
                 {
                   name: `Sector ${sector} PD Level`,
-                  data: createSeries(pdData, `sector${sector}`),
+                  data: createSeries(filteredPdData, `sector${sector}`),
                 },
               ]}
               type="line"
@@ -139,7 +167,7 @@ export default function OpticalCharts() {
               series={[
                 {
                   name: `Sector ${sector} LD Level`,
-                  data: createSeries(ldData, `sector${sector}`),
+                  data: createSeries(filteredLdData, `sector${sector}`),
                 },
               ]}
               type="line"

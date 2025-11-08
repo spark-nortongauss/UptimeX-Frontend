@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
+import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -54,6 +55,34 @@ const createSeries = (data, key) =>
 
 export default function NetworkConnectivityCharts() {
   const t = useTranslations('DetailedSystem.network')
+  // Use individual selectors to avoid creating new objects on every render
+  const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
+  const dateTo = useTimeframeFilterStore((state) => state.dateTo)
+  const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
+  const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+
+  // Filter data based on timeframe
+  const filterDataByTimeframe = useMemo(() => {
+    return (data) => {
+      return data.filter((point) => {
+        const pointTime = point.time
+        if (!pointTime) return false
+        
+        // Check if time is within the time range
+        // For same date range, check both time bounds
+        if (dateFrom === dateTo) {
+          return pointTime >= timeFrom && pointTime <= timeTo
+        }
+        
+        // For different dates, include all times (they represent data points across the date range)
+        return true
+      })
+    }
+  }, [dateFrom, dateTo, timeFrom, timeTo])
+
+  const filteredIcmpData = useMemo(() => filterDataByTimeframe(icmpData), [filterDataByTimeframe])
+  const filteredLatencyData = useMemo(() => filterDataByTimeframe(latencyData), [filterDataByTimeframe])
+  const filteredLossData = useMemo(() => filterDataByTimeframe(lossData), [filterDataByTimeframe])
 
   const baseOptions = useMemo(
     () => ({
@@ -115,30 +144,30 @@ export default function NetworkConnectivityCharts() {
     () => [
       {
         name: t('icmp'),
-        data: createSeries(icmpData, 'status'),
+        data: createSeries(filteredIcmpData, 'status'),
       },
     ],
-    [t]
+    [t, filteredIcmpData]
   )
 
   const latencySeries = useMemo(
     () => [
       {
         name: t('latency'),
-        data: createSeries(latencyData, 'latency'),
+        data: createSeries(filteredLatencyData, 'latency'),
       },
     ],
-    [t]
+    [t, filteredLatencyData]
   )
 
   const lossSeries = useMemo(
     () => [
       {
         name: t('loss'),
-        data: createSeries(lossData, 'loss'),
+        data: createSeries(filteredLossData, 'loss'),
       },
     ],
-    [t]
+    [t, filteredLossData]
   )
 
   const icmpOptions = useMemo(
