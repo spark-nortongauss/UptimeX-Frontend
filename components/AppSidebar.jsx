@@ -147,7 +147,11 @@ export default function AppSidebar() {
         {/* Logo only when sidebar is expanded */}
         {state === "expanded" && (
           <Link href="/observability/overview" className="flex items-center gap-2 shrink-0">
-            <img src="/assets/observone_logo_1080p.png" alt="ObservOne logo" className="h-20 w-auto object-contain  ml-1 mt-2" />
+            <img
+              src="/assets/observone_logo_1080p.png"
+              alt="ObservOne logo"
+              className="h-20 w-auto object-contain ml-1 mt-2 dark:invert"
+            />
           </Link>
         )}
 
