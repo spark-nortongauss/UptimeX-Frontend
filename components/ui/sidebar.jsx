@@ -157,6 +157,26 @@ const Sidebar = React.forwardRef((
   // Access pinned state from provider
   const { getPinned } = useSidebar()
 
+  // Define callbacks unconditionally to keep hook order consistent
+  const handleMouseEnter = React.useCallback(() => {
+    if (isMobile) return
+    if (state === "collapsed") {
+      hoverExpandedRef.current = true
+      setOpen(true)
+    }
+  }, [isMobile, state, setOpen])
+
+  const handleMouseLeave = React.useCallback(() => {
+    if (isMobile) return
+    if (hoverExpandedRef.current) {
+      hoverExpandedRef.current = false
+      // Only collapse back if user hasn't pinned it open via trigger
+      if (!getPinned()) {
+        setOpen(false)
+      }
+    }
+  }, [isMobile, setOpen, getPinned])
+
   if (collapsible === "none") {
     return (
       <div
@@ -193,25 +213,6 @@ const Sidebar = React.forwardRef((
       </Sheet>
     );
   }
-
-  const handleMouseEnter = React.useCallback(() => {
-    if (isMobile) return
-    if (state === "collapsed") {
-      hoverExpandedRef.current = true
-      setOpen(true)
-    }
-  }, [isMobile, state, setOpen])
-
-  const handleMouseLeave = React.useCallback(() => {
-    if (isMobile) return
-    if (hoverExpandedRef.current) {
-      hoverExpandedRef.current = false
-      // Only collapse back if user hasn't pinned it open via trigger
-      if (!getPinned()) {
-        setOpen(false)
-      }
-    }
-  }, [isMobile, setOpen, getPinned])
 
   return (
     <div
