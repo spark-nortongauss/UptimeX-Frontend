@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { Eye } from 'lucide-react'
 import AuthGuard from '@/components/AuthGuard'
 import { zabbixService } from '@/lib/services/zabbixService'
 import { useZabbixStore } from '@/lib/stores/zabbixStore'
@@ -43,9 +44,8 @@ export default function DetailedPage() {
   const [loading, setLoading] = useState(true)
   const { setSystems: cacheSystems, selectSystem } = useSystemSelectionStore()
   const [currentPage, setCurrentPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const { problems, fetchProblems } = useZabbixStore()
-  
-  const ROWS_PER_PAGE = 10
 
   // Determine highest severity per host and map to page status
   const hostIdToStatus = useMemo(() => {
@@ -204,9 +204,9 @@ export default function DetailedPage() {
   }, [searchTerm, systems])
 
   // Pagination calculations
-  const totalPages = Math.ceil(filteredSystems.length / ROWS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ROWS_PER_PAGE
-  const endIndex = startIndex + ROWS_PER_PAGE
+  const totalPages = Math.ceil(filteredSystems.length / rowsPerPage)
+  const startIndex = (currentPage - 1) * rowsPerPage
+  const endIndex = startIndex + rowsPerPage
   const paginatedSystems = useMemo(() => {
     return filteredSystems.slice(startIndex, endIndex)
   }, [filteredSystems, startIndex, endIndex])
@@ -239,6 +239,17 @@ export default function DetailedPage() {
     }
   }
 
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value))
+    setCurrentPage(1)
+  }
+
+  const handleViewDetails = (e, system) => {
+    e.stopPropagation()
+    selectSystem(system.id, system)
+    router.push(`/observability/detailed/${system.id}`)
+  }
+
   return (
     <AuthGuard>
       <div className="min-h-screen text-gray-900 dark:text-gray-100">
@@ -248,26 +259,45 @@ export default function DetailedPage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{t('title')}</h1>
           </div>
 
-          {/* Search Bar */}
-          <div className="mb-4 sm:mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder={t('searchPlaceholder')}
-                value={searchTerm}
-                onChange={handleSearch}
-                className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 dark:border-neutral-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-              />
+          {/* Search Bar and Rows Per Page Filter */}
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={t('searchPlaceholder')}
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="w-full max-w-md px-4 py-3 text-base sm:text-lg border border-gray-300 dark:border-neutral-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                />
+              </div>
+              {searchTerm && (
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  {t('found', { count: filteredSystems.length, term: searchTerm })}
+                </p>
+              )}
             </div>
-            {searchTerm && (
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {t('found', { count: filteredSystems.length, term: searchTerm })}
-              </p>
-            )}
+            
+            <div className="flex items-center gap-3">
+              <label htmlFor="rowsPerPage" className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                Rows per page:
+              </label>
+              <select
+                id="rowsPerPage"
+                value={rowsPerPage}
+                onChange={handleRowsPerPageChange}
+                className="px-3 py-2 text-sm border border-gray-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
           </div>
 
           {/* Data Table */}
-          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-800 overflow-hidden">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
@@ -286,67 +316,81 @@ export default function DetailedPage() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full divide-y divide-gray-200 dark:divide-neutral-800">
-                    <thead className="bg-gray-50 dark:bg-neutral-900">
-                      <tr>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          {t('columns.systemId')}
+                  <table className="w-full min-w-max">
+                    <thead>
+                      <tr className="border-b border-gray-100 dark:border-neutral-800">
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                          Host ID
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          {t('columns.systemName')}
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                          Host Name
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                           {t('columns.currentStatus')}
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                           {t('columns.targetSla')}
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                           {t('columns.achievedSla')}
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                           {t('columns.systemType')}
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
-                          {t('columns.systemLocation')}
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                          Host Location
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-neutral-800">
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
                           {t('columns.createdAt')}
+                        </th>
+                        <th className="px-3 sm:px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                          Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white dark:bg-neutral-900 divide-y divide-gray-200 dark:divide-neutral-800">
-                      {paginatedSystems.map((system) => (
+                    <tbody className="bg-white dark:bg-neutral-900">
+                      {paginatedSystems.map((system, index) => (
                       <tr 
                         key={system.id} 
-                        className="hover:bg-gray-50 dark:hover:bg-neutral-800/60 cursor-pointer"
+                        className={`${
+                          index !== paginatedSystems.length - 1 ? 'border-b border-gray-50 dark:border-neutral-800/50' : ''
+                        } hover:bg-gray-100 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors`}
                         onClick={() => { selectSystem(system.id, system); router.push(`/observability/detailed/${system.id}`) }}
                         role="button"
                         aria-label={`View details for system ${system.id}`}
                       >
-                        <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate">{system.id}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          {system.id}
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate">{system.name}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {system.name}
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
+                        <td className="px-3 sm:px-6 py-5 text-sm whitespace-nowrap">
                           <StatusBadge status={system.status} />
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate">{system.targetSla}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {system.targetSla}
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate">{system.achievedSla}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {system.achievedSla}
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate">{system.type}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {system.type}
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate" title={system.location}>{system.location}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap" title={system.location}>
+                          {system.location}
                         </td>
-                        <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-800">
-                          <div className="truncate">{system.createdAt}</div>
+                        <td className="px-3 sm:px-6 py-5 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {system.createdAt}
+                        </td>
+                        <td className="px-3 sm:px-6 py-5 text-center whitespace-nowrap">
+                          <button
+                            onClick={(e) => handleViewDetails(e, system)}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all"
+                            aria-label={`View details for ${system.name}`}
+                          >
+                            <Eye className="h-5 w-5" />
+                          </button>
                         </td>
                       </tr>
                       ))}
@@ -356,9 +400,9 @@ export default function DetailedPage() {
                 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="mt-4 px-3 sm:px-6 py-4 border-t border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-900 flex items-center justify-between">
+                  <div className="px-6 py-4 border-t border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         {t('pagination.showing', { from: startIndex + 1, to: Math.min(endIndex, filteredSystems.length), total: filteredSystems.length })}
                       </span>
                     </div>
@@ -366,24 +410,24 @@ export default function DetailedPage() {
                       <button
                         onClick={handlePreviousPage}
                         disabled={currentPage === 1}
-                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                           currentPage === 1
-                            ? 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                            : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
+                            ? 'bg-gray-50 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-50 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700'
                         }`}
                       >
                         {t('pagination.previous')}
                       </button>
-                      <span className="text-sm text-gray-700 px-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 px-2">
                         {t('pagination.pageOf', { page: currentPage, pages: totalPages })}
                       </span>
                       <button
                         onClick={handleNextPage}
                         disabled={currentPage === totalPages}
-                        className={`px-4 py-2 text-sm font-medium rounded-md ${
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                           currentPage === totalPages
-                            ? 'bg-gray-100 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                            : 'bg-white dark:bg-neutral-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800'
+                            ? 'bg-gray-50 dark:bg-neutral-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-50 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700'
                         }`}
                       >
                         {t('pagination.next')}
@@ -430,8 +474,15 @@ export default function DetailedPage() {
                         <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{system.id}</h3>
                         <p className="text-xs text-gray-600 dark:text-gray-300 truncate">{system.name}</p>
                       </div>
-                      <div className="ml-2 shrink-0">
+                      <div className="ml-2 shrink-0 flex items-center gap-2">
                         <StatusBadge status={system.status} />
+                        <button
+                          onClick={(e) => handleViewDetails(e, system)}
+                          className="p-1.5 rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          aria-label={`View details for ${system.name}`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">

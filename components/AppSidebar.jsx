@@ -43,6 +43,7 @@ import { useAuthStore } from "@/lib/stores/authStore"
 import { toast } from "sonner"
 import { useUIStore } from "@/lib/stores/uiStore"
 import { useTranslations } from "next-intl"
+import WorkspaceSelector from "./WorkspaceSelector"
 
 function buildNavigationItems(t) {
   return [
@@ -160,6 +161,11 @@ export default function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Workspace selector between logo and search */}
+        <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
+          <WorkspaceSelector />
+        </SidebarHeader>
+
         {/* Compact sidebar search */}
       <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
           <div className="relative px-2 mt-8">
