@@ -13,6 +13,8 @@ import {
   Server,
   Tag,
   Search,
+  Cpu,
+  CheckCircle2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -93,6 +95,8 @@ export default function EventsTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(ROW_SIZE_OPTIONS[0])
   const [isVisible, setIsVisible] = useState(false)
+  const [selectedQuickAction, setSelectedQuickAction] = useState(null) // 'ai', 'ticket', 'acknowledge'
+  const [selectedRowId, setSelectedRowId] = useState(null)
 
   const activeRange = useMemo(() => getRangeInfo(), [getRangeInfo, mode, dateFrom, timeFrom, dateTo, timeTo])
   const timeFromSeconds = activeRange?.time_from ?? null
@@ -302,11 +306,60 @@ export default function EventsTable() {
               )}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            <span>
-              Searching: <strong>{searchQuery || "All events"}</strong>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Quick Actions:
             </span>
+            <div className="flex items-center gap-2">
+              <Button 
+                size="sm" 
+                className={cn(
+                  "bg-lime-500 hover:bg-lime-600 text-white font-bold border-0 shadow-sm",
+                  selectedQuickAction === 'ai' && "ring-2 ring-lime-400 ring-offset-2"
+                )}
+                onClick={() => {
+                  setSelectedQuickAction(selectedQuickAction === 'ai' ? null : 'ai')
+                  setSelectedRowId(null)
+                }}
+              >
+                <Cpu className="h-4 w-4 mr-1.5" />
+                AI
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className={cn(
+                  "dark:hover:bg-neutral-800 dark:text-white",
+                  selectedQuickAction === 'ticket' && "ring-2 ring-blue-400 ring-offset-2"
+                )}
+                onClick={() => {
+                  setSelectedQuickAction(selectedQuickAction === 'ticket' ? null : 'ticket')
+                  setSelectedRowId(null)
+                }}
+              >
+                Ticket
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className={cn(
+                  "dark:hover:bg-neutral-800 dark:text-white",
+                  selectedQuickAction === 'acknowledge' && "ring-2 ring-green-400 ring-offset-2"
+                )}
+                onClick={() => {
+                  setSelectedQuickAction(selectedQuickAction === 'acknowledge' ? null : 'acknowledge')
+                  setSelectedRowId(null)
+                }}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                Acknowledge
+              </Button>
+            </div>
+            {selectedQuickAction && (
+              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                Please select an event row to {selectedQuickAction === 'ai' ? 'analyze' : selectedQuickAction === 'ticket' ? 'create a ticket for' : 'acknowledge'}
+              </span>
+            )}
           </div>
         </div>
 
@@ -355,11 +408,20 @@ export default function EventsTable() {
                     className={cn(
                       "group transition-all duration-200 ease-out hover:bg-muted/50 dark:hover:bg-neutral-800/60",
                       index % 2 === 0 ? "bg-background dark:bg-neutral-950/50" : "bg-muted/20 dark:bg-neutral-900/50",
-                      isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+                      isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4",
+                      selectedQuickAction && "cursor-pointer",
+                      selectedRowId === alarm.id && selectedQuickAction && "bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500"
                     )}
                     style={{
                       transitionDelay: `${index * 100}ms`,
                       animationDelay: `${index * 100}ms`,
+                    }}
+                    onClick={() => {
+                      if (selectedQuickAction) {
+                        setSelectedRowId(alarm.id)
+                        // TODO: Implement the actual action when features are ready
+                        console.log(`Selected ${selectedQuickAction} action for event:`, alarm)
+                      }
                     }}
                   >
                     <td className="whitespace-nowrap px-6 py-4">
