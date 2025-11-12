@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
+import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 
@@ -42,6 +43,7 @@ const createSeries = (data, key) =>
   }))
 
 export default function OpticalCharts() {
+  const { resolvedTheme } = useTheme()
   const sectors = [1, 2, 3]
   // Use individual selectors to avoid creating new objects on every render
   const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
@@ -71,10 +73,41 @@ export default function OpticalCharts() {
   const filteredPdData = useMemo(() => filterDataByTimeframe(pdData), [filterDataByTimeframe])
   const filteredLdData = useMemo(() => filterDataByTimeframe(ldData), [filterDataByTimeframe])
 
+  const makeResampler = useMemo(() => {
+    const toMinutes = (t) => {
+      const [h, m] = String(t).split(':').map(Number)
+      return (h || 0) * 60 + (m || 0)
+    }
+    const toLabel = (min) => `${String(Math.floor(min / 60)).padStart(2,'0')}:${String(min % 60).padStart(2,'0')}`
+    return (data, key) => {
+      if (!Array.isArray(data) || data.length === 0) return []
+      const map = new Map()
+      data.forEach(p => map.set(String(p.time), p[key] ?? null))
+      const start = dateFrom === dateTo ? timeFrom : '00:00'
+      const end = dateFrom === dateTo ? timeTo : '23:45'
+      const startMin = toMinutes(start)
+      const endMin = toMinutes(end)
+      let last = null
+      const out = []
+      for (let m = startMin; m <= endMin; m += 15) {
+        const label = toLabel(m)
+        let val = map.has(label) ? map.get(label) : null
+        if (val === null && last !== null) val = last
+        if (val !== null) last = val
+        out.push({ time: label, [key]: val })
+      }
+      return out
+    }
+  }, [dateFrom, dateTo, timeFrom, timeTo])
+
   const baseOptions = useMemo(
     () => ({
       chart: {
         type: 'line',
+        foreColor: (() => {
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
+          return `hsl(${v})`
+        })(),
         toolbar: {
           show: true,
           tools: {
@@ -95,7 +128,14 @@ export default function OpticalCharts() {
       },
       dataLabels: { enabled: false },
       stroke: { curve: 'smooth', width: 2 },
-      markers: { size: 2 },
+      markers: {
+        size: 2,
+        strokeWidth: 2,
+        strokeColors: (() => {
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--card').trim()
+          return `hsl(${v})`
+        })(),
+      },
       xaxis: {
         type: 'datetime',
         labels: {
@@ -106,12 +146,17 @@ export default function OpticalCharts() {
           },
         },
       },
-      grid: { borderColor: '#e5e7eb' },
+      grid: {
+        borderColor: (() => {
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--border').trim()
+          return `hsl(${v})`
+        })(),
+      },
       tooltip: {
         x: { format: 'HH:mm' },
       },
     }),
-    []
+    [resolvedTheme]
   )
 
   const buildOptions = useMemo(
@@ -146,7 +191,7 @@ export default function OpticalCharts() {
               series={[
                 {
                   name: `Sector ${sector} PD Level`,
-                  data: createSeries(filteredPdData, `sector${sector}`),
+                  data: createSeries(makeResampler(filteredPdData, `sector${sector}`), `sector${sector}`),
                 },
               ]}
               type="line"
@@ -167,7 +212,7 @@ export default function OpticalCharts() {
               series={[
                 {
                   name: `Sector ${sector} LD Level`,
-                  data: createSeries(filteredLdData, `sector${sector}`),
+                  data: createSeries(makeResampler(filteredLdData, `sector${sector}`), `sector${sector}`),
                 },
               ]}
               type="line"

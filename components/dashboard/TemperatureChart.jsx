@@ -89,12 +89,46 @@ export default function TemperatureChart({ hostId: propHostId, showTitle = true 
       return false
     })
 
-    if (data.length > 100) {
-      const step = Math.ceil(data.length / 50)
-      return data.filter((_, index) => index % step === 0)
+    // Resample to 15-minute grid to ensure points every 15 minutes
+    const toMinutes = (t) => {
+      const [h, m] = String(t).split(':').map(Number)
+      return (h || 0) * 60 + (m || 0)
+    }
+    const labelFromPoint = (p) => {
+      if (p.time) return p.time
+      if (p.timestamp) {
+        const d = new Date(p.timestamp * 1000)
+        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+      }
+      return undefined
+    }
+    const toLabel = (min) => `${String(Math.floor(min / 60)).padStart(2,'0')}:${String(min % 60).padStart(2,'0')}`
+
+    const map = new Map()
+    data.forEach((p) => {
+      const lbl = labelFromPoint(p)
+      if (!lbl) return
+      map.set(lbl, { BIU1: p.BIU1 ?? null, BIU2: p.BIU2 ?? null, BIU3: p.BIU3 ?? null })
+    })
+
+    const start = dateFrom === dateTo ? timeFrom : '00:00'
+    const end = dateFrom === dateTo ? timeTo : '23:45'
+    const startMin = toMinutes(start)
+    const endMin = toMinutes(end)
+
+    let last = { BIU1: null, BIU2: null, BIU3: null }
+    const out = []
+    for (let m = startMin; m <= endMin; m += 15) {
+      const lbl = toLabel(m)
+      const cur = map.get(lbl) || { BIU1: null, BIU2: null, BIU3: null }
+      const biu1 = cur.BIU1 !== null ? cur.BIU1 : last.BIU1
+      const biu2 = cur.BIU2 !== null ? cur.BIU2 : last.BIU2
+      const biu3 = cur.BIU3 !== null ? cur.BIU3 : last.BIU3
+      out.push({ time: lbl, timestamp: undefined, BIU1: biu1 ?? null, BIU2: biu2 ?? null, BIU3: biu3 ?? null })
+      last = { BIU1: biu1, BIU2: biu2, BIU3: biu3 }
     }
 
-    return data
+    return out
   }, [monitoringData, hostId, currentHostId, getTemperatureChartData, getAggregatedTemperatureData, dateFrom, dateTo, timeFrom, timeTo])
 
   // Determine which BIU sensors are available

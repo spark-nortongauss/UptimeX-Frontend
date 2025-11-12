@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
+import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
@@ -54,6 +55,7 @@ const createSeries = (data, key) =>
   }))
 
 export default function NetworkConnectivityCharts() {
+  const { resolvedTheme } = useTheme()
   const t = useTranslations('DetailedSystem.network')
   // Use individual selectors to avoid creating new objects on every render
   const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
@@ -84,10 +86,45 @@ export default function NetworkConnectivityCharts() {
   const filteredLatencyData = useMemo(() => filterDataByTimeframe(latencyData), [filterDataByTimeframe])
   const filteredLossData = useMemo(() => filterDataByTimeframe(lossData), [filterDataByTimeframe])
 
+  const makeResampler = useMemo(() => {
+    const toMinutes = (t) => {
+      const [h, m] = String(t).split(':').map(Number)
+      return (h || 0) * 60 + (m || 0)
+    }
+    const toLabel = (min) => `${String(Math.floor(min / 60)).padStart(2,'0')}:${String(min % 60).padStart(2,'0')}`
+    return (data, key) => {
+      if (!Array.isArray(data) || data.length === 0) return []
+      const map = new Map()
+      data.forEach(p => map.set(String(p.time), p[key] ?? null))
+      const start = dateFrom === dateTo ? timeFrom : '00:00'
+      const end = dateFrom === dateTo ? timeTo : '23:45'
+      const startMin = toMinutes(start)
+      const endMin = toMinutes(end)
+      let last = null
+      const out = []
+      for (let m = startMin; m <= endMin; m += 15) {
+        const label = toLabel(m)
+        let val = map.has(label) ? map.get(label) : null
+        if (val === null && last !== null) val = last
+        if (val !== null) last = val
+        out.push({ time: label, [key]: val })
+      }
+      return out
+    }
+  }, [dateFrom, dateTo, timeFrom, timeTo])
+
+  const resampledIcmpData = useMemo(() => makeResampler(filteredIcmpData, 'status'), [filteredIcmpData, makeResampler])
+  const resampledLatencyData = useMemo(() => makeResampler(filteredLatencyData, 'latency'), [filteredLatencyData, makeResampler])
+  const resampledLossData = useMemo(() => makeResampler(filteredLossData, 'loss'), [filteredLossData, makeResampler])
+
   const baseOptions = useMemo(
     () => ({
       chart: {
         type: 'line',
+        foreColor: (() => {
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
+          return `hsl(${v})`
+        })(),
         toolbar: {
           show: true,
           tools: {
@@ -108,7 +145,14 @@ export default function NetworkConnectivityCharts() {
       },
       dataLabels: { enabled: false },
       stroke: { curve: 'smooth', width: 2 },
-      markers: { size: 3 },
+      markers: {
+        size: 3,
+        strokeWidth: 2,
+        strokeColors: (() => {
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--card').trim()
+          return `hsl(${v})`
+        })(),
+      },
       xaxis: {
         type: 'datetime',
         labels: {
@@ -119,12 +163,17 @@ export default function NetworkConnectivityCharts() {
           },
         },
       },
-      grid: { borderColor: '#e5e7eb' },
+      grid: {
+        borderColor: (() => {
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--border').trim()
+          return `hsl(${v})`
+        })(),
+      },
       tooltip: {
         x: { format: 'HH:mm' },
       },
     }),
-    []
+    [resolvedTheme]
   )
 
   const buildOptions = useMemo(
@@ -144,7 +193,7 @@ export default function NetworkConnectivityCharts() {
     () => [
       {
         name: t('icmp'),
-        data: createSeries(filteredIcmpData, 'status'),
+        data: createSeries(resampledIcmpData, 'status'),
       },
     ],
     [t, filteredIcmpData]
@@ -154,7 +203,7 @@ export default function NetworkConnectivityCharts() {
     () => [
       {
         name: t('latency'),
-        data: createSeries(filteredLatencyData, 'latency'),
+        data: createSeries(resampledLatencyData, 'latency'),
       },
     ],
     [t, filteredLatencyData]
@@ -164,7 +213,7 @@ export default function NetworkConnectivityCharts() {
     () => [
       {
         name: t('loss'),
-        data: createSeries(filteredLossData, 'loss'),
+        data: createSeries(resampledLossData, 'loss'),
       },
     ],
     [t, filteredLossData]
