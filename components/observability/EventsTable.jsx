@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Activity,
   AlertTriangle,
@@ -77,6 +78,7 @@ const buildPaginationRange = (current, total) => {
 }
 
 export default function EventsTable() {
+  const router = useRouter()
   const {
     problems,
     loading,
@@ -106,8 +108,8 @@ export default function EventsTable() {
   useEffect(() => {
     const params =
       mode === "range" && timeFromSeconds && timeTillSeconds
-        ? { limit: 500, time_from: timeFromSeconds, time_till: timeTillSeconds }
-        : { limit: 500 }
+        ? { time_from: timeFromSeconds, time_till: timeTillSeconds }
+        : {} // No limit - fetch ALL problems
     fetchProblems(params)
   }, [fetchProblems, mode, timeFromSeconds, timeTillSeconds])
 
@@ -172,8 +174,8 @@ export default function EventsTable() {
   const handleRefresh = () => {
     const params =
       mode === "range" && timeFromSeconds && timeTillSeconds
-        ? { limit: 500, time_from: timeFromSeconds, time_till: timeTillSeconds }
-        : { limit: 500 }
+        ? { time_from: timeFromSeconds, time_till: timeTillSeconds }
+        : {} // No limit - fetch ALL problems
     fetchProblems(params)
   }
 
@@ -409,7 +411,7 @@ export default function EventsTable() {
                       "group transition-all duration-200 ease-out hover:bg-muted/50 dark:hover:bg-neutral-800/60",
                       index % 2 === 0 ? "bg-background dark:bg-neutral-950/50" : "bg-muted/20 dark:bg-neutral-900/50",
                       isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4",
-                      selectedQuickAction && "cursor-pointer",
+                      "cursor-pointer",
                       selectedRowId === alarm.id && selectedQuickAction && "bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500"
                     )}
                     style={{
@@ -421,6 +423,9 @@ export default function EventsTable() {
                         setSelectedRowId(alarm.id)
                         // TODO: Implement the actual action when features are ready
                         console.log(`Selected ${selectedQuickAction} action for event:`, alarm)
+                      } else {
+                        // Navigate to detail page when clicking a row
+                        router.push(`/observability/events/${alarm.id}`)
                       }
                     }}
                   >
