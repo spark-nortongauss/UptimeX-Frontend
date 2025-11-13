@@ -16,10 +16,13 @@ import {
   Search,
   Cpu,
   CheckCircle2,
+  Download,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ 
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
@@ -99,6 +102,11 @@ export default function EventsTable() {
   const [isVisible, setIsVisible] = useState(false)
   const [selectedQuickAction, setSelectedQuickAction] = useState(null) // 'ai', 'ticket', 'acknowledge'
   const [selectedRowId, setSelectedRowId] = useState(null)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exportPDFChecked, setExportPDFChecked] = useState(true)
+  const [exportCSVChecked, setExportCSVChecked] = useState(true)
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportError, setExportError] = useState(null)
 
   const activeRange = useMemo(() => getRangeInfo(), [getRangeInfo, mode, dateFrom, timeFrom, dateTo, timeTo])
   const timeFromSeconds = activeRange?.time_from ?? null
@@ -156,6 +164,120 @@ export default function EventsTable() {
     () => buildPaginationRange(safeCurrentPage, totalPages),
     [safeCurrentPage, totalPages]
   )
+
+  const exportRecords = useMemo(() => filteredProblems.map((p) => ({ host: p.host, problem: p.problem })), [filteredProblems])
+
+  const EXPORT_HEADERS = ["Host Name", "Problem"]
+  const filenameSuffix = () => new Date().toISOString().replace(/[:.]/g, "-")
+  const buildCSVFromRecords = (records, headers) => {
+    const escape = (val) => {
+      if (val == null) return ""
+      const s = String(val)
+      if (s.includes(",") || s.includes("\n") || s.includes('"')) {
+        return '"' + s.replace(/"/g, '""') + '"'
+      }
+      return s
+    }
+    const lines = [headers.join(",")]
+    for (const r of records) {
+      lines.push([escape(r.host), escape(r.problem)].join(","))
+    }
+    return lines.join("\n")
+  }
+
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const loadJsPDF = async () => {
+    if (typeof window !== "undefined" && window.jspdf && window.jspdf.jsPDF) {
+      return window.jspdf.jsPDF
+    }
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script")
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+      script.async = true
+      script.onload = resolve
+      script.onerror = reject
+      document.head.appendChild(script)
+    })
+    return window.jspdf.jsPDF
+  }
+
+  const exportCSV = async () => {
+    const csv = buildCSVFromRecords(exportRecords, EXPORT_HEADERS)
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const ts = filenameSuffix()
+    downloadBlob(blob, `events-export-${ts}.csv`)
+  }
+
+  const exportPDF = async () => {
+    const JsPDF = await loadJsPDF()
+    const doc = new JsPDF({ unit: "pt", format: "a4" })
+
+    const marginLeft = 40
+    const marginTop = 50
+    const lineHeight = 18
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const usableWidth = pageWidth - marginLeft * 2
+
+    doc.setFontSize(16)
+    doc.text("Events Export", marginLeft, marginTop)
+    doc.setFontSize(10)
+    doc.text(`Generated: ${new Date().toLocaleString()}`, marginLeft, marginTop + 20)
+
+    let y = marginTop + 50
+    doc.setFont(undefined, "bold")
+    doc.setFontSize(12)
+    doc.text(EXPORT_HEADERS[0], marginLeft, y)
+    doc.text(EXPORT_HEADERS[1], marginLeft + usableWidth * 0.45, y)
+    doc.setFont(undefined, "normal")
+    y += 8
+    doc.setLineWidth(0.5)
+    doc.line(marginLeft, y, marginLeft + usableWidth, y)
+    y += 12
+
+    for (const r of exportRecords) {
+      if (y > doc.internal.pageSize.getHeight() - 60) {
+        doc.addPage()
+        y = marginTop
+      }
+      doc.setFontSize(11)
+      doc.text(String(r.host || ""), marginLeft, y)
+      doc.text(String(r.problem || ""), marginLeft + usableWidth * 0.45, y)
+      y += lineHeight
+    }
+
+    const pdfBlob = doc.output("blob")
+    const ts = filenameSuffix()
+    downloadBlob(pdfBlob, `events-export-${ts}.pdf`)
+  }
+
+  const handleExportConfirm = async () => {
+    setExportError(null)
+    if (!exportPDFChecked && !exportCSVChecked) {
+      setExportError("Select at least one format to export")
+      return
+    }
+    setExportLoading(true)
+    try {
+      if (exportPDFChecked) await exportPDF()
+      if (exportCSVChecked) await exportCSV()
+      setExportOpen(false)
+    } catch (e) {
+      console.error("Export failed", e)
+      setExportError("Failed to generate export files. Please try again.")
+    } finally {
+      setExportLoading(false)
+    }
+  }
 
   const handleItemsPerPageChange = (value) => {
     const parsed = Number(value)
@@ -240,6 +362,7 @@ export default function EventsTable() {
   }
 
   return (
+    <>
     <Card
       className={cn(
         "overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-neutral-900 dark:to-neutral-900/50 transition-all duration-700 ease-out",
@@ -309,6 +432,15 @@ export default function EventsTable() {
             </span>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button 
+              size="sm"
+              className="bg-[#5771d7] hover:bg-[#495fc0] text-white font-bold gap-2 border-0 shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              onClick={() => setExportOpen(true)}
+              aria-label="Open export options dialog"
+            >
+              <Download className="h-4 w-4" strokeWidth={3} />
+              Export
+            </Button>
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Quick Actions:
             </span>
@@ -572,5 +704,65 @@ export default function EventsTable() {
         </div>
       </CardContent>
     </Card>
+    <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+      <DialogContent aria-label="Export options" className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Export Events</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <label htmlFor="export-pdf" className="flex-1 text-sm font-medium text-foreground">
+              PDF (Host Name, Problem)
+            </label>
+            <input
+              id="export-pdf"
+              type="checkbox"
+              aria-label="Select PDF format"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={exportPDFChecked}
+              onChange={(e) => setExportPDFChecked(e.target.checked)}
+            />
+          </div>
+          <div className="flex items-start justify-between gap-4">
+            <label htmlFor="export-csv" className="flex-1 text-sm font-medium text-foreground">
+              CSV (Host Name, Problem)
+            </label>
+            <input
+              id="export-csv"
+              type="checkbox"
+              aria-label="Select CSV format"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={exportCSVChecked}
+              onChange={(e) => setExportCSVChecked(e.target.checked)}
+            />
+          </div>
+          {exportError && (
+            <div className="flex items-center gap-2 rounded-md bg-red-50 p-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300" role="alert">
+              <AlertTriangle className="h-4 w-4" />
+              {exportError}
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setExportOpen(false)}
+            aria-label="Cancel export"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleExportConfirm}
+            disabled={exportLoading}
+            aria-label="Confirm export"
+            className="gap-2"
+          >
+            {exportLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
+            {exportLoading ? "Exporting..." : "Export"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
