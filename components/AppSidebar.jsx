@@ -55,8 +55,6 @@ function buildNavigationItems(t) {
         { label: t("detailed"), href: "/observability/detailed", icon: Search },
         { label: t("topologyMap"), href: "/observability/topology", icon: Map },
         { label: t("events"), href: "/observability/events", icon: AlertTriangle },
-        { label: t("incidents"), href: "/observability/incidents", icon: AlertCircle },
-        { label: t("problems"), href: "/observability/problems", icon: Wrench },
         { label: t("services"), href: "/observability/services", icon: Server },
         { label: t("reports"), href: "/observability/reports", icon: FileText },
       ]
