@@ -153,7 +153,6 @@ export default function SystemTopbar({ systemId }) {
             <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('export')}</Button>
             <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('report')}</Button>
             <Button size="sm" className="dark:hover:bg-neutral-800">{tActions('openTicket')}</Button>
-            <Button size="sm" variant="secondary" className="dark:hover:bg-neutral-700">{tActions('addDevice')}</Button>
           </div>
         </div>
       </div>
