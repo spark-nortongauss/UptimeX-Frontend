@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { useZabbixStore } from '@/lib/stores/zabbixStore'
+import { useAlarmsStore } from '@/lib/stores/alarmsStore'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { AlertTriangle, CircleDot, ChevronLeft, ChevronRight, Activity, Server, Tag, Clock, ScrollText, Bot, CheckCircle2 } from 'lucide-react'
@@ -15,8 +15,9 @@ export default function ActiveAlarmsTable() {
     problems,
     loading,
     error,
-    fetchProblems
-  } = useZabbixStore()
+    fetchProblems,
+    acknowledgeAlarm
+  } = useAlarmsStore()
 
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
@@ -359,6 +360,7 @@ export default function ActiveAlarmsTable() {
                           title="Acknowledge"
                           onClick={() => {
                             console.log('Acknowledge requested for alarm', alarm.id);
+                            acknowledgeAlarm(alarm.id);
                           }}
                         >
                           <CheckCircle2 className="h-4 w-4" />
