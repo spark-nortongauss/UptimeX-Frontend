@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Search, HelpCircle, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,17 +11,20 @@ import { useAuthStore } from "@/lib/stores/authStore"
 import ThemeToggle from "@/components/ThemeToggle"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
 import { useTranslations } from "next-intl"
+import { authService } from "@/lib/services/authService"
 
 // Thin top navigation bar shown above the sidebar layout
 export default function Topbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const t = useTranslations("Topbar")
-  const { user } = useAuthStore()
+  const { user, initialized, getToken } = useAuthStore()
   const { state, isMobile } = useSidebar()
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const menuRef = useRef(null)
   const searchInputRef = useRef(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const displayName = useMemo(() => {
     return (
@@ -45,6 +48,19 @@ export default function Topbar() {
     if (open) document.addEventListener("mousedown", onClick)
     return () => document.removeEventListener("mousedown", onClick)
   }, [open])
+
+  useEffect(() => {
+    const run = async () => {
+      if (!initialized) return
+      const token = getToken() || await authService.getSessionToken()
+      if (!token) return
+      try {
+        const admin = await authService.isAdmin(token)
+        setIsAdmin(admin)
+      } catch {}
+    }
+    run()
+  }, [initialized, getToken])
 
   // Handle search form submission
   const handleSearchSubmit = (e) => {
@@ -96,6 +112,16 @@ export default function Topbar() {
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
+          {isAdmin && pathname?.startsWith('/observability/overview') && (
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={() => router.push('/admin')}
+              className="ml-1 bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold hover:from-blue-700 hover:to-purple-700 border-0 shadow-sm"
+            >
+              Go To Admin
+            </Button>
+          )}
           {/* Help button - Hidden on very small screens */}
           <Button 
             variant="ghost" 
