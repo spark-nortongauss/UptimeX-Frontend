@@ -1,12 +1,13 @@
 "use client"
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
 import { useTranslations } from 'next-intl'
-import { Cpu } from 'lucide-react'
+import { Cpu, ChevronDown, FileText, FileSpreadsheet } from 'lucide-react'
 import { zabbixService } from '@/lib/services/zabbixService'
 import geocodingService from '@/lib/services/geocodingService'
+import { generatePDF, generateCSV } from '@/lib/utils/exportUtils'
 
 const StatusBadge = ({ status }) => {
   const cls = useMemo(() => {
@@ -38,6 +39,8 @@ export default function SystemTopbar({ systemId }) {
   const { systemsById } = useSystemSelectionStore()
   const system = systemsById[systemId]
   const [inventoryData, setInventoryData] = useState(null)
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const exportMenuRef = useRef(null)
 
   // Fetch inventory data if not already in system
   useEffect(() => {
@@ -118,6 +121,38 @@ export default function SystemTopbar({ systemId }) {
   const vendor = inventory.vendor || 'N/A'
   const propertyType = inventory.property_type || inventory.type || 'N/A'
 
+  // Handle export menu click outside
+  useEffect(() => {
+    const onClick = (e) => {
+      if (!exportMenuRef.current) return
+      if (!exportMenuRef.current.contains(e.target)) {
+        setExportMenuOpen(false)
+      }
+    }
+    if (exportMenuOpen) document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [exportMenuOpen])
+
+  const handleExportPDF = () => {
+    try {
+      generatePDF(systemId)
+      setExportMenuOpen(false)
+    } catch (error) {
+      console.error('Failed to generate PDF:', error)
+      alert('Failed to generate PDF. Please try again.')
+    }
+  }
+
+  const handleExportCSV = () => {
+    try {
+      generateCSV(systemId)
+      setExportMenuOpen(false)
+    } catch (error) {
+      console.error('Failed to generate CSV:', error)
+      alert('Failed to generate CSV. Please try again.')
+    }
+  }
+
   return (
     <div className="w-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-4 mb-6">
       {/* First Row: System Name, Status, and Quick Actions */}
@@ -149,8 +184,50 @@ export default function SystemTopbar({ systemId }) {
             </Button>
             <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">Ping</Button>
             <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('inventory')}</Button>
-            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('download')}</Button>
-            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('export')}</Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="dark:hover:bg-neutral-800 dark:text-white"
+              onClick={() => {
+                try {
+                  generatePDF(systemId)
+                } catch (error) {
+                  console.error('Failed to generate PDF:', error)
+                  alert('Failed to generate PDF. Please try again.')
+                }
+              }}
+            >
+              {t('download')}
+            </Button>
+            <div className="relative" ref={exportMenuRef}>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="dark:hover:bg-neutral-800 dark:text-white"
+                onClick={() => setExportMenuOpen(!exportMenuOpen)}
+              >
+                {t('export')}
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+              {exportMenuOpen && (
+                <div className="absolute top-full right-0 mt-1 w-48 rounded-md border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-lg z-50">
+                  <button
+                    onClick={handleExportPDF}
+                    className="w-full flex items-center px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-neutral-800 first:rounded-t-md last:rounded-b-md"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Download as PDF
+                  </button>
+                  <button
+                    onClick={handleExportCSV}
+                    className="w-full flex items-center px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-neutral-800 first:rounded-t-md last:rounded-b-md border-t border-gray-200 dark:border-neutral-800"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Download as CSV
+                  </button>
+                </div>
+              )}
+            </div>
             <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('report')}</Button>
             <Button size="sm" className="dark:hover:bg-neutral-800">{tActions('openTicket')}</Button>
           </div>

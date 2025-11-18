@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import ClientLayout from "@/components/ClientLayout";
 import ThemeProvider from "@/components/ThemeProvider";
 import IntlProvider from "@/components/IntlProvider";
+import SensitiveFiltersInitializer from "@/components/SensitiveFiltersInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,6 +66,7 @@ export default function RootLayout({ children }) {
       >
         <IntlProvider>
           <ThemeProvider>
+            <SensitiveFiltersInitializer />
             <ClientLayout>{children}</ClientLayout>
           </ThemeProvider>
         </IntlProvider>
