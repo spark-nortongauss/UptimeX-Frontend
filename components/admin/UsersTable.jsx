@@ -6,12 +6,14 @@ import { authService } from "@/lib/services/authService"
 import { usersService } from "@/lib/services/usersService"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
 
 export default function UsersTable() {
   const { getToken } = useAuthStore()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [updatingId, setUpdatingId] = useState(null)
 
   useEffect(() => {
     const run = async () => {
@@ -49,6 +51,7 @@ export default function UsersTable() {
               <TableHead className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300">Name</TableHead>
               <TableHead className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300">Email</TableHead>
               <TableHead className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300">Role</TableHead>
+              <TableHead className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300">Make Admin</TableHead>
               <TableHead className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300">Created</TableHead>
             </TableRow>
           </TableHeader>
@@ -66,6 +69,28 @@ export default function UsersTable() {
                   }>
                     {u.role}
                   </span>
+                </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={u.role === 'ADMIN'}
+                    disabled={updatingId === u.id}
+                    onCheckedChange={async (checked) => {
+                      const token = useAuthStore.getState().getToken() || await authService.getSessionToken()
+                      if (!token) return
+                      const nextRole = checked ? 'ADMIN' : 'USER'
+                      setUpdatingId(u.id)
+                      setUsers((prev) => prev.map((x) => x.id === u.id ? { ...x, role: nextRole } : x))
+                      try {
+                        await usersService.updateRole(u.id, nextRole, token)
+                      } catch (e) {
+                        setUsers((prev) => prev.map((x) => x.id === u.id ? { ...x, role: u.role } : x))
+                        console.error(e)
+                      } finally {
+                        setUpdatingId(null)
+                      }
+                    }}
+                    className="data-[state=checked]:bg-purple-600"
+                  />
                 </TableCell>
                 <TableCell className="text-sm text-gray-700 dark:text-gray-300">
                   {new Date(u.createdAt).toLocaleString()}
