@@ -203,7 +203,21 @@ export default function ProblemEventDetail({ eventId, onBack }) {
       lines.push("=== ACKNOWLEDGMENT HISTORY ===")
       lines.push("Acknowledge ID,User Name,Username,User ID,Timestamp,Message,Action,Event ID,Event Name")
       data.acknowledgmentHistory.forEach((ack) => {
-        const displayName = ack.fullName || ack.username || ack.userid || "Unknown"
+        // Format username properly - handle "uptimex" -> "UptimeX"
+        let displayName = ack.fullName;
+        if (!displayName && ack.username) {
+          if (ack.username.toLowerCase() === 'uptimex') {
+            displayName = 'UptimeX';
+          } else {
+            displayName = ack.username;
+          }
+        }
+        if (!displayName && ack.userid) {
+          displayName = ack.userid;
+        }
+        if (!displayName) {
+          displayName = 'Inactive User';
+        }
         lines.push([
           escape(ack.acknowledgeid || ""),
           escape(displayName),
@@ -279,11 +293,11 @@ export default function ProblemEventDetail({ eventId, onBack }) {
       lines.push("")
     }
 
-    // Correlated Events
+    // Correlated Events (limit to 5 for export)
     if (data.correlatedEvents && data.correlatedEvents.length > 0) {
       lines.push("=== CORRELATED EVENTS ===")
       lines.push("Event ID,Timestamp,Name,Severity,Hosts")
-      data.correlatedEvents.forEach((event) => {
+      data.correlatedEvents.slice(0, 5).forEach((event) => {
         const hosts = event.hosts ? event.hosts.map(h => h.name).join("; ") : "N/A"
         lines.push([
           escape(event.eventid || ""),
@@ -293,6 +307,9 @@ export default function ProblemEventDetail({ eventId, onBack }) {
           escape(hosts)
         ].join(","))
       })
+      if (data.correlatedEvents.length > 5) {
+        lines.push(`... and ${data.correlatedEvents.length - 5} more events`)
+      }
     }
 
     const csv = lines.join("\n")
@@ -469,8 +486,22 @@ export default function ProblemEventDetail({ eventId, onBack }) {
         addPageIfNeeded(40)
         doc.setFont(undefined, "bold")
         doc.setFontSize(9)
-        const userName = ack.fullName || ack.username || ack.userid || "Unknown"
-        doc.text(`User: ${userName} - ${formatTimestamp(ack.clock)}`, marginLeft, y)
+        // Format username properly - handle "uptimex" -> "UptimeX"
+        let userName = ack.fullName;
+        if (!userName && ack.username) {
+          if (ack.username.toLowerCase() === 'uptimex') {
+            userName = 'UptimeX';
+          } else {
+            userName = ack.username;
+          }
+        }
+        if (!userName && ack.userid) {
+          userName = ack.userid;
+        }
+        if (!userName) {
+          userName = 'Inactive User';
+        }
+        doc.text(`Acknowledged by ${userName} - ${formatTimestamp(ack.clock)}`, marginLeft, y)
         y += 15
         doc.setFont(undefined, "normal")
         doc.setFontSize(8)
@@ -620,7 +651,7 @@ export default function ProblemEventDetail({ eventId, onBack }) {
       y += 20
     }
 
-    // Correlated Events
+    // Correlated Events (limit to 5 for export)
     if (data.correlatedEvents && data.correlatedEvents.length > 0) {
       addPageIfNeeded(60)
       doc.setFontSize(14)
@@ -635,7 +666,7 @@ export default function ProblemEventDetail({ eventId, onBack }) {
       y += 15
       doc.setFont(undefined, "normal")
       
-      data.correlatedEvents.forEach((event) => {
+      data.correlatedEvents.slice(0, 5).forEach((event) => {
         addPageIfNeeded()
         doc.setFontSize(8)
         doc.text(formatTimestamp(event.clock), marginLeft, y)
@@ -644,6 +675,12 @@ export default function ProblemEventDetail({ eventId, onBack }) {
         doc.text(severityLabels[event.severity || 0], marginLeft + 300, y)
         y += Math.max(lineHeight, nameLines.length * lineHeight)
       })
+      if (data.correlatedEvents.length > 5) {
+        addPageIfNeeded()
+        doc.setFontSize(8)
+        doc.text(`... and ${data.correlatedEvents.length - 5} more events`, marginLeft, y)
+        y += lineHeight
+      }
     }
 
     const pdfBlob = doc.output("blob")
@@ -880,32 +917,49 @@ export default function ProblemEventDetail({ eventId, onBack }) {
     </CardHeader>
     <CardContent>
       <div className="space-y-3">
-        {acknowledgmentHistory.map((ack, index) => (
-          <div key={ack.acknowledgeid || index} className="p-4 border rounded-lg">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <p className="font-semibold">
-                  {ack.fullName ? (
-                    <span>{ack.fullName}</span>
-                  ) : ack.username ? (
-                    <span>{ack.username}</span>
-                  ) : (
-                    <span>{ack.userid || "Unknown"}</span>
-                  )}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {formatTimestamp(ack.clock)}
-                </p>
+        {acknowledgmentHistory.map((ack, index) => {
+          // Format username properly - handle "uptimex" -> "UptimeX"
+          const getDisplayName = () => {
+            if (ack.fullName) {
+              return ack.fullName;
+            }
+            if (ack.username) {
+              // Check if username is "uptimex" (case-insensitive) and format it as "UptimeX"
+              if (ack.username.toLowerCase() === 'uptimex') {
+                return 'UptimeX';
+              }
+              return ack.username;
+            }
+            if (ack.userid) {
+              return ack.userid;
+            }
+            // Fallback to "Inactive User" if no username/userid is found
+            return 'Inactive User';
+          };
+
+          const displayName = getDisplayName();
+
+          return (
+            <div key={ack.acknowledgeid || index} className="p-4 border rounded-lg">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="font-semibold">
+                    Acknowledged by {displayName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatTimestamp(ack.clock)}
+                  </p>
+                </div>
               </div>
+              {ack.message && (
+                <p className="text-sm mt-2">{ack.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-2">
+                Event: {ack.eventName || "N/A"}
+              </p>
             </div>
-            {ack.message && (
-              <p className="text-sm mt-2">{ack.message}</p>
-            )}
-            <p className="text-xs text-muted-foreground mt-2">
-              Event: {ack.eventName || "N/A"}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </CardContent>
   </Card>
@@ -1075,7 +1129,7 @@ export default function ProblemEventDetail({ eventId, onBack }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {correlatedEvents.map((event, index) => (
+              {correlatedEvents.slice(0, 5).map((event, index) => (
                 <div key={event.eventid || index} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
@@ -1094,6 +1148,11 @@ export default function ProblemEventDetail({ eventId, onBack }) {
                   </div>
                 </div>
               ))}
+              {correlatedEvents.length > 5 && (
+                <p className="text-sm text-muted-foreground text-center py-2">
+                  Showing 5 of {correlatedEvents.length} correlated events
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

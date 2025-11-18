@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { useAlarmsStore } from '@/lib/stores/alarmsStore'
 import { useTranslations } from 'next-intl'
@@ -22,6 +23,10 @@ export default function ActiveAlarmsTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
   const [isVisible, setIsVisible] = useState(false)
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+  const [acknowledgingAlarm, setAcknowledgingAlarm] = useState(null)
+  const [isAcknowledging, setIsAcknowledging] = useState(false)
 
   // Fetch data on component mount
   useEffect(() => {
@@ -48,6 +53,30 @@ export default function ActiveAlarmsTable() {
 
   const handleNextPage = () => {
     setCurrentPage(prev => Math.min(prev + 1, totalPages))
+  }
+
+  const handleConfirmAcknowledge = async () => {
+    if (!acknowledgingAlarm) return
+    
+    setIsAcknowledging(true)
+    try {
+      const response = await acknowledgeAlarm(acknowledgingAlarm.id)
+      if (response && response.success) {
+        setConfirmDialogOpen(false)
+        setSuccessDialogOpen(true)
+        // Refresh the problems list
+        await fetchProblems({ limit: 100 })
+      } else {
+        throw new Error(response?.message || 'Failed to acknowledge alarm')
+      }
+    } catch (error) {
+      console.error('Failed to acknowledge alarm:', error)
+      alert(`Failed to acknowledge alarm: ${error.message}`)
+      setConfirmDialogOpen(false)
+    } finally {
+      setIsAcknowledging(false)
+      setAcknowledgingAlarm(null)
+    }
   }
 
   const severityStyles = (sev) => {
@@ -188,6 +217,7 @@ export default function ActiveAlarmsTable() {
   }
 
   return (
+    <>
     <Card className={cn(
       "overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-neutral-900 dark:to-neutral-900/50 transition-all duration-700 ease-out",
       isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -359,8 +389,8 @@ export default function ActiveAlarmsTable() {
                           aria-label="Acknowledge"
                           title="Acknowledge"
                           onClick={() => {
-                            console.log('Acknowledge requested for alarm', alarm.id);
-                            acknowledgeAlarm(alarm.id);
+                            setAcknowledgingAlarm(alarm)
+                            setConfirmDialogOpen(true)
                           }}
                         >
                           <CheckCircle2 className="h-4 w-4" />
@@ -405,5 +435,79 @@ export default function ActiveAlarmsTable() {
         </div>
       </CardContent>
     </Card>
+
+    {/* Confirmation Dialog */}
+    <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            Confirm Acknowledgement
+          </DialogTitle>
+          <DialogDescription>
+            Are you sure you want to acknowledge this event problem?
+          </DialogDescription>
+        </DialogHeader>
+        {acknowledgingAlarm && (
+          <div className="py-4">
+            <div className="rounded-lg bg-muted p-4 space-y-2">
+              <p className="text-sm font-medium text-foreground">Event Problem:</p>
+              <p className="text-sm text-muted-foreground">{acknowledgingAlarm.problem}</p>
+              <p className="text-xs text-muted-foreground mt-2">Host: {acknowledgingAlarm.host}</p>
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setConfirmDialogOpen(false)
+              setAcknowledgingAlarm(null)
+            }}
+            disabled={isAcknowledging}
+          >
+            No
+          </Button>
+          <Button
+            onClick={handleConfirmAcknowledge}
+            disabled={isAcknowledging}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isAcknowledging ? 'Acknowledging...' : 'Yes'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* Success Dialog */}
+    <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            Acknowledgement Successful
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-4 space-y-2">
+            <p className="text-sm font-medium text-green-900 dark:text-green-100">
+              The event problem <span className="font-bold">"{acknowledgingAlarm?.problem}"</span> has been properly acknowledged.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            onClick={() => {
+              setSuccessDialogOpen(false)
+              setAcknowledgingAlarm(null)
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            OK
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

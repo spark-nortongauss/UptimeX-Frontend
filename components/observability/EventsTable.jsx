@@ -21,13 +21,14 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
  
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { useZabbixStore } from "@/lib/stores/zabbixStore"
 import { useEventsTimeframeStore } from "@/lib/stores/eventsTimeframeStore"
+import { alarmsService } from "@/lib/services/alarmsService"
 
 const ROW_SIZE_OPTIONS = [10, 25, 50, 100]
 
@@ -107,6 +108,10 @@ export default function EventsTable() {
   const [exportCSVChecked, setExportCSVChecked] = useState(true)
   const [exportLoading, setExportLoading] = useState(false)
   const [exportError, setExportError] = useState(null)
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+  const [acknowledgingAlarm, setAcknowledgingAlarm] = useState(null)
+  const [isAcknowledging, setIsAcknowledging] = useState(false)
 
   const activeRange = useMemo(() => getRangeInfo(), [getRangeInfo, mode, dateFrom, timeFrom, dateTo, timeTo])
   const timeFromSeconds = activeRange?.time_from ?? null
@@ -299,6 +304,36 @@ export default function EventsTable() {
         ? { time_from: timeFromSeconds, time_till: timeTillSeconds }
         : {} // No limit - fetch ALL problems
     fetchProblems(params)
+  }
+
+  const handleConfirmAcknowledge = async () => {
+    if (!acknowledgingAlarm) return
+    
+    setIsAcknowledging(true)
+    try {
+      const response = await alarmsService.acknowledgeAlarm(acknowledgingAlarm.id)
+      if (response && response.success) {
+        setConfirmDialogOpen(false)
+        setSuccessDialogOpen(true)
+        setSelectedQuickAction(null)
+        setSelectedRowId(null)
+        // Refresh the problems list
+        const params =
+          mode === "range" && timeFromSeconds && timeTillSeconds
+            ? { time_from: timeFromSeconds, time_till: timeTillSeconds }
+            : {}
+        await fetchProblems(params)
+      } else {
+        throw new Error(response?.message || 'Failed to acknowledge alarm')
+      }
+    } catch (error) {
+      console.error('Failed to acknowledge alarm:', error)
+      alert(`Failed to acknowledge alarm: ${error.message}`)
+      setConfirmDialogOpen(false)
+    } finally {
+      setIsAcknowledging(false)
+      setAcknowledgingAlarm(null)
+    }
   }
 
   const totalCount = filteredProblems.length
@@ -553,8 +588,13 @@ export default function EventsTable() {
                     onClick={() => {
                       if (selectedQuickAction) {
                         setSelectedRowId(alarm.id)
-                        // TODO: Implement the actual action when features are ready
-                        console.log(`Selected ${selectedQuickAction} action for event:`, alarm)
+                        if (selectedQuickAction === 'acknowledge') {
+                          setAcknowledgingAlarm(alarm)
+                          setConfirmDialogOpen(true)
+                        } else {
+                          // TODO: Implement the actual action when features are ready
+                          console.log(`Selected ${selectedQuickAction} action for event:`, alarm)
+                        }
                       } else {
                         // Navigate to detail page when clicking a row
                         router.push(`/observability/events/${alarm.id}`)
@@ -759,6 +799,79 @@ export default function EventsTable() {
           >
             {exportLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
             {exportLoading ? "Exporting..." : "Export"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* Confirmation Dialog */}
+    <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            Confirm Acknowledgement
+          </DialogTitle>
+          <DialogDescription>
+            Are you sure you want to acknowledge this event problem?
+          </DialogDescription>
+        </DialogHeader>
+        {acknowledgingAlarm && (
+          <div className="py-4">
+            <div className="rounded-lg bg-muted p-4 space-y-2">
+              <p className="text-sm font-medium text-foreground">Event Problem:</p>
+              <p className="text-sm text-muted-foreground">{acknowledgingAlarm.problem}</p>
+              <p className="text-xs text-muted-foreground mt-2">Host: {acknowledgingAlarm.host}</p>
+            </div>
+          </div>
+        )}
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setConfirmDialogOpen(false)
+              setAcknowledgingAlarm(null)
+            }}
+            disabled={isAcknowledging}
+          >
+            No
+          </Button>
+          <Button
+            onClick={handleConfirmAcknowledge}
+            disabled={isAcknowledging}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isAcknowledging ? 'Acknowledging...' : 'Yes'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* Success Dialog */}
+    <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            Acknowledgement Successful
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-4 space-y-2">
+            <p className="text-sm font-medium text-green-900 dark:text-green-100">
+              The event problem <span className="font-bold">"{acknowledgingAlarm?.problem}"</span> has been properly acknowledged.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            onClick={() => {
+              setSuccessDialogOpen(false)
+              setAcknowledgingAlarm(null)
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            OK
           </Button>
         </DialogFooter>
       </DialogContent>
