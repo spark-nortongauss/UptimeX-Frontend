@@ -45,7 +45,18 @@ import { useUIStore } from "@/lib/stores/uiStore"
 import { useTranslations } from "next-intl"
 import WorkspaceSelector from "./WorkspaceSelector"
 
-function buildNavigationItems(t) {
+function buildNavigationItems(t, isAdminRoute) {
+  if (isAdminRoute) {
+    return [
+      {
+        title: 'Users',
+        icon: Server,
+        items: [
+          { label: 'Users', href: '/admin', icon: Server },
+        ]
+      }
+    ]
+  }
   return [
     {
       title: t("observability"),
@@ -95,7 +106,8 @@ export default function AppSidebar() {
   const [expandedGroups, setExpandedGroups] = useState(new Set())
   const { sidebarSearch, setSidebarSearch } = useUIStore()
   const { state } = useSidebar()
-  const navigationItems = buildNavigationItems(t)
+  const isAdminRoute = pathname?.startsWith('/admin')
+  const navigationItems = buildNavigationItems(t, isAdminRoute)
 
   const handleLogout = async () => {
     try {
