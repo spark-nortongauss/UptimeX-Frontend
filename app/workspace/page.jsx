@@ -20,31 +20,22 @@ export default function CreateWorkspace() {
   const [workspaceName, setWorkspaceName] = useState('');
   
   const [loading, setLoading] = useState(false);
-  const [hasWorkspaces, setHasWorkspaces] = useState(false);
 
   useEffect(() => {
-    // Check if user already has workspaces
-    const checkExistingWorkspaces = async () => {
+    // Ensure user is authenticated before allowing creation
+    const ensureAuth = async () => {
       try {
         const token = getToken();
         if (!token) {
           router.push('/signin');
-          return;
-        }
-
-        const workspaces = await workspaceService.getWorkspaces(token);
-        if (workspaces && workspaces.length > 0) {
-          setHasWorkspaces(true);
-          // Redirect to overview if workspaces exist
-          router.push('/observability/overview');
         }
       } catch (error) {
-        console.error('Error checking workspaces:', error);
+        console.error('Error ensuring auth:', error);
       }
     };
 
     if (user) {
-      checkExistingWorkspaces();
+      ensureAuth();
     }
   }, [user, getToken, router]);
 
@@ -95,17 +86,7 @@ export default function CreateWorkspace() {
     }
   };
 
-  // Don't show the form if user has workspaces (will redirect)
-  if (hasWorkspaces) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-700">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  // Always show the form to allow creating additional workspaces
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
