@@ -113,7 +113,7 @@ export default function CreateWorkspace() {
               Welcome to Observone!
             </h1>
             <p className="text-xl text-gray-500 font-medium">
-              Create your first workspace to get started.
+              Create your workspace to get started.
             </p>
           </div>
 
