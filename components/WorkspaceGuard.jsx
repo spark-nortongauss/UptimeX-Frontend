@@ -11,7 +11,7 @@ export default function WorkspaceGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, getToken, initialized } = useAuthStore();
-  const { workspaces, setWorkspaces, hasWorkspaces, loading, setLoading } = useWorkspaceStore();
+  const { workspaces, setWorkspaces, hasWorkspaces, loading, setLoading, shouldRevalidate, setLastFetchedAt } = useWorkspaceStore();
   
   const [checkingWorkspaces, setCheckingWorkspaces] = useState(true);
   const [hasChecked, setHasChecked] = useState(false);
@@ -38,7 +38,6 @@ export default function WorkspaceGuard({ children }) {
 
     const checkUserWorkspaces = async () => {
       try {
-        setLoading(true);
         const token = getToken();
         
         if (!token) {
@@ -46,22 +45,27 @@ export default function WorkspaceGuard({ children }) {
           return;
         }
 
-        // Fetch user workspaces
+        if (hasWorkspaces()) {
+          setCheckingWorkspaces(false);
+          if (shouldRevalidate()) {
+            try {
+              const fresh = await workspaceService.getWorkspaces(token);
+              setWorkspaces(fresh);
+              setLastFetchedAt(Date.now());
+            } catch {}
+          }
+          return;
+        }
+
+        setLoading(true);
         const userWorkspaces = await workspaceService.getWorkspaces(token);
         setWorkspaces(userWorkspaces);
-        
+        setLastFetchedAt(Date.now());
         setHasChecked(true);
-        
-        // If user has no workspaces and is not on workspace creation page, redirect to workspace creation
+
         if (!userWorkspaces || userWorkspaces.length === 0) {
           if (pathname !== '/workspace') {
             router.push('/workspace');
-          }
-        } else {
-          // User has workspaces, allow normal navigation
-          // If on workspace creation page, redirect to overview
-          if (pathname === '/workspace') {
-            router.push('/observability/overview');
           }
         }
       } catch (error) {
@@ -80,16 +84,16 @@ export default function WorkspaceGuard({ children }) {
   }, [user, initialized, pathname, isPublicRoute, router, getToken, setWorkspaces, setLoading]);
 
   // Show loading state while checking workspaces
-  if (checkingWorkspaces && !isPublicRoute) {
-    return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-950">Checking your workspaces...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (checkingWorkspaces && !isPublicRoute) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-200 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+  //         <p className="text-gray-950">Checking your workspaces...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Don't render children if user needs to create workspace
   if (!hasWorkspaces() && !isPublicRoute && hasChecked) {
