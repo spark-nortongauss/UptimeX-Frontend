@@ -151,7 +151,7 @@ export default function Header() {
             transition={{ duration: 0.5 }}
           >
             <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
-              <Link href="/signup">{t("signup")}</Link>
+              <Link href="/signin">Sign In</Link>
             </Button>
           </motion.div>
 
@@ -184,7 +184,7 @@ export default function Header() {
               <span className="block px-3 py-2 text-base font-medium text-gray-400 rounded-md cursor-not-allowed select-none">About</span>
               <div className="pt-4 pb-2 border-t border-gray-200">
                 <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700">
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href="/signin">Sign In</Link>
                 </Button>
               </div>
             </div>
