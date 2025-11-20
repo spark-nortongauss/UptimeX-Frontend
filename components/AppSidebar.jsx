@@ -49,10 +49,11 @@ function buildNavigationItems(t, isAdminRoute) {
   if (isAdminRoute) {
     return [
       {
-        title: 'Users',
+        title: 'Admin',
         icon: Server,
         items: [
           { label: 'Users', href: '/admin', icon: Server },
+          { label: 'Workspace', href: '/admin/workspaces', icon: Building },
         ]
       }
     ]
@@ -140,15 +141,15 @@ export default function AppSidebar() {
   const normalizedQuery = sidebarSearch.trim().toLowerCase()
   const filteredSections = normalizedQuery
     ? navigationItems
-        .map((section) => ({
-          ...section,
-          items: section.items.filter(
-            (it) =>
-              it.label.toLowerCase().includes(normalizedQuery) ||
-              it.href.toLowerCase().includes(normalizedQuery)
-          ),
-        }))
-        .filter((s) => s.items.length > 0)
+      .map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (it) =>
+            it.label.toLowerCase().includes(normalizedQuery) ||
+            it.href.toLowerCase().includes(normalizedQuery)
+        ),
+      }))
+      .filter((s) => s.items.length > 0)
     : navigationItems
 
   return (
@@ -177,7 +178,7 @@ export default function AppSidebar() {
         </SidebarHeader>
 
         {/* Compact sidebar search */}
-      <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
+        <SidebarHeader className="pt-0 group-data-[collapsible=icon]:hidden">
           <div className="relative px-2 mt-8">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <SidebarInput
@@ -188,63 +189,63 @@ export default function AppSidebar() {
             />
           </div>
         </SidebarHeader>
-      {filteredSections.map((section) => {
-        const SectionIcon = section.icon
-        const isSearching = normalizedQuery.length > 0
-        const isExpanded = isSearching || expandedGroups.has(section.title)
-        const hasSubItems = section.items.length > 0
+        {filteredSections.map((section) => {
+          const SectionIcon = section.icon
+          const isSearching = normalizedQuery.length > 0
+          const isExpanded = isSearching || expandedGroups.has(section.title)
+          const hasSubItems = section.items.length > 0
 
-        return (
-          <SidebarGroup key={section.title}>
-            {hasSubItems ? (
-              <>
+          return (
+            <SidebarGroup key={section.title}>
+              {hasSubItems ? (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton onClick={() => toggleGroup(section.title)}>
+                      <SectionIcon className="h-4 w-4" />
+                      <span>{section.title}</span>
+                      <ChevronRight className={cn(
+                        "ml-auto h-4 w-4 transition-transform",
+                        isExpanded && "rotate-90"
+                      )} />
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  {isExpanded && (
+                    <SidebarMenu>
+                      {section.items.map((item) => {
+                        const ItemIcon = item.icon
+                        const isActive = isItemActive(item.href)
+
+                        return (
+                          <SidebarMenuItem key={item.href}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive}
+                            >
+                              <Link href={item.href}>
+                                {ItemIcon && <ItemIcon />}
+                                <span>{item.label}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </SidebarMenu>
+                  )}
+                </>
+              ) : (
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => toggleGroup(section.title)}>
-                    <SectionIcon className="h-4 w-4" />
-                    <span>{section.title}</span>
-                    <ChevronRight className={cn(
-                      "ml-auto h-4 w-4 transition-transform",
-                      isExpanded && "rotate-90"
-                    )} />
+                  <SidebarMenuButton asChild isActive={pathname === "/settings"}>
+                    <Link href="/settings">
+                      <SectionIcon className="h-4 w-4" />
+                      <span>{section.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                
-                {isExpanded && (
-                  <SidebarMenu>
-                    {section.items.map((item) => {
-                      const ItemIcon = item.icon
-                      const isActive = isItemActive(item.href)
-                      
-                      return (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton 
-                            asChild 
-                            isActive={isActive}
-                          >
-                            <Link href={item.href}>
-                              {ItemIcon && <ItemIcon />}
-                              <span>{item.label}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      )
-                    })}
-                  </SidebarMenu>
-                )}
-              </>
-            ) : (
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/settings"}>
-                  <Link href="/settings">
-                    <SectionIcon className="h-4 w-4" />
-                    <span>{section.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
-          </SidebarGroup>
-        )
-      })}
+              )}
+            </SidebarGroup>
+          )
+        })}
       </SidebarContent>
 
       <SidebarFooter>

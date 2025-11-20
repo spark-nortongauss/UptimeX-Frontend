@@ -26,8 +26,13 @@ export default function AdminGuard({ children }) {
           return
         }
         setOk(true)
-      } catch {
-        router.push('/signin')
+      } catch (error) {
+        const status = error?.status
+        if (status === 401 || status === 403) {
+          router.push('/observability/overview')
+          return
+        }
+        setOk(true)
       }
     }
     run()
