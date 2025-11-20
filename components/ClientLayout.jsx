@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import { useUIStore } from "@/lib/stores/uiStore"
 import { useAuthStore } from "@/lib/stores/authStore"
 import AppLayout from "./AppLayout"
+import WorkspaceGuard from "./WorkspaceGuard"
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname()
@@ -52,6 +53,10 @@ export default function ClientLayout({ children }) {
     return children
   }
 
-  return <AppLayout>{children}</AppLayout>
+  return (
+    <WorkspaceGuard>
+      <AppLayout>{children}</AppLayout>
+    </WorkspaceGuard>
+  )
 }
 
