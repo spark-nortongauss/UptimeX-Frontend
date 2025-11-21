@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
@@ -42,7 +42,7 @@ const createSeries = (data, key) =>
     y: point[key] ?? null,
   }))
 
-export default function OpticalCharts() {
+export default function OpticalCharts({ chartRefs = {}, chartInstanceRefs = {} }) {
   const { resolvedTheme } = useTheme()
   const sectors = [1, 2, 3]
   // Use individual selectors to avoid creating new objects on every render
@@ -50,6 +50,15 @@ export default function OpticalCharts() {
   const dateTo = useTimeframeFilterStore((state) => state.dateTo)
   const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
   const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+  
+  const handleChartMount = useCallback(
+    (refKey, component) => {
+      if (component?.chart && chartInstanceRefs?.[refKey]) {
+        chartInstanceRefs[refKey].current = component.chart
+      }
+    },
+    [chartInstanceRefs]
+  )
 
   // Filter data based on timeframe
   const filterDataByTimeframe = useMemo(() => {
@@ -181,46 +190,48 @@ export default function OpticalCharts() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {sectors.map((sector) => (
-        <Card key={`pd-${sector}`}>
-          <CardHeader>
-            <CardTitle>Sector {sector} RU{sector} PD Level</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ReactApexChart
-              options={buildOptions('#22c55e', 'V')}
-              series={[
-                {
-                  name: `Sector ${sector} PD Level`,
-                  data: createSeries(makeResampler(filteredPdData, `sector${sector}`), `sector${sector}`),
-                },
-              ]}
-              type="line"
-              height={200}
-            />
-          </CardContent>
-        </Card>
-      ))}
+  <Card key={`pd-${sector}`} ref={chartRefs[`pdSector${sector}`]}>
+    <CardHeader>
+      <CardTitle>Sector {sector} RU{sector} PD Level</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <ReactApexChart
+        ref={(component) => handleChartMount(`pdSector${sector}`, component)}
+        options={buildOptions('#22c55e', 'V')}
+        series={[
+          {
+            name: `Sector ${sector} PD Level`,
+            data: createSeries(makeResampler(filteredPdData, `sector${sector}`), `sector${sector}`),
+          },
+        ]}
+        type="line"
+        height={200}
+      />
+    </CardContent>
+  </Card>
+))}
 
-      {sectors.map((sector) => (
-        <Card key={`ld-${sector}`}>
-          <CardHeader>
-            <CardTitle>Sector {sector} RU{sector} LD Level</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ReactApexChart
-              options={buildOptions('#a78bfa', 'mA')}
-              series={[
-                {
-                  name: `Sector ${sector} LD Level`,
-                  data: createSeries(makeResampler(filteredLdData, `sector${sector}`), `sector${sector}`),
-                },
-              ]}
-              type="line"
-              height={200}
-            />
-          </CardContent>
-        </Card>
-      ))}
+{sectors.map((sector) => (
+  <Card key={`ld-${sector}`} ref={chartRefs[`ldSector${sector}`]}>
+    <CardHeader>
+      <CardTitle>Sector {sector} RU{sector} LD Level</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <ReactApexChart
+        ref={(component) => handleChartMount(`ldSector${sector}`, component)}
+        options={buildOptions('#a78bfa', 'mA')}
+        series={[
+          {
+            name: `Sector ${sector} LD Level`,
+            data: createSeries(makeResampler(filteredLdData, `sector${sector}`), `sector${sector}`),
+          },
+        ]}
+        type="line"
+        height={200}
+      />
+    </CardContent>
+  </Card>
+))}
     </div>
   )
 }

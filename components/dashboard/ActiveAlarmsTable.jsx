@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { useAlarmsStore } from '@/lib/stores/alarmsStore'
+import { observoneAiService } from '@/lib/services/observoneAiService'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { AlertTriangle, CircleDot, ChevronLeft, ChevronRight, Activity, Server, Tag, Clock, ScrollText, Bot, CheckCircle2 } from 'lucide-react'
+import { AlertTriangle, CircleDot, ChevronLeft, ChevronRight, Activity, Server, Tag, Clock, ScrollText, Bot, CheckCircle2, Loader2, Copy } from 'lucide-react'
 
 export default function ActiveAlarmsTable() {
   const t = useTranslations('Overview.alarms')
@@ -27,6 +28,13 @@ export default function ActiveAlarmsTable() {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [acknowledgingAlarm, setAcknowledgingAlarm] = useState(null)
   const [isAcknowledging, setIsAcknowledging] = useState(false)
+  const [aiDialogOpen, setAiDialogOpen] = useState(false)
+  const [aiDialogAlarm, setAiDialogAlarm] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiResult, setAiResult] = useState(null)
+  const [aiError, setAiError] = useState(null)
+  const [aiMetadata, setAiMetadata] = useState(null)
+  const [aiCopied, setAiCopied] = useState(false)
 
   // Fetch data on component mount
   useEffect(() => {
@@ -76,6 +84,176 @@ export default function ActiveAlarmsTable() {
     } finally {
       setIsAcknowledging(false)
       setAcknowledgingAlarm(null)
+    }
+  }
+
+  const resetAiDialogState = () => {
+    setAiDialogOpen(false)
+    setAiDialogAlarm(null)
+    setAiResult(null)
+    setAiError(null)
+    setAiMetadata(null)
+    setAiLoading(false)
+    setAiCopied(false)
+  }
+
+  const handleAiAnalysis = async (alarm) => {
+    const targetAlarm = alarm || null
+    const eventId = targetAlarm?.id || targetAlarm?.eventid
+    const hostId = targetAlarm?.hostId || targetAlarm?.host_id || targetAlarm?.hostid
+  
+    setAiDialogAlarm(targetAlarm)
+    setAiDialogOpen(true)
+    setAiResult(null)
+    setAiError(null)
+    setAiMetadata(null)
+    setAiCopied(false)
+    setAiLoading(true)
+  
+    if (!eventId || !hostId) {
+      setAiLoading(false)
+      setAiError('Missing host or event identifiers. Please refresh the alarms list and try again.')
+      return
+    }
+  
+    try {
+      const response = await observoneAiService.diagnoseAlarm({
+        eventId,
+        hostId,
+        triggerName: targetAlarm?.problem,
+        rowId: targetAlarm?.id ?? targetAlarm?.eventid
+      })
+  
+      console.log('handleAiAnalysis - Full response object:', JSON.stringify(response, null, 2))
+      console.log('handleAiAnalysis - Response type:', typeof response)
+      console.log('handleAiAnalysis - Response keys:', Object.keys(response || {}))
+      console.log('handleAiAnalysis - Response.ai_output:', response?.ai_output)
+      console.log('handleAiAnalysis - Response.ai_output type:', typeof response?.ai_output)
+      console.log('handleAiAnalysis - Response.zabbix_response?.value:', response?.zabbix_response?.value)
+
+      // The backend returns (after unwrapResponse):
+      // {
+      //   success: true,
+      //   rowId: "27594",
+      //   ai_output: "...",
+      //   metadata: {...},
+      //   zabbix_response: {
+      //     value: "...",
+      //     ...
+      //   }
+      // }
+
+      let aiOutput = ''
+
+      if (typeof response === 'string' && response.trim().length > 0) {
+        // If response is directly a string
+        aiOutput = response
+        console.log('handleAiAnalysis - Response is a string, using directly')
+      } else if (typeof response === 'object' && response !== null) {
+        // Check ai_output first (primary field from backend)
+        if (response.ai_output) {
+          if (typeof response.ai_output === 'string') {
+            aiOutput = response.ai_output
+            console.log('handleAiAnalysis - Found ai_output as string, length:', aiOutput.length)
+          } else {
+            console.warn('handleAiAnalysis - ai_output exists but is not a string:', typeof response.ai_output)
+          }
+        }
+        
+        // Fallback to zabbix_response.value if ai_output is not available or empty
+        if (!aiOutput || aiOutput.trim() === '') {
+          if (response.zabbix_response?.value && typeof response.zabbix_response.value === 'string') {
+            aiOutput = response.zabbix_response.value
+            console.log('handleAiAnalysis - Using zabbix_response.value, length:', aiOutput.length)
+          }
+        }
+        
+        // Check other possible locations as last resort
+        if (!aiOutput || aiOutput.trim() === '') {
+          aiOutput = 
+            response.aiOutput ||
+            response.data?.ai_output ||
+            response.data?.aiOutput ||
+            response.result?.ai_output ||
+            response.zabbix_response?.output ||
+            response.data?.zabbix_response?.value ||
+            ''
+          
+          if (aiOutput) {
+            console.log('handleAiAnalysis - Found output in fallback location, length:', aiOutput.length)
+          }
+        }
+      }
+
+      console.log('handleAiAnalysis - Final extracted ai_output:', aiOutput ? `${aiOutput.substring(0, 100)}...` : '(empty)')
+      console.log('handleAiAnalysis - Output length:', aiOutput?.length || 0)
+      console.log('handleAiAnalysis - Output trimmed length:', aiOutput?.trim()?.length || 0)
+
+      // Check if we have a valid output
+      const trimmedOutput = typeof aiOutput === 'string' ? aiOutput.trim() : ''
+      if (!trimmedOutput) {
+        console.error('handleAiAnalysis - No valid AI output found in response')
+        setAiError('No AI diagnosis was generated. The service returned an empty response.')
+        setAiLoading(false)
+        return
+      }
+      
+      // Use the trimmed output
+      aiOutput = trimmedOutput
+  
+      setAiResult(aiOutput)
+      setAiMetadata({
+        rowId: response?.rowId ?? response?.data?.rowId ?? targetAlarm?.id ?? null,
+        metadata: response?.metadata ?? response?.data?.metadata,
+        zabbix: response?.zabbix_response ?? response?.data?.zabbix_response
+      })
+      
+      console.log('handleAiAnalysis - Successfully set AI result, length:', aiOutput.length)
+    } catch (error) {
+      console.error('handleAiAnalysis - Error occurred:', error)
+      console.error('handleAiAnalysis - Error message:', error?.message)
+      console.error('handleAiAnalysis - Error response:', error?.response?.data)
+      console.error('handleAiAnalysis - Error payload:', error?.payload)
+      
+      // Extract error message from various possible locations
+      let errorMessage = 
+        error?.message || 
+        error?.response?.data?.message || 
+        error?.payload?.message ||
+        error?.response?.data?.error ||
+        'Failed to run AI diagnosis. Please try again.'
+      
+      // If the error message contains scope information, make it more user-friendly
+      if (errorMessage.includes('scope') || errorMessage.includes('Manual host action')) {
+        // Keep the detailed message as it contains helpful instructions
+        errorMessage = errorMessage.replace(/\n/g, '\n\n')
+      }
+      
+      setAiError(errorMessage)
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const handleCopyAiOutput = async () => {
+    if (!aiResult || typeof navigator === 'undefined' || !navigator?.clipboard) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(aiResult)
+      setAiCopied(true)
+      setTimeout(() => setAiCopied(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy AI output', error)
+    }
+  }
+
+  const handleAiDialogOpenChange = (open) => {
+    if (!open) {
+      resetAiDialogState()
+    } else {
+      setAiDialogOpen(true)
     }
   }
 
@@ -375,9 +553,7 @@ export default function ActiveAlarmsTable() {
                           className="inline-flex items-center gap-2 font-semibold transition-all duration-300 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 dark:hover:bg-indigo-950/20 dark:hover:border-indigo-900 dark:hover:text-indigo-300 hover:shadow-md hover:scale-105 transform-gpu active:scale-95"
                           aria-label="AI analysis"
                           title="AI analysis"
-                          onClick={() => {
-                            console.log('AI analysis requested for alarm', alarm.id);
-                          }}
+                          onClick={() => handleAiAnalysis(alarm)}
                         >
                           <Bot className="h-4 w-4" />
                           AI
@@ -435,6 +611,106 @@ export default function ActiveAlarmsTable() {
         </div>
       </CardContent>
     </Card>
+
+    {/* AI Diagnosis Dialog */}
+    <Dialog open={aiDialogOpen} onOpenChange={handleAiDialogOpenChange}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <Bot className="h-5 w-5 text-indigo-600" />
+            AI Diagnosis
+          </DialogTitle>
+        </DialogHeader>
+
+        {aiDialogAlarm && (
+          <div className="rounded-lg border border-dashed border-indigo-200/70 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/10 px-4 py-3 text-sm space-y-2">
+            <div className="flex flex-wrap gap-4">
+              <span className="font-semibold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                <Server className="h-4 w-4" />
+                Host: <span className="font-bold text-indigo-700 dark:text-indigo-100">{aiDialogAlarm.host}</span>
+              </span>
+              <span className="font-semibold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Event: <span className="font-bold text-indigo-700 dark:text-indigo-100">{aiDialogAlarm.id}</span>
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {aiDialogAlarm.problem}
+            </p>
+          </div>
+        )}
+
+        <div className="rounded-lg border bg-background/60 dark:bg-neutral-900/60 px-4 py-4">
+          {aiLoading && (
+            <div className="flex flex-col items-center justify-center py-6 gap-3 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+              <p className="text-sm font-medium">Requesting diagnosis from Zabbix...</p>
+            </div>
+          )}
+
+          {!aiLoading && aiError && (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-md bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-200">
+                {aiError}
+              </div>
+              {aiDialogAlarm && (
+                <Button
+                  variant="outline"
+                  onClick={() => handleAiAnalysis(aiDialogAlarm)}
+                  className="self-start"
+                >
+                  Retry
+                </Button>
+              )}
+            </div>
+          )}
+
+          {!aiLoading && !aiError && aiResult && (
+            <div className="space-y-3">
+              <pre className="whitespace-pre-wrap break-words text-sm font-mono leading-relaxed bg-background border rounded-md p-4 text-foreground">
+                {aiResult}
+              </pre>
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <p>Host ID: {aiDialogAlarm?.hostId || 'n/a'} • Event ID: {aiDialogAlarm?.id || 'n/a'}</p>
+                  <p>Row ID: {aiMetadata?.rowId || 'n/a'}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyAiOutput}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    {aiCopied ? 'Copied' : 'Copy'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAiAnalysis(aiDialogAlarm)}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!aiLoading && !aiError && !aiResult && (
+            <p className="text-sm text-muted-foreground">
+              No AI output available yet. Try running the analysis again.
+            </p>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={resetAiDialogState}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     {/* Confirmation Dialog */}
     <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>

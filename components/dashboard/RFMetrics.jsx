@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
@@ -48,7 +48,7 @@ const createSeries = (data, key) =>
     y: point[key] ?? null,
   }))
 
-export default function RFMetrics() {
+export default function RFMetrics({ chartRefs = {}, chartInstanceRefs = {} }) {
   const { resolvedTheme } = useTheme()
   // Use individual selectors to avoid creating new objects on every render
   const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
@@ -77,6 +77,21 @@ export default function RFMetrics() {
 
   const filteredRfTxData = useMemo(() => filterDataByTimeframe(rfTxData), [filterDataByTimeframe])
   const filteredRfRxData = useMemo(() => filterDataByTimeframe(rfRxData), [filterDataByTimeframe])
+
+  const handleChartMount = useCallback(
+    (sectorNumber, chartType, component) => {
+      const chart = component?.chart
+      if (!chart) return
+
+      const sectorKey = `sector${sectorNumber}`
+      const sectorRefs = chartInstanceRefs?.[sectorKey]
+
+      if (sectorRefs?.[chartType]) {
+        sectorRefs[chartType].current = chart
+      }
+    },
+    [chartInstanceRefs]
+  )
 
   const makeResampler = useMemo(() => {
     const toMinutes = (t) => {
@@ -186,62 +201,63 @@ export default function RFMetrics() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {sectorData.map((sector) => {
-        const txSeries = [
-          {
-            name: `Sector ${sector.sector} MU RF TX IN`,
-            data: createSeries(filteredRfTxData, `sector${sector.sector}`),
-          },
-        ]
-        const rxSeries = [
-          {
-            name: `Sector ${sector.sector} RU RX Out`,
-            data: createSeries(filteredRfRxData, `sector${sector.sector}`),
-          },
-        ]
+  const txSeries = [{
+    name: `Sector ${sector.sector} MU RF TX IN`,
+    data: createSeries(filteredRfTxData, `sector${sector.sector}`),
+  }]
+  
+  const rxSeries = [{
+    name: `Sector ${sector.sector} RU RX Out`,
+    data: createSeries(filteredRfRxData, `sector${sector.sector}`),
+  }]
 
-        return (
-          <div key={sector.sector} className="space-y-4">
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-sm text-muted-foreground">
-                  Avg. Sector {sector.sector} RF TX IN Power
-                </div>
-                <div className="mt-1 text-4xl font-extrabold">
-                  {sector.avg} dBm
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Sector {sector.sector} MU RF TX IN</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ReactApexChart
-                  options={buildOptions('#eab308', 'dBm')}
-                  series={[{ ...txSeries[0], data: createSeries(makeResampler(filteredRfTxData, `sector${sector.sector}`), `sector${sector.sector}`) }]}
-                  type="line"
-                  height={220}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Sector {sector.sector} RU RX Out</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ReactApexChart
-                  options={buildOptions('#60a5fa', 'dBm')}
-                  series={[{ ...rxSeries[0], data: createSeries(makeResampler(filteredRfRxData, `sector${sector.sector}`), `sector${sector.sector}`) }]}
-                  type="line"
-                  height={220}
-                />
-              </CardContent>
-            </Card>
+  const sectorRefs = chartRefs[`sector${sector.sector}`] || {}
+  
+  return (
+    <div key={sector.sector} className="space-y-4">
+      <Card ref={sectorRefs.powerCard}>
+        <CardContent className="p-6">
+          <div className="text-sm text-muted-foreground">
+            Avg. Sector {sector.sector} RF TX IN Power
           </div>
-        )
-      })}
+          <div className="mt-1 text-4xl font-extrabold">
+            {sector.avg} dBm
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card ref={sectorRefs.txChart}>
+        <CardHeader>
+          <CardTitle>Sector {sector.sector} MU RF TX IN</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReactApexChart
+            ref={(component) => handleChartMount(sector.sector, 'txChart', component)}
+            options={buildOptions('#eab308', 'dBm')}
+            series={[{ ...txSeries[0], data: createSeries(makeResampler(filteredRfTxData, `sector${sector.sector}`), `sector${sector.sector}`) }]}
+            type="line"
+            height={220}
+          />
+        </CardContent>
+      </Card>
+
+      <Card ref={sectorRefs.rxChart}>
+        <CardHeader>
+          <CardTitle>Sector {sector.sector} RU RX Out</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReactApexChart
+            ref={(component) => handleChartMount(sector.sector, 'rxChart', component)}
+            options={buildOptions('#60a5fa', 'dBm')}
+            series={[{ ...rxSeries[0], data: createSeries(makeResampler(filteredRfRxData, `sector${sector.sector}`), `sector${sector.sector}`) }]}
+            type="line"
+            height={220}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  )
+})}
     </div>
   )
 }

@@ -10,7 +10,7 @@ import CollapsibleSection from '@/components/dashboard/CollapsibleSection'
 import SystemTopbar from '@/components/observability/SystemTopbar'
 import TimeframeFilter from '@/components/observability/TimeframeFilter'
 import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
-import { useEffect, useMemo, use } from 'react'
+import { useEffect, useMemo, use, useRef, useCallback } from 'react'
 import { zabbixService } from '@/lib/services/zabbixService'
 import { useTranslations } from 'next-intl'
 import geocodingService from '@/lib/services/geocodingService'
@@ -87,12 +87,98 @@ export default function DetailedSystemPage({ params }) {
     selected?.targetSla || null
   ), [selected])
 
+  // Create refs for all chart components (DOM refs for html2canvas)
+  const healthCardsRef = useRef(null)
+  const temperatureChartRef = useRef(null)
+  
+  // Network charts DOM refs
+  const networkChartsRefs = {
+    icmp: useRef(null),
+    latency: useRef(null),
+    loss: useRef(null),
+  }
+  
+  // RF metrics DOM refs (3 sectors, each with power card, TX chart, RX chart)
+  const rfMetricsRefs = {
+    sector1: {
+      powerCard: useRef(null),
+      txChart: useRef(null),
+      rxChart: useRef(null),
+    },
+    sector2: {
+      powerCard: useRef(null),
+      txChart: useRef(null),
+      rxChart: useRef(null),
+    },
+    sector3: {
+      powerCard: useRef(null),
+      txChart: useRef(null),
+      rxChart: useRef(null),
+    },
+  }
+  
+  // Optical charts DOM refs (PD and LD for each of 3 sectors)
+  const opticalChartsRefs = {
+    pdSector1: useRef(null),
+    pdSector2: useRef(null),
+    pdSector3: useRef(null),
+    ldSector1: useRef(null),
+    ldSector2: useRef(null),
+    ldSector3: useRef(null),
+  }
+
+  // Chart instance refs for fast ApexChart export (FAST - instant export)
+  const temperatureChartInstanceRef = useRef(null)
+  const networkChartInstanceRefs = {
+    icmp: useRef(null),
+    latency: useRef(null),
+    loss: useRef(null),
+  }
+  const rfChartInstanceRefs = {
+    sector1: {
+      txChart: useRef(null),
+      rxChart: useRef(null),
+    },
+    sector2: {
+      txChart: useRef(null),
+      rxChart: useRef(null),
+    },
+    sector3: {
+      txChart: useRef(null),
+      rxChart: useRef(null),
+    },
+  }
+  const opticalChartInstanceRefs = {
+    pdSector1: useRef(null),
+    pdSector2: useRef(null),
+    pdSector3: useRef(null),
+    ldSector1: useRef(null),
+    ldSector2: useRef(null),
+    ldSector3: useRef(null),
+  }
+
+  // Combine all refs for SystemTopbar
+  const allChartRefs = useMemo(() => ({
+    healthCards: healthCardsRef,
+    temperatureChart: temperatureChartRef,
+    networkCharts: networkChartsRefs,
+    rfMetrics: rfMetricsRefs,
+    opticalCharts: opticalChartsRefs,
+    // Chart instances for fast export
+    chartInstances: {
+      temperature: temperatureChartInstanceRef,
+      network: networkChartInstanceRefs,
+      rf: rfChartInstanceRefs,
+      optical: opticalChartInstanceRefs,
+    },
+  }), [])
+
   return (
     <AuthGuard>
       <div className="space-y-8">
 
         {/* Top bar with system name, status and quick actions */}
-        <SystemTopbar systemId={id} />
+        <SystemTopbar systemId={id} chartRefs={allChartRefs} />
 
         {/* Timeframe Filter */}
         <TimeframeFilter />
@@ -102,33 +188,46 @@ export default function DetailedSystemPage({ params }) {
           title={`${healthTranslations('overallStatus')} / ${healthTranslations('overallAvailability')}`}
           subtitle={headerTranslations('status')}
         >
-          <SystemHealthCards availability={availability} targetSla={targetSla} />
+          <SystemHealthCards ref={healthCardsRef} availability={availability} targetSla={targetSla} />
         </CollapsibleSection>
 
         {/* 7. TEMPERATURE MONITORING CHART */}
         <CollapsibleSection title={tempTranslations('title')} subtitle={headerTranslations('status')}>
-          <TemperatureChart showTitle={false} />
+          <TemperatureChart 
+            ref={temperatureChartRef} 
+            chartInstanceRef={temperatureChartInstanceRef} 
+            showTitle={false} 
+          />
         </CollapsibleSection>
 
         {/* 8 & 9. WAN LINK STATUS AND CHARTS */}
         <CollapsibleSection
           title={`${headerTranslations('wanLink')} ${headerTranslations('status')}`}
         >
-          <NetworkConnectivityCharts />
+          <NetworkConnectivityCharts 
+            chartRefs={networkChartsRefs} 
+            chartInstanceRefs={networkChartInstanceRefs} 
+          />
         </CollapsibleSection>
 
         {/* 10 & 11. RF STATUS AND METRICS */}
         <CollapsibleSection
           title={`${headerTranslations('systemRf')} ${headerTranslations('status')}`}
         >
-          <RFMetrics />
+          <RFMetrics 
+            chartRefs={rfMetricsRefs} 
+            chartInstanceRefs={rfChartInstanceRefs} 
+          />
         </CollapsibleSection>
 
         {/* 12 & 13. OPTICAL STATUS AND CHARTS */}
         <CollapsibleSection
           title={`${headerTranslations('systemOptical')} ${headerTranslations('status')}`}
         >
-          <OpticalCharts />
+          <OpticalCharts 
+            chartRefs={opticalChartsRefs} 
+            chartInstanceRefs={opticalChartInstanceRefs} 
+          />
         </CollapsibleSection>
       </div>
     </AuthGuard>

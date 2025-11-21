@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useMemo } from 'react'
+import { useMemo, forwardRef } from 'react'
 
 // Donut gauge component with color based on SLA status
 function DonutGauge({ value = 0, targetSla = null }) {
@@ -65,7 +65,7 @@ function DonutGauge({ value = 0, targetSla = null }) {
   )
 }
 
-export default function SystemHealthCards({ availability, targetSla = null }) {
+const SystemHealthCards = forwardRef(function SystemHealthCards({ availability, targetSla = null }, ref) {
   const { useTranslations } = require('next-intl')
   const t = useTranslations('Overview.health')
   const availabilityValue = typeof availability === 'number' && !Number.isNaN(availability)
@@ -83,7 +83,7 @@ export default function SystemHealthCards({ availability, targetSla = null }) {
   }, [targetSla])
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Card>
         <CardHeader>
           <CardTitle>{t('overallStatus')}</CardTitle>
@@ -105,4 +105,6 @@ export default function SystemHealthCards({ availability, targetSla = null }) {
       </Card>
     </div>
   )
-}
+})
+
+export default SystemHealthCards

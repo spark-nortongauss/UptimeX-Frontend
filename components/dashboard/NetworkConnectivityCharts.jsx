@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
@@ -54,7 +54,7 @@ const createSeries = (data, key) =>
     y: point[key] ?? null,
   }))
 
-export default function NetworkConnectivityCharts() {
+export default function NetworkConnectivityCharts({ chartRefs = {}, chartInstanceRefs = {} }) {
   const { resolvedTheme } = useTheme()
   const t = useTranslations('DetailedSystem.network')
   // Use individual selectors to avoid creating new objects on every render
@@ -62,6 +62,15 @@ export default function NetworkConnectivityCharts() {
   const dateTo = useTimeframeFilterStore((state) => state.dateTo)
   const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
   const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+
+  const handleChartMount = useCallback(
+    (key, component) => {
+      if (component?.chart && chartInstanceRefs?.[key]) {
+        chartInstanceRefs[key].current = component.chart
+      }
+    },
+    [chartInstanceRefs]
+  )
 
   // Filter data based on timeframe
   const filterDataByTimeframe = useMemo(() => {
@@ -260,30 +269,48 @@ export default function NetworkConnectivityCharts() {
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      <Card>
+      <Card ref={chartRefs.icmp}>
         <CardHeader>
           <CardTitle>{t('icmp')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ReactApexChart options={icmpOptions} series={icmpSeries} type="line" height={260} />
+          <ReactApexChart
+            ref={(component) => handleChartMount('icmp', component)}
+            options={icmpOptions}
+            series={icmpSeries}
+            type="line"
+            height={260}
+          />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card ref={chartRefs.latency}>
         <CardHeader>
           <CardTitle>{t('latency')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ReactApexChart options={latencyOptions} series={latencySeries} type="line" height={260} />
+          <ReactApexChart
+            ref={(component) => handleChartMount('latency', component)}
+            options={latencyOptions}
+            series={latencySeries}
+            type="line"
+            height={260}
+          />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card ref={chartRefs.loss}>
         <CardHeader>
           <CardTitle>{t('loss')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <ReactApexChart options={lossOptions} series={lossSeries} type="line" height={260} />
+          <ReactApexChart
+            ref={(component) => handleChartMount('loss', component)}
+            options={lossOptions}
+            series={lossSeries}
+            type="line"
+            height={260}
+          />
         </CardContent>
       </Card>
     </div>

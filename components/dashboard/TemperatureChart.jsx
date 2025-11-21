@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, forwardRef, useRef, useCallback } from 'react'
 import { useMonitoringDataStore } from '@/lib/stores/monitoringDataStore'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 import { useParams } from 'next/navigation'
@@ -23,9 +23,11 @@ const parseTimeStringToMillis = (time) => {
   return Date.UTC(1970, 0, 1, hours, minutes || 0)
 }
 
-export default function TemperatureChart({ hostId: propHostId, showTitle = true }) {
+const TemperatureChart = forwardRef(function TemperatureChart({ hostId: propHostId, showTitle = true, chartInstanceRef }, ref) {
   const t = useTranslations('DetailedSystem.temperature')
   const params = useParams()
+  const internalChartRef = useRef(null)
+  const chartComponentRef = useRef(null)
 
   // Get hostId from prop, params, or fallback
   const hostId = propHostId || params?.id || null
@@ -59,6 +61,23 @@ export default function TemperatureChart({ hostId: propHostId, showTitle = true 
       include_history: true,
     })
   }, [hostId, refreshIfStale, dateFrom, dateTo, timeFrom, timeTo, getTimeRange])
+
+  const handleChartMount = useCallback(
+    (component) => {
+      const chart = component?.chart
+      if (!chart) return
+
+      internalChartRef.current = chart
+      if (chartInstanceRef) {
+        if (typeof chartInstanceRef === 'function') {
+          chartInstanceRef(chart)
+        } else if (chartInstanceRef.current !== undefined) {
+          chartInstanceRef.current = chart
+        }
+      }
+    },
+    [chartInstanceRef]
+  )
 
   // Get temperature chart data filtered by timeframe
   const chartData = useMemo(() => {
@@ -294,15 +313,23 @@ export default function TemperatureChart({ hostId: propHostId, showTitle = true 
   }
 
   return (
-    <Card>
+    <Card ref={ref}>
       {showTitle ? (
         <CardHeader>
           <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
       ) : null}
       <CardContent className={showTitle ? undefined : 'p-6'}>
-        <ReactApexChart options={options} series={series} type="line" height={320} />
+        <ReactApexChart
+          ref={handleChartMount}
+          options={options}
+          series={series}
+          type="line"
+          height={320}
+        />
       </CardContent>
     </Card>
   )
-}
+})
+
+export default TemperatureChart
