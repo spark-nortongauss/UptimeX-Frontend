@@ -18,7 +18,7 @@ export default function WorkspaceGuard({ children }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Routes that don't require workspace check
-  const publicRoutes = ['/signin', '/signup', '/forgot-password', '/auth/callback', '/workspace'];
+  const publicRoutes = ['/signin', '/signup', '/forgot-password', '/auth/callback', '/workspace', '/admin'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   useEffect(() => {
@@ -78,14 +78,15 @@ export default function WorkspaceGuard({ children }) {
         setHasChecked(true);
 
         if (!userWorkspaces || userWorkspaces.length === 0) {
-          if (pathname !== '/workspace') {
+          // Don't redirect admin users to workspace page
+          if (pathname !== '/workspace' && !pathname.startsWith('/admin')) {
             router.push('/workspace');
           }
         }
       } catch (error) {
         console.error('Error checking workspaces:', error);
-        // On error, assume user needs to create workspace
-        if (pathname !== '/workspace') {
+        // On error, assume user needs to create workspace (but not for admin users)
+        if (pathname !== '/workspace' && !pathname.startsWith('/admin')) {
           router.push('/workspace');
         }
       } finally {
