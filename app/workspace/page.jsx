@@ -24,6 +24,16 @@ export default function CreateWorkspace() {
         const token = getToken();
         if (!token) {
           router.push('/signin');
+          return;
+        }
+
+        // Check if user is admin - redirect to observability overview
+        const { authService } = await import('@/lib/services/authService');
+        const isAdmin = await authService.isAdmin(token);
+
+        if (isAdmin) {
+          router.push('/observability/overview');
+          return;
         }
       } catch (error) {
         console.error('Error ensuring auth:', error);

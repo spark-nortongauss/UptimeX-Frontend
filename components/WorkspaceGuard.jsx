@@ -12,9 +12,10 @@ export default function WorkspaceGuard({ children }) {
   const pathname = usePathname();
   const { user, getToken, initialized } = useAuthStore();
   const { workspaces, setWorkspaces, hasWorkspaces, loading, setLoading, shouldRevalidate, setLastFetchedAt } = useWorkspaceStore();
-  
+
   const [checkingWorkspaces, setCheckingWorkspaces] = useState(true);
   const [hasChecked, setHasChecked] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Routes that don't require workspace check
   const publicRoutes = ['/signin', '/signup', '/forgot-password', '/auth/callback', '/workspace'];
@@ -39,9 +40,22 @@ export default function WorkspaceGuard({ children }) {
     const checkUserWorkspaces = async () => {
       try {
         const token = getToken();
-        
+
         if (!token) {
           router.push('/signin');
+          return;
+        }
+
+        // Check if user is Admin - Admin users don't need workspaces
+        const { authService } = await import('@/lib/services/authService');
+        const adminStatus = await authService.isAdmin(token);
+        setIsAdmin(adminStatus);
+
+        if (adminStatus) {
+          // Admin users skip workspace requirement
+          setCheckingWorkspaces(false);
+          setLoading(false);
+          setHasChecked(true);
           return;
         }
 
@@ -52,7 +66,7 @@ export default function WorkspaceGuard({ children }) {
               const fresh = await workspaceService.getWorkspaces(token);
               setWorkspaces(fresh);
               setLastFetchedAt(Date.now());
-            } catch {}
+            } catch { }
           }
           return;
         }
@@ -95,8 +109,8 @@ export default function WorkspaceGuard({ children }) {
   //   );
   // }
 
-  // Don't render children if user needs to create workspace
-  if (!hasWorkspaces() && !isPublicRoute && hasChecked) {
+  // Don't render children if user needs to create workspace (but allow admin users)
+  if (!hasWorkspaces() && !isPublicRoute && hasChecked && !isAdmin) {
     return null; // Will redirect to /workspace
   }
 
