@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Search, HelpCircle, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useSidebar } from "@/components/ui/sidebar"
+import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/stores/authStore"
 import ThemeToggle from "@/components/ThemeToggle"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
@@ -91,6 +91,7 @@ export default function Topbar() {
         : "left-[3rem]"
       }`}>
       <div className="h-full px-2 sm:px-4 lg:px-8 flex items-center gap-2 sm:gap-4">
+        <SidebarTrigger className="sm:hidden" />
         {/* Center: Search - Hidden on mobile, shown on tablet+ */}
         <div className="flex-1 max-w-2xl mx-auto hidden sm:flex items-center">
           <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
