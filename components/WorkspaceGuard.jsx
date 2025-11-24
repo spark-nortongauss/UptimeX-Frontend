@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useWorkspaceStore } from '@/lib/stores/workspaceStore';
@@ -11,16 +11,18 @@ export default function WorkspaceGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, getToken, initialized } = useAuthStore();
-  const { workspaces, setWorkspaces, hasWorkspaces, loading, setLoading, shouldRevalidate, setLastFetchedAt } = useWorkspaceStore();
+  const { workspaces, setWorkspaces, hasWorkspaces, loading, setLoading, setLastFetchedAt } = useWorkspaceStore();
 
   const [checkingWorkspaces, setCheckingWorkspaces] = useState(true);
   const [hasChecked, setHasChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const adminCheckDoneRef = useRef(false);
 
   // Routes that don't require workspace check
   const publicRoutes = ['/signin', '/signup', '/forgot-password', '/auth/callback', '/workspace', '/admin'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
+  // Perform admin check ONCE on mount, not on every pathname change
   useEffect(() => {
     // Skip workspace check for public routes
     if (isPublicRoute) {
@@ -28,16 +30,20 @@ export default function WorkspaceGuard({ children }) {
       return;
     }
 
-    // Only check workspaces when auth is initialized and user is logged in
+    // Only check when auth is initialized and user is logged in
     if (!initialized || !user) {
       if (initialized && !user) {
-        // User is not logged in, redirect to signin
         router.push('/signin');
       }
       return;
     }
 
-    const checkUserWorkspaces = async () => {
+    // If we've already checked admin status, don't check again
+    if (adminCheckDoneRef.current) {
+      return;
+    }
+
+    const performAdminCheck = async () => {
       try {
         const token = getToken();
 
@@ -46,31 +52,74 @@ export default function WorkspaceGuard({ children }) {
           return;
         }
 
-        // Check if user is Admin - Admin users don't need workspaces
+        // Check if user is Admin - ONLY do this once
         const { authService } = await import('@/lib/services/authService');
-        const adminStatus = await authService.isAdmin(token);
-        setIsAdmin(adminStatus);
+        try {
+          const adminStatus = await authService.isAdmin(token);
+          setIsAdmin(adminStatus);
 
-        if (adminStatus) {
-          // Admin users skip workspace requirement
-          setCheckingWorkspaces(false);
-          setLoading(false);
-          setHasChecked(true);
-          return;
-        }
-
-        if (hasWorkspaces()) {
-          setCheckingWorkspaces(false);
-          if (shouldRevalidate()) {
-            try {
-              const fresh = await workspaceService.getWorkspaces(token);
-              setWorkspaces(fresh);
-              setLastFetchedAt(Date.now());
-            } catch { }
+          if (adminStatus) {
+            // Admin users skip workspace requirement entirely
+            adminCheckDoneRef.current = true;
+            setCheckingWorkspaces(false);
+            setLoading(false);
+            setHasChecked(true);
+            return;
           }
+        } catch (error) {
+          // If admin check times out, assume admin (safer fallback)
+          if (error.name === 'AbortError') {
+            console.warn('Admin check timed out in WorkspaceGuard - assuming admin');
+            setIsAdmin(true);
+            adminCheckDoneRef.current = true;
+            setCheckingWorkspaces(false);
+            setLoading(false);
+            setHasChecked(true);
+            return;
+          }
+          // For other errors, treat as non-admin
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
+
+        adminCheckDoneRef.current = true;
+      } finally {
+        setCheckingWorkspaces(false);
+      }
+    };
+
+    performAdminCheck();
+  }, [initialized, user, isPublicRoute, router, getToken]);
+
+  // Separate effect for workspace loading (only for non-admin users)
+  useEffect(() => {
+    if (isPublicRoute || !initialized || !user || !adminCheckDoneRef.current) {
+      return;
+    }
+
+    // Admin users don't need to load workspaces
+    if (isAdmin) {
+      return;
+    }
+
+    // For non-admin users: check if we already have workspaces cached
+    if (hasWorkspaces()) {
+      setCheckingWorkspaces(false);
+      setLoading(false);
+      setHasChecked(true);
+      return;
+    }
+
+    const loadUserWorkspaces = async () => {
+      try {
+        const token = getToken();
+
+        if (!token) {
+          router.push('/signin');
           return;
         }
 
+        // First time loading workspaces for non-admin user
         setLoading(true);
         const userWorkspaces = await workspaceService.getWorkspaces(token);
         setWorkspaces(userWorkspaces);
@@ -78,14 +127,14 @@ export default function WorkspaceGuard({ children }) {
         setHasChecked(true);
 
         if (!userWorkspaces || userWorkspaces.length === 0) {
-          // Don't redirect admin users to workspace page
+          // No workspaces, redirect to workspace creation
           if (pathname !== '/workspace' && !pathname.startsWith('/admin')) {
             router.push('/workspace');
           }
         }
       } catch (error) {
         console.error('Error checking workspaces:', error);
-        // On error, assume user needs to create workspace (but not for admin users)
+        // On error, redirect to workspace creation
         if (pathname !== '/workspace' && !pathname.startsWith('/admin')) {
           router.push('/workspace');
         }
@@ -95,20 +144,8 @@ export default function WorkspaceGuard({ children }) {
       }
     };
 
-    checkUserWorkspaces();
-  }, [user, initialized, pathname, isPublicRoute, router, getToken, setWorkspaces, setLoading]);
-
-  // Show loading state while checking workspaces
-  // if (checkingWorkspaces && !isPublicRoute) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-200 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
-  //         <p className="text-gray-950">Checking your workspaces...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+    loadUserWorkspaces();
+  }, [isAdmin, initialized, user, isPublicRoute, router, getToken, pathname]);
 
   // Don't render children if user needs to create workspace (but allow admin users)
   if (!hasWorkspaces() && !isPublicRoute && hasChecked && !isAdmin) {
