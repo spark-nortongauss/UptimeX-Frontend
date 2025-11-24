@@ -37,7 +37,19 @@ export default function SignInPage() {
         const { workspaceService } = await import('@/lib/services/workspaceService')
 
         // Check if user is admin
-        const isAdmin = await authService.isAdmin(token)
+        let isAdmin = false;
+        try {
+          isAdmin = await authService.isAdmin(token)
+        } catch (error) {
+          // If admin check times out, default to admin flow (safer than treating admin as regular user)
+          if (error.name === 'AbortError') {
+            console.warn('Admin verification timed out during signin - defaulting to admin flow');
+            router.push('/observability/overview');
+            return;
+          }
+          // For other errors, continue with workspace check
+          console.error('Admin check failed:', error);
+        }
 
         if (isAdmin) {
           // Admin users go to observability overview
