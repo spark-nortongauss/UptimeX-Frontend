@@ -21,14 +21,35 @@ export default function WorkspaceSelector() {
   const router = useRouter();
   const { getToken } = useAuthStore();
   const { workspaces, currentWorkspace, setCurrentWorkspace, setWorkspaces } = useWorkspaceStore();
-  
+
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Load workspaces when component mounts
-    loadWorkspaces();
-  }, []);
+    // Check if user is admin
+    const checkAdminRole = async () => {
+      try {
+        const token = getToken();
+        if (!token) return;
+
+        const { authService } = await import('@/lib/services/authService');
+        const adminStatus = await authService.isAdmin(token);
+        setIsAdmin(adminStatus);
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+      }
+    };
+
+    checkAdminRole();
+  }, [getToken]);
+
+  useEffect(() => {
+    // Load workspaces when component mounts (only for non-admin users)
+    if (!isAdmin) {
+      loadWorkspaces();
+    }
+  }, [isAdmin]);
 
   const loadWorkspaces = async () => {
     try {
@@ -37,7 +58,7 @@ export default function WorkspaceSelector() {
 
       const userWorkspaces = await workspaceService.getWorkspaces(token);
       setWorkspaces(userWorkspaces);
-      
+
       // Set current workspace if not set and workspaces exist
       if (!currentWorkspace && userWorkspaces.length > 0) {
         setCurrentWorkspace(userWorkspaces[0]);
@@ -51,7 +72,7 @@ export default function WorkspaceSelector() {
   const handleWorkspaceSelect = (workspace) => {
     setCurrentWorkspace(workspace);
     setIsOpen(false);
-    
+
     // Navigate to overview page when workspace changes
     router.push('/observability/overview');
   };
@@ -66,6 +87,11 @@ export default function WorkspaceSelector() {
     // Navigate to workspace settings (you can implement this page later)
     toast.info('Workspace settings coming soon!');
   };
+
+  // Admin users don't need workspace selector
+  if (isAdmin) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -106,11 +132,11 @@ export default function WorkspaceSelector() {
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent className="w-64" align="start">
         <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
+
         {workspaces.map((workspace) => (
           <DropdownMenuItem
             key={workspace.id}
@@ -131,14 +157,14 @@ export default function WorkspaceSelector() {
             </div>
           </DropdownMenuItem>
         ))}
-        
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem onClick={handleCreateWorkspace}>
           <Plus className="h-4 w-4 mr-2" />
           Create New Workspace
         </DropdownMenuItem>
-        
+
         {currentWorkspace && (
           <DropdownMenuItem onClick={handleWorkspaceSettings}>
             <Settings className="h-4 w-4 mr-2" />

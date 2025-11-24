@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Search, HelpCircle, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useSidebar } from "@/components/ui/sidebar"
+import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/stores/authStore"
 import ThemeToggle from "@/components/ThemeToggle"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
@@ -57,10 +57,10 @@ export default function Topbar() {
       try {
         const admin = await authService.isAdmin(token)
         setIsAdmin(admin)
-      } catch {}
+      } catch { }
     }
     run()
-  }, [initialized, getToken])
+  }, [initialized]) // Only depend on initialized, not getToken
 
   // Handle search form submission
   const handleSearchSubmit = (e) => {
@@ -84,14 +84,14 @@ export default function Topbar() {
   }
 
   return (
-    <header className={`fixed top-0 right-0 h-14 border-b border-gray-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 supports-[backdrop-filter]:dark:bg-neutral-900/60 z-40 transition-[left] duration-200 ease-linear ${
-      isMobile 
-        ? "left-0"  // ← Remove "inset-x-0", just use "left-0"
-        : state === "expanded" 
-          ? "left-[16rem]" 
-          : "left-[3rem]"
-    }`}>
+    <header className={`fixed top-0 right-0 h-14 border-b border-gray-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 supports-[backdrop-filter]:dark:bg-neutral-900/60 z-40 transition-[left] duration-200 ease-linear ${isMobile
+      ? "left-0"  // ← Remove "inset-x-0", just use "left-0"
+      : state === "expanded"
+        ? "left-[16rem]"
+        : "left-[3rem]"
+      }`}>
       <div className="h-full px-2 sm:px-4 lg:px-8 flex items-center gap-2 sm:gap-4">
+        <SidebarTrigger className="sm:hidden" />
         {/* Center: Search - Hidden on mobile, shown on tablet+ */}
         <div className="flex-1 max-w-2xl mx-auto hidden sm:flex items-center">
           <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
@@ -112,10 +112,10 @@ export default function Topbar() {
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          {isAdmin && pathname?.startsWith('/observability/overview') && (
-            <Button 
-              variant="default" 
-              size="sm" 
+          {isAdmin && pathname?.startsWith('/observability') && (
+            <Button
+              variant="default"
+              size="sm"
               onClick={() => router.push('/admin')}
               className="ml-1 bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold hover:from-blue-700 hover:to-purple-700 border-0 shadow-sm"
             >
@@ -123,9 +123,9 @@ export default function Topbar() {
             </Button>
           )}
           {/* Help button - Hidden on very small screens */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             aria-label={t("help")}
             onClick={() => router.push("/help")}
             className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hidden xs:flex"
