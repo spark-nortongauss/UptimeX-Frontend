@@ -10,7 +10,7 @@ import CollapsibleSection from '@/components/dashboard/CollapsibleSection'
 import SystemTopbar from '@/components/observability/SystemTopbar'
 import TimeframeFilter from '@/components/observability/TimeframeFilter'
 import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
-import { useEffect, useMemo, use } from 'react'
+import { useEffect, useMemo, use, useRef } from 'react'
 import { zabbixService } from '@/lib/services/zabbixService'
 import { useTranslations } from 'next-intl'
 import geocodingService from '@/lib/services/geocodingService'
@@ -24,7 +24,6 @@ export default function DetailedSystemPage({ params }) {
   const { systemsById, selectSystem } = useSystemSelectionStore()
   const selected = systemsById[id]
 
-  // On hard refresh, populate store with minimal data for this id
   useEffect(() => {
     let mounted = true
     const loadIfMissing = async () => {
@@ -46,7 +45,6 @@ export default function DetailedSystemPage({ params }) {
         const lon = inventory.location_lon
         const createdAtStr = createdRow?.createdAtTs ? new Date(Number(createdRow.createdAtTs) * 1000).toISOString().slice(0, 10) : ''
 
-        // Geocode location if coordinates are available
         let location = 'Location Not Available'
         if (lat && lon) {
           try {
@@ -54,7 +52,7 @@ export default function DetailedSystemPage({ params }) {
             location = geocodedLocation || 'Location Not Available'
           } catch (error) {
             console.warn(`Geocoding failed for ${id}:`, error)
-            location = `${lat}, ${lon}` // Fallback to coordinates
+            location = `${lat}, ${lon}`
           }
         }
 
@@ -68,7 +66,7 @@ export default function DetailedSystemPage({ params }) {
           location: location,
           coordinates: lat && lon ? { lat, lon } : null,
           createdAt: createdAtStr,
-          inventory: inventory, // Store full inventory for SystemTopbar
+          inventory: inventory,
         }
         if (mounted) selectSystem(String(id), systemData)
       } catch (e) {
@@ -87,48 +85,120 @@ export default function DetailedSystemPage({ params }) {
     selected?.targetSla || null
   ), [selected])
 
+  const healthCardsRef = useRef(null)
+  const temperatureChartRef = useRef(null)
+  
+  const networkChartsRefs = useMemo(() => ({
+    icmp: { current: null },
+    latency: { current: null },
+    loss: { current: null },
+  }), [])
+  
+  const rfMetricsRefs = useMemo(() => ({
+    sector1: { powerCard: { current: null }, txChart: { current: null }, rxChart: { current: null } },
+    sector2: { powerCard: { current: null }, txChart: { current: null }, rxChart: { current: null } },
+    sector3: { powerCard: { current: null }, txChart: { current: null }, rxChart: { current: null } },
+  }), [])
+  
+  const opticalChartsRefs = {
+    pdSector1: useRef(null),
+    pdSector2: useRef(null),
+    pdSector3: useRef(null),
+    ldSector1: useRef(null),
+    ldSector2: useRef(null),
+    ldSector3: useRef(null),
+  }
+
+  const temperatureChartInstanceRef = useRef(null)
+  const networkChartInstanceRefs = {
+    icmp: useRef(null),
+    latency: useRef(null),
+    loss: useRef(null),
+  }
+  const rfChartInstanceRefs = {
+    sector1: { txChart: useRef(null), rxChart: useRef(null) },
+    sector2: { txChart: useRef(null), rxChart: useRef(null) },
+    sector3: { txChart: useRef(null), rxChart: useRef(null) },
+  }
+  const opticalChartInstanceRefs = {
+    pdSector1: useRef(null),
+    pdSector2: useRef(null),
+    pdSector3: useRef(null),
+    ldSector1: useRef(null),
+    ldSector2: useRef(null),
+    ldSector3: useRef(null),
+  }
+
+  const allChartRefs = useMemo(() => ({
+    healthCards: healthCardsRef,
+    temperatureChart: temperatureChartRef,
+    networkCharts: networkChartsRefs,
+    rfMetrics: rfMetricsRefs,
+    opticalCharts: opticalChartsRefs,
+    chartInstances: {
+      temperature: temperatureChartInstanceRef,
+      network: networkChartInstanceRefs,
+      rf: rfChartInstanceRefs,
+      optical: opticalChartInstanceRefs,
+    },
+  }), [])
+
   return (
     <AuthGuard>
       <div className="space-y-8">
-
-        {/* Top bar with system name, status and quick actions */}
-        <SystemTopbar systemId={id} />
-
-        {/* Timeframe Filter */}
+        <SystemTopbar systemId={id} chartRefs={allChartRefs} />
         <TimeframeFilter />
 
-        {/* 6. SYSTEM HEALTH CARDS */}
+        {/* SYSTEM HEALTH CARDS */}
         <CollapsibleSection
           title={`${healthTranslations('overallStatus')} / ${healthTranslations('overallAvailability')}`}
           subtitle={headerTranslations('status')}
         >
-          <SystemHealthCards availability={availability} targetSla={targetSla} />
+          <SystemHealthCards ref={healthCardsRef} availability={availability} targetSla={targetSla} />
         </CollapsibleSection>
 
-        {/* 7. TEMPERATURE MONITORING CHART */}
+        {/* TEMPERATURE MONITORING CHART */}
         <CollapsibleSection title={tempTranslations('title')} subtitle={headerTranslations('status')}>
-          <TemperatureChart showTitle={false} />
+          <TemperatureChart 
+            ref={temperatureChartRef} 
+            chartInstanceRef={temperatureChartInstanceRef} 
+            showTitle={false} 
+          />
         </CollapsibleSection>
 
-        {/* 8 & 9. WAN LINK STATUS AND CHARTS */}
+        {/* WAN LINK STATUS AND CHARTS - with overflow visible */}
         <CollapsibleSection
           title={`${headerTranslations('wanLink')} ${headerTranslations('status')}`}
+          contentClassName="overflow-visible"
         >
-          <NetworkConnectivityCharts />
+          <div className="overflow-visible">
+            <NetworkConnectivityCharts 
+              chartRefs={networkChartsRefs} 
+              chartInstanceRefs={networkChartInstanceRefs} 
+              systemId={id}
+            />
+          </div>
         </CollapsibleSection>
 
-        {/* 10 & 11. RF STATUS AND METRICS */}
+        {/* RF STATUS AND METRICS */}
         <CollapsibleSection
           title={`${headerTranslations('systemRf')} ${headerTranslations('status')}`}
         >
-          <RFMetrics />
+          <RFMetrics 
+            chartRefs={rfMetricsRefs} 
+            chartInstanceRefs={rfChartInstanceRefs}
+            hostId={id}
+          />
         </CollapsibleSection>
 
-        {/* 12 & 13. OPTICAL STATUS AND CHARTS */}
+        {/* OPTICAL STATUS AND CHARTS */}
         <CollapsibleSection
           title={`${headerTranslations('systemOptical')} ${headerTranslations('status')}`}
         >
-          <OpticalCharts />
+          <OpticalCharts 
+            chartRefs={opticalChartsRefs} 
+            chartInstanceRefs={opticalChartInstanceRefs} 
+          />
         </CollapsibleSection>
       </div>
     </AuthGuard>

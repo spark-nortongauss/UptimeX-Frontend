@@ -1,129 +1,103 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { useMemo } from 'react'
+import { useMemo, useCallback, useEffect, useState, useRef } from 'react'
 import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
+import wanNetworkService from '@/lib/services/wanNetworkService'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
-const icmpData = [
-  { time: '00:00', status: 1 },
-  { time: '03:00', status: 1 },
-  { time: '06:00', status: 1 },
-  { time: '09:00', status: 1 },
-  { time: '12:00', status: 1 },
-  { time: '15:00', status: 1 },
-  { time: '18:00', status: 1 },
-  { time: '21:00', status: 1 },
-]
+// Debounce hook for performance
+function useDebouncedValue(value, delay = 300) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
 
-const latencyData = [
-  { time: '00:00', latency: 182 },
-  { time: '03:00', latency: 180 },
-  { time: '06:00', latency: 185 },
-  { time: '09:00', latency: 170 },
-  { time: '12:00', latency: 182 },
-  { time: '15:00', latency: 181 },
-  { time: '18:00', latency: 176 },
-  { time: '21:00', latency: 185 },
-]
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
 
-const lossData = [
-  { time: '00:00', loss: 0 },
-  { time: '03:00', loss: 0 },
-  { time: '06:00', loss: 1 },
-  { time: '09:00', loss: 0 },
-  { time: '12:00', loss: 0 },
-  { time: '15:00', loss: 0 },
-  { time: '18:00', loss: 1 },
-  { time: '21:00', loss: 0 },
-]
-
-const parseTimeToMillis = (time) => {
-  const [hours, minutes] = String(time).split(':').map(Number)
-  if (Number.isNaN(hours)) return undefined
-  return Date.UTC(1970, 0, 1, hours, minutes || 0)
+  return debouncedValue
 }
 
-const createSeries = (data, key) =>
-  data.map((point) => ({
-    x: parseTimeToMillis(point.time),
-    y: point[key] ?? null,
-  }))
+// Data sampling to prevent browser crashes with large datasets
+function sampleData(data, maxPoints = 500) {
+  if (!data || data.length <= maxPoints) return data
 
-export default function NetworkConnectivityCharts() {
+  const step = Math.ceil(data.length / maxPoints)
+  const sampled = []
+
+  for (let i = 0; i < data.length; i += step) {
+    sampled.push(data[i])
+  }
+
+  // Always include the last point for accuracy
+  if (sampled.length > 0 && sampled[sampled.length - 1] !== data[data.length - 1]) {
+    sampled.push(data[data.length - 1])
+  }
+
+  return sampled
+}
+
+export default function NetworkConnectivityCharts({
+  chartRefs = {},
+  chartInstanceRefs = {},
+  systemId,
+}) {
   const { resolvedTheme } = useTheme()
   const t = useTranslations('DetailedSystem.network')
-  // Use individual selectors to avoid creating new objects on every render
   const dateFrom = useTimeframeFilterStore((state) => state.dateFrom)
   const dateTo = useTimeframeFilterStore((state) => state.dateTo)
   const timeFrom = useTimeframeFilterStore((state) => state.timeFrom)
   const timeTo = useTimeframeFilterStore((state) => state.timeTo)
+  const getTimeRange = useTimeframeFilterStore((state) => state.getTimeRange)
 
-  // Filter data based on timeframe
-  const filterDataByTimeframe = useMemo(() => {
-    return (data) => {
-      return data.filter((point) => {
-        const pointTime = point.time
-        if (!pointTime) return false
-        
-        // Check if time is within the time range
-        // For same date range, check both time bounds
-        if (dateFrom === dateTo) {
-          return pointTime >= timeFrom && pointTime <= timeTo
-        }
-        
-        // For different dates, include all times (they represent data points across the date range)
-        return true
-      })
+  // Debounce timeframe values to prevent rapid re-fetches
+  const debouncedDateFrom = useDebouncedValue(dateFrom, 500)
+  const debouncedDateTo = useDebouncedValue(dateTo, 500)
+  const debouncedTimeFrom = useDebouncedValue(timeFrom, 500)
+  const debouncedTimeTo = useDebouncedValue(timeTo, 500)
+
+  const [icmpSeriesData, setIcmpSeriesData] = useState([])
+  const [latencySeriesData, setLatencySeriesData] = useState([])
+  const [lossSeriesData, setLossSeriesData] = useState([])
+  const [latencyStats, setLatencyStats] = useState(null)
+  const [lossStats, setLossStats] = useState(null)
+  const [wanLoading, setWanLoading] = useState(false)
+  const [wanError, setWanError] = useState(null)
+
+  // Track if component is mounted to prevent state updates after unmount
+  const isMountedRef = useRef(true)
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
     }
-  }, [dateFrom, dateTo, timeFrom, timeTo])
+  }, [])
 
-  const filteredIcmpData = useMemo(() => filterDataByTimeframe(icmpData), [filterDataByTimeframe])
-  const filteredLatencyData = useMemo(() => filterDataByTimeframe(latencyData), [filterDataByTimeframe])
-  const filteredLossData = useMemo(() => filterDataByTimeframe(lossData), [filterDataByTimeframe])
-
-  const makeResampler = useMemo(() => {
-    const toMinutes = (t) => {
-      const [h, m] = String(t).split(':').map(Number)
-      return (h || 0) * 60 + (m || 0)
-    }
-    const toLabel = (min) => `${String(Math.floor(min / 60)).padStart(2,'0')}:${String(min % 60).padStart(2,'0')}`
-    return (data, key) => {
-      if (!Array.isArray(data) || data.length === 0) return []
-      const map = new Map()
-      data.forEach(p => map.set(String(p.time), p[key] ?? null))
-      const start = dateFrom === dateTo ? timeFrom : '00:00'
-      const end = dateFrom === dateTo ? timeTo : '23:45'
-      const startMin = toMinutes(start)
-      const endMin = toMinutes(end)
-      let last = null
-      const out = []
-      for (let m = startMin; m <= endMin; m += 15) {
-        const label = toLabel(m)
-        let val = map.has(label) ? map.get(label) : null
-        if (val === null && last !== null) val = last
-        if (val !== null) last = val
-        out.push({ time: label, [key]: val })
+  const handleChartMount = useCallback(
+    (key, component) => {
+      if (component?.chart && chartInstanceRefs?.[key]) {
+        chartInstanceRefs[key].current = component.chart
       }
-      return out
-    }
-  }, [dateFrom, dateTo, timeFrom, timeTo])
+    },
+    [chartInstanceRefs]
+  )
 
-  const resampledIcmpData = useMemo(() => makeResampler(filteredIcmpData, 'status'), [filteredIcmpData, makeResampler])
-  const resampledLatencyData = useMemo(() => makeResampler(filteredLatencyData, 'latency'), [filteredLatencyData, makeResampler])
-  const resampledLossData = useMemo(() => makeResampler(filteredLossData, 'loss'), [filteredLossData, makeResampler])
-
+  // Memoized base options with SSR safety
   const baseOptions = useMemo(
     () => ({
       chart: {
         type: 'line',
         foreColor: (() => {
-          const v = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
-          return `hsl(${v})`
+          if (typeof document === 'undefined') return '#fff'
+          const v = getComputedStyle(document.documentElement)
+            .getPropertyValue('--foreground')
+            .trim()
+          return v ? `hsl(${v})` : '#fff'
         })(),
         toolbar: {
           show: true,
@@ -142,6 +116,14 @@ export default function NetworkConnectivityCharts() {
           type: 'x',
           autoScaleYaxis: true,
         },
+        // Performance optimizations
+        animations: {
+          enabled: false,
+        },
+        redrawOnParentResize: false,
+        redrawOnWindowResize: false,
+        parentHeightOffset: 0,
+        offsetY: 0,
       },
       dataLabels: { enabled: false },
       stroke: { curve: 'smooth', width: 2 },
@@ -149,8 +131,11 @@ export default function NetworkConnectivityCharts() {
         size: 3,
         strokeWidth: 2,
         strokeColors: (() => {
-          const v = getComputedStyle(document.documentElement).getPropertyValue('--card').trim()
-          return `hsl(${v})`
+          if (typeof document === 'undefined') return '#1a1a1a'
+          const v = getComputedStyle(document.documentElement)
+            .getPropertyValue('--card')
+            .trim()
+          return v ? `hsl(${v})` : '#1a1a1a'
         })(),
       },
       xaxis: {
@@ -161,13 +146,23 @@ export default function NetworkConnectivityCharts() {
             hour: 'HH:mm',
             minute: 'HH:mm',
           },
+          offsetY: 0,
         },
       },
       grid: {
         borderColor: (() => {
-          const v = getComputedStyle(document.documentElement).getPropertyValue('--border').trim()
-          return `hsl(${v})`
+          if (typeof document === 'undefined') return '#333'
+          const v = getComputedStyle(document.documentElement)
+            .getPropertyValue('--border')
+            .trim()
+          return v ? `hsl(${v})` : '#333'
         })(),
+        padding: {
+          top: 0,
+          right: 10,
+          bottom: 0,
+          left: 10,
+        },
       },
       tooltip: {
         x: { format: 'HH:mm' },
@@ -176,47 +171,32 @@ export default function NetworkConnectivityCharts() {
     [resolvedTheme]
   )
 
-  const buildOptions = useMemo(
-    () =>
-      (overrides = {}) => ({
-        ...baseOptions,
-        ...overrides,
-        chart: { ...baseOptions.chart, ...overrides.chart },
-        xaxis: { ...baseOptions.xaxis, ...overrides.xaxis },
-        tooltip: { ...baseOptions.tooltip, ...overrides.tooltip },
-        yaxis: overrides.yaxis ? { ...overrides.yaxis } : undefined,
-      }),
+  const buildOptions = useCallback(
+    (overrides = {}) => ({
+      ...baseOptions,
+      ...overrides,
+      chart: { ...baseOptions.chart, ...overrides.chart },
+      xaxis: { ...baseOptions.xaxis, ...overrides.xaxis },
+      tooltip: { ...baseOptions.tooltip, ...overrides.tooltip },
+      grid: { ...baseOptions.grid, ...overrides.grid },
+      yaxis: overrides.yaxis ? { ...overrides.yaxis } : undefined,
+    }),
     [baseOptions]
   )
 
   const icmpSeries = useMemo(
-    () => [
-      {
-        name: t('icmp'),
-        data: createSeries(resampledIcmpData, 'status'),
-      },
-    ],
-    [t, filteredIcmpData]
+    () => [{ name: t('icmp'), data: icmpSeriesData }],
+    [t, icmpSeriesData]
   )
 
   const latencySeries = useMemo(
-    () => [
-      {
-        name: t('latency'),
-        data: createSeries(resampledLatencyData, 'latency'),
-      },
-    ],
-    [t, filteredLatencyData]
+    () => [{ name: t('latency'), data: latencySeriesData }],
+    [t, latencySeriesData]
   )
 
   const lossSeries = useMemo(
-    () => [
-      {
-        name: t('loss'),
-        data: createSeries(resampledLossData, 'loss'),
-      },
-    ],
-    [t, filteredLossData]
+    () => [{ name: t('loss'), data: lossSeriesData }],
+    [t, lossSeriesData]
   )
 
   const icmpOptions = useMemo(
@@ -240,6 +220,7 @@ export default function NetworkConnectivityCharts() {
       buildOptions({
         colors: ['#f59e0b'],
         yaxis: {
+          min: 0,
           title: { text: 'ms' },
         },
       }),
@@ -252,38 +233,196 @@ export default function NetworkConnectivityCharts() {
         colors: ['#22c55e'],
         yaxis: {
           min: 0,
+          max: 100,
+          tickAmount: 4,
           title: { text: '%' },
+          labels: {
+            formatter: (value) => `${Number(value).toFixed(0)}%`,
+          },
         },
       }),
     [buildOptions]
   )
 
+  // Fetch data with debounced values
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchWanStatus = async () => {
+      if (!systemId) {
+        setIcmpSeriesData([])
+        setLatencySeriesData([])
+        setLossSeriesData([])
+        setLatencyStats(null)
+        setLossStats(null)
+        setWanError(null)
+        return
+      }
+
+      setWanLoading(true)
+      setWanError(null)
+
+      try {
+        const { time_from, time_till } = getTimeRange()
+        const response = await wanNetworkService.getStatus(systemId, {
+          from: time_from,
+          till: time_till,
+          limit: 500, // Reduced from 2880 for performance
+        })
+
+        if (cancelled || !isMountedRef.current) return
+
+        const hostData = response?.data ?? response
+
+        // Process ICMP data with sampling
+        const icmpHistory = hostData?.icmpStatus?.history || []
+        const icmpMapped = icmpHistory.map((point) => ({
+          x: Number(point.timestamp) * 1000,
+          y: Number(point.value),
+        }))
+        setIcmpSeriesData(sampleData(icmpMapped, 500))
+
+        // Process Latency data with sampling
+        const latencyHistory = hostData?.icmpLatency?.history || []
+        const latencyMapped = latencyHistory.map((point) => ({
+          x: Number(point.timestamp) * 1000,
+          y: Number(point.value),
+        }))
+        setLatencySeriesData(sampleData(latencyMapped, 500))
+        setLatencyStats({
+          current: hostData?.icmpLatency?.currentValue ?? null,
+          min: hostData?.icmpLatency?.summary?.minValue ?? null,
+          max: hostData?.icmpLatency?.summary?.maxValue ?? null,
+          avg: hostData?.icmpLatency?.summary?.averageValue ?? null,
+        })
+
+        // Process Loss data with sampling
+        const lossHistory = hostData?.icmpLoss?.history || []
+        const lossMapped = lossHistory.map((point) => ({
+          x: Number(point.timestamp) * 1000,
+          y: Number(point.value),
+        }))
+        setLossSeriesData(sampleData(lossMapped, 500))
+        setLossStats({
+          current: hostData?.icmpLoss?.currentValue ?? null,
+          max: hostData?.icmpLoss?.summary?.maxLossPercent ?? null,
+          lossOccurrences: hostData?.icmpLoss?.summary?.lossOccurrences ?? 0,
+          lossPercentage: hostData?.icmpLoss?.summary?.lossPercentage ?? null,
+          hasLossNow: hostData?.icmpLoss?.summary?.hasLossNow ?? false,
+        })
+      } catch (error) {
+        if (cancelled || !isMountedRef.current) return
+        console.error('Failed to fetch WAN network status', error)
+        setWanError(error?.message || 'Failed to load WAN status')
+        setIcmpSeriesData([])
+        setLatencySeriesData([])
+        setLossSeriesData([])
+        setLatencyStats(null)
+        setLossStats(null)
+      } finally {
+        if (!cancelled && isMountedRef.current) {
+          setWanLoading(false)
+        }
+      }
+    }
+
+    fetchWanStatus()
+    return () => {
+      cancelled = true
+    }
+  }, [systemId, debouncedDateFrom, debouncedDateTo, debouncedTimeFrom, debouncedTimeTo, getTimeRange])
+
+  const hasNoData = !wanLoading && !wanError && icmpSeriesData.length === 0
+  const hasIcmpData = icmpSeriesData.length > 0
+  const hasLatencyData = latencySeriesData.length > 0
+  const hasLossData = lossSeriesData.length > 0
+
   return (
     <div className="grid grid-cols-1 gap-4">
-      <Card>
-        <CardHeader>
+      {/* ICMP Chart */}
+      <Card ref={chartRefs.icmp} className="overflow-visible">
+        <CardHeader className="pb-2">
           <CardTitle>{t('icmp')}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ReactApexChart options={icmpOptions} series={icmpSeries} type="line" height={260} />
+        <CardContent className="overflow-visible">
+          {wanLoading && (
+            <p className="mb-2 text-sm text-muted-foreground">Loading ICMP status…</p>
+          )}
+          {wanError && <p className="mb-2 text-sm text-red-500">{wanError}</p>}
+          {hasNoData && (
+            <p className="mb-2 text-sm text-muted-foreground">No data available</p>
+          )}
+          {!wanLoading && hasIcmpData && (
+            <ReactApexChart
+              ref={(component) => handleChartMount('icmp', component)}
+              options={icmpOptions}
+              series={icmpSeries}
+              type="line"
+              height={280}
+            />
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      {/* Latency Chart */}
+      <Card ref={chartRefs.latency} className="overflow-visible">
+        <CardHeader className="pb-2">
           <CardTitle>{t('latency')}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ReactApexChart options={latencyOptions} series={latencySeries} type="line" height={260} />
+        <CardContent className="overflow-visible">
+          {latencyStats && (
+            <div className="mb-2 text-xs text-muted-foreground flex flex-wrap gap-4">
+              <span>Min: {latencyStats.min ?? '—'} ms</span>
+              <span>Max: {latencyStats.max ?? '—'} ms</span>
+              <span>Avg: {latencyStats.avg ?? '—'} ms</span>
+              <span>Current: {latencyStats.current ?? '—'} ms</span>
+            </div>
+          )}
+          {wanError && <p className="mb-2 text-sm text-red-500">{wanError}</p>}
+          {hasNoData && (
+            <p className="mb-2 text-sm text-muted-foreground">No data available</p>
+          )}
+          {!wanLoading && hasLatencyData && (
+            <ReactApexChart
+              ref={(component) => handleChartMount('latency', component)}
+              options={latencyOptions}
+              series={latencySeries}
+              type="line"
+              height={280}
+            />
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      {/* Loss Chart */}
+      <Card ref={chartRefs.loss} className="overflow-visible">
+        <CardHeader className="pb-2">
           <CardTitle>{t('loss')}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ReactApexChart options={lossOptions} series={lossSeries} type="line" height={260} />
+        <CardContent className="overflow-visible pb-8">
+          {lossStats && (
+            <div className="mb-2 text-xs text-muted-foreground flex flex-wrap gap-4">
+              <span>Current: {lossStats.current ?? 0}%</span>
+              <span>Max: {lossStats.max ?? 0}%</span>
+              <span>Loss Events: {lossStats.lossOccurrences ?? 0}</span>
+              {typeof lossStats.lossPercentage === 'number' && (
+                <span>{lossStats.lossPercentage}% of samples impacted</span>
+              )}
+            </div>
+          )}
+          {wanError && <p className="mb-2 text-sm text-red-500">{wanError}</p>}
+          {hasNoData && (
+            <p className="mb-2 text-sm text-muted-foreground">No data available</p>
+          )}
+          {!wanLoading && hasLossData && (
+            <ReactApexChart
+              ref={(component) => handleChartMount('loss', component)}
+              options={lossOptions}
+              series={lossSeries}
+              type="line"
+              height={320}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

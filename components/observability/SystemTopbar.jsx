@@ -4,10 +4,11 @@ import { useMemo, useEffect, useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useSystemSelectionStore } from '@/lib/stores/systemSelectionStore'
 import { useTranslations } from 'next-intl'
-import { Cpu, ChevronDown, FileText, FileSpreadsheet } from 'lucide-react'
+import { Cpu, ChevronDown, FileText, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { zabbixService } from '@/lib/services/zabbixService'
 import geocodingService from '@/lib/services/geocodingService'
 import { generatePDF, generateCSV } from '@/lib/utils/exportUtils'
+import { generateReportPDF } from '@/lib/utils/reportGenerator'
 
 const StatusBadge = ({ status }) => {
   const cls = useMemo(() => {
@@ -33,7 +34,7 @@ const StatusBadge = ({ status }) => {
   )
 }
 
-export default function SystemTopbar({ systemId }) {
+export default function SystemTopbar({ systemId, chartRefs = {} }) {
   const t = useTranslations('DetailedSystem.topbar')
   const tActions = useTranslations('Overview.health')
   const { systemsById } = useSystemSelectionStore()
@@ -41,6 +42,8 @@ export default function SystemTopbar({ systemId }) {
   const [inventoryData, setInventoryData] = useState(null)
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
   const exportMenuRef = useRef(null)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const [reportProgress, setReportProgress] = useState('')
 
   // Fetch inventory data if not already in system
   useEffect(() => {
@@ -153,6 +156,26 @@ export default function SystemTopbar({ systemId }) {
     }
   }
 
+  const handleGenerateReport = async () => {
+    if (isGeneratingReport) return
+    
+    setIsGeneratingReport(true)
+    setReportProgress('Preparing report...')
+    
+    try {
+      await generateReportPDF(systemId, chartRefs, (progress) => {
+        setReportProgress(progress)
+      })
+      setReportProgress('')
+    } catch (error) {
+      console.error('Failed to generate report:', error)
+      alert(`Failed to generate report: ${error.message || 'Unknown error'}`)
+      setReportProgress('')
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }
+
   return (
     <div className="w-full bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-4 mb-6">
       {/* First Row: System Name, Status, and Quick Actions */}
@@ -228,7 +251,22 @@ export default function SystemTopbar({ systemId }) {
                 </div>
               )}
             </div>
-            <Button size="sm" variant="outline" className="dark:hover:bg-neutral-800 dark:text-white">{t('report')}</Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="dark:hover:bg-neutral-800 dark:text-white"
+              onClick={handleGenerateReport}
+              disabled={isGeneratingReport}
+            >
+              {isGeneratingReport ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  {reportProgress || 'Generating...'}
+                </>
+              ) : (
+                t('report')
+              )}
+            </Button>
             <Button size="sm" className="dark:hover:bg-neutral-800">{tActions('openTicket')}</Button>
           </div>
         </div>
