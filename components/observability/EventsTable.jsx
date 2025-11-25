@@ -25,12 +25,103 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
  
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { useZabbixStore } from "@/lib/stores/zabbixStore"
 import { useEventsTimeframeStore } from "@/lib/stores/eventsTimeframeStore"
 import { alarmsService } from "@/lib/services/alarmsService"
+import { ticketsService } from "@/lib/services/ticketsService"
+import { toast } from "sonner"
+import { TicketDrawer } from "@/components/events/TicketDrawer"
 
 const ROW_SIZE_OPTIONS = [10, 25, 50, 100]
+
+const PRIORITY_OPTIONS = [
+  { label: "Urgent", value: "URGENT" },
+  { label: "High", value: "HIGH" },
+  { label: "Medium", value: "MEDIUM" },
+  { label: "Low", value: "LOW" },
+]
+
+const PRIORITY_DUE_DATE_HOURS = {
+  URGENT: 4,
+  HIGH: 12,
+  MEDIUM: 24,
+  LOW: 48,
+}
+
+const SEVERITY_PRIORITY_MAP = {
+  CRITICAL: "URGENT",
+  MAJOR: "HIGH",
+  MINOR: "MEDIUM",
+}
+
+const ASSIGNEE_OPTIONS = [
+  { label: "Unassigned", value: "Unassigned" },
+  { label: "Network Team", value: "Network Team" },
+  { label: "Hardware Team", value: "Hardware Team" },
+  { label: "Support Team", value: "Support Team" },
+  { label: "Individual Users", value: "Individual Users" },
+]
+
+const DEFAULT_TICKET_CATEGORY = "EVENTS"
+
+const padTime = (value) => String(value).padStart(2, "0")
+
+const formatDateTimeLocal = (date) => {
+  if (!date) return ""
+  const year = date.getFullYear()
+  const month = padTime(date.getMonth() + 1)
+  const day = padTime(date.getDate())
+  const hours = padTime(date.getHours())
+  const minutes = padTime(date.getMinutes())
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+const getDefaultDueDateForPriority = (priority) => {
+  const hours = PRIORITY_DUE_DATE_HOURS[priority] ?? 24
+  const dueDate = new Date()
+  dueDate.setHours(dueDate.getHours() + hours)
+  return formatDateTimeLocal(dueDate)
+}
+
+const buildTicketDescription = (alarm) => {
+  const details = [
+    alarm.problem && `Problem: ${alarm.problem}`,
+    alarm.opdata && `Details: ${alarm.opdata}`,
+    alarm.host && `Host: ${alarm.host}`,
+    alarm.group && `Group: ${alarm.group}`,
+    alarm.time && `Detected: ${alarm.time}`,
+    alarm.age && `Age: ${alarm.age}`,
+  ].filter(Boolean)
+
+  if (details.length === 0) {
+    return ""
+  }
+
+  return `${details.join("\n")}\n\nAdditional Notes:`
+}
+
+const buildInitialTicketForm = (alarm) => {
+  if (!alarm) return null
+
+  const severity = (alarm.severity || "MINOR").toUpperCase()
+  const priority = SEVERITY_PRIORITY_MAP[severity] || "MEDIUM"
+
+  return {
+    eventId: alarm.id,
+    hostName: alarm.host || "Unknown Host",
+    problemName: alarm.problem || "Unknown Problem",
+    severity,
+    problemDescription: alarm.opdata || alarm.problem || "",
+    title: (alarm.problem || "").slice(0, 500),
+    priority,
+    category: DEFAULT_TICKET_CATEGORY,
+    description: buildTicketDescription(alarm),
+    assignTo: ASSIGNEE_OPTIONS[0].value,
+    dueDate: getDefaultDueDateForPriority(priority),
+  }
+}
 
 const severityStyles = (sev) => {
   switch (sev) {
@@ -112,6 +203,11 @@ export default function EventsTable() {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false)
   const [acknowledgingAlarm, setAcknowledgingAlarm] = useState(null)
   const [isAcknowledging, setIsAcknowledging] = useState(false)
+  const [ticketDrawerOpen, setTicketDrawerOpen] = useState(false)
+  const [ticketFormData, setTicketFormData] = useState(null)
+  const [ticketSubmitting, setTicketSubmitting] = useState(false)
+  const [ticketError, setTicketError] = useState(null)
+  const [ticketDueDateTouched, setTicketDueDateTouched] = useState(false)
 
   const activeRange = useMemo(() => getRangeInfo(), [getRangeInfo, mode, dateFrom, timeFrom, dateTo, timeTo])
   const timeFromSeconds = activeRange?.time_from ?? null
@@ -333,6 +429,70 @@ export default function EventsTable() {
     } finally {
       setIsAcknowledging(false)
       setAcknowledgingAlarm(null)
+    }
+  }
+
+  const handleTicketDrawerClose = () => {
+    setTicketDrawerOpen(false)
+    setTicketFormData(null)
+    setTicketError(null)
+    setTicketDueDateTouched(false)
+    setSelectedRowId(null)
+    setSelectedQuickAction(null)
+  }
+
+  const openTicketDrawer = (alarm) => {
+    const initialForm = buildInitialTicketForm(alarm)
+    setTicketFormData(initialForm)
+    setTicketDrawerOpen(true)
+    setTicketError(null)
+    setTicketDueDateTouched(false)
+  }
+
+  const handleTicketFieldChange = (field, value) => {
+    setTicketFormData((prev) => {
+      if (!prev) return prev
+      const updated = { ...prev, [field]: value }
+      if (field === "priority" && !ticketDueDateTouched) {
+        updated.dueDate = getDefaultDueDateForPriority(value)
+      }
+      return updated
+    })
+  }
+
+  const handleDueDateChange = (value) => {
+    setTicketDueDateTouched(true)
+    setTicketFormData((prev) => (prev ? { ...prev, dueDate: value } : prev))
+  }
+
+  const handleTicketSubmit = async () => {
+    if (!ticketFormData) return
+    const trimmedTitle = ticketFormData.title?.trim()
+    if (!trimmedTitle) {
+      setTicketError("Title is required.")
+      return
+    }
+
+    setTicketSubmitting(true)
+    setTicketError(null)
+
+    try {
+      const payload = {
+        ...ticketFormData,
+        title: trimmedTitle,
+        category: DEFAULT_TICKET_CATEGORY,
+        dueDate: ticketFormData.dueDate ? new Date(ticketFormData.dueDate).toISOString() : undefined,
+      }
+
+      await ticketsService.createTicket(payload)
+      toast.success("Ticket created successfully.")
+      handleTicketDrawerClose()
+    } catch (error) {
+      const message = error?.message || "Failed to create ticket."
+      setTicketError(message)
+      toast.error(message)
+    } finally {
+      setTicketSubmitting(false)
     }
   }
 
@@ -591,6 +751,8 @@ export default function EventsTable() {
                         if (selectedQuickAction === 'acknowledge') {
                           setAcknowledgingAlarm(alarm)
                           setConfirmDialogOpen(true)
+                        } else if (selectedQuickAction === 'ticket') {
+                          openTicketDrawer(alarm)
                         } else {
                           // TODO: Implement the actual action when features are ready
                           console.log(`Selected ${selectedQuickAction} action for event:`, alarm)
@@ -744,6 +906,8 @@ export default function EventsTable() {
         </div>
       </CardContent>
     </Card>
+
+    {/* Export Dialog */}
     <Dialog open={exportOpen} onOpenChange={setExportOpen}>
       <DialogContent aria-label="Export options" className="sm:max-w-md">
         <DialogHeader>
@@ -804,44 +968,35 @@ export default function EventsTable() {
       </DialogContent>
     </Dialog>
 
-    {/* Confirmation Dialog */}
+    {/* Acknowledge Confirmation Dialog */}
     <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Confirm Acknowledgement
-          </DialogTitle>
+          <DialogTitle>Confirm Acknowledgement</DialogTitle>
           <DialogDescription>
-            Are you sure you want to acknowledge this event problem?
+            Are you sure you want to acknowledge this alarm?
           </DialogDescription>
         </DialogHeader>
         {acknowledgingAlarm && (
-          <div className="py-4">
-            <div className="rounded-lg bg-muted p-4 space-y-2">
-              <p className="text-sm font-medium text-foreground">Event Problem:</p>
-              <p className="text-sm text-muted-foreground">{acknowledgingAlarm.problem}</p>
-              <p className="text-xs text-muted-foreground mt-2">Host: {acknowledgingAlarm.host}</p>
-            </div>
+          <div className="space-y-2 text-sm">
+            <p><strong>Host:</strong> {acknowledgingAlarm.host}</p>
+            <p><strong>Problem:</strong> {acknowledgingAlarm.problem}</p>
+            <p><strong>Severity:</strong> {acknowledgingAlarm.severity}</p>
           </div>
         )}
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => {
-              setConfirmDialogOpen(false)
-              setAcknowledgingAlarm(null)
-            }}
+            onClick={() => setConfirmDialogOpen(false)}
             disabled={isAcknowledging}
           >
-            No
+            Cancel
           </Button>
           <Button
             onClick={handleConfirmAcknowledge}
             disabled={isAcknowledging}
-            className="bg-green-600 hover:bg-green-700 text-white"
           >
-            {isAcknowledging ? 'Acknowledging...' : 'Yes'}
+            {isAcknowledging ? "Acknowledging..." : "Acknowledge"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -849,33 +1004,33 @@ export default function EventsTable() {
 
     {/* Success Dialog */}
     <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-            Acknowledgement Successful
-          </DialogTitle>
+          <DialogTitle>Success</DialogTitle>
+          <DialogDescription>
+            The alarm has been acknowledged successfully.
+          </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-4 space-y-2">
-            <p className="text-sm font-medium text-green-900 dark:text-green-100">
-              The event problem <span className="font-bold">"{acknowledgingAlarm?.problem}"</span> has been properly acknowledged.
-            </p>
-          </div>
-        </div>
         <DialogFooter>
-          <Button
-            onClick={() => {
-              setSuccessDialogOpen(false)
-              setAcknowledgingAlarm(null)
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            OK
+          <Button onClick={() => setSuccessDialogOpen(false)}>
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Ticket Drawer */}
+    <TicketDrawer
+      open={ticketDrawerOpen}
+      onClose={handleTicketDrawerClose}
+      formData={ticketFormData}
+      onFieldChange={handleTicketFieldChange}
+      onDueDateChange={handleDueDateChange}
+      onSubmit={handleTicketSubmit}
+      isSubmitting={ticketSubmitting}
+      error={ticketError}
+      dueDateTouched={ticketDueDateTouched}
+    />
     </>
   )
 }
