@@ -77,8 +77,6 @@ function buildNavigationItems(t, isAdminRoute) {
       items: [
         { label: t("tickets"), href: "/support/tickets", icon: Ticket },
         { label: t("majorIncidents"), href: "/support/majorIncidents", icon: AlertOctagon },
-        { label: t("problems"), href: "/support/problems", icon: Bug },
-        { label: t("reports"), href: "/support/reports", icon: FileText },
       ]
     },
     {

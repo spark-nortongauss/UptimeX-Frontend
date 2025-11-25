@@ -100,14 +100,7 @@ export default function DetailedSystemPage({ params }) {
     sector3: { powerCard: { current: null }, txChart: { current: null }, rxChart: { current: null } },
   }), [])
   
-  const opticalChartsRefs = {
-    pdSector1: useRef(null),
-    pdSector2: useRef(null),
-    pdSector3: useRef(null),
-    ldSector1: useRef(null),
-    ldSector2: useRef(null),
-    ldSector3: useRef(null),
-  }
+  const opticalChartsRefs = useMemo(() => ({}), [])
 
   const temperatureChartInstanceRef = useRef(null)
   const networkChartInstanceRefs = {
@@ -120,14 +113,7 @@ export default function DetailedSystemPage({ params }) {
     sector2: { txChart: useRef(null), rxChart: useRef(null) },
     sector3: { txChart: useRef(null), rxChart: useRef(null) },
   }
-  const opticalChartInstanceRefs = {
-    pdSector1: useRef(null),
-    pdSector2: useRef(null),
-    pdSector3: useRef(null),
-    ldSector1: useRef(null),
-    ldSector2: useRef(null),
-    ldSector3: useRef(null),
-  }
+  const opticalChartInstanceRefs = useMemo(() => ({}), [])
 
   const allChartRefs = useMemo(() => ({
     healthCards: healthCardsRef,
@@ -141,7 +127,7 @@ export default function DetailedSystemPage({ params }) {
       rf: rfChartInstanceRefs,
       optical: opticalChartInstanceRefs,
     },
-  }), [])
+  }), [opticalChartsRefs, opticalChartInstanceRefs])
 
   return (
     <AuthGuard>
@@ -198,6 +184,7 @@ export default function DetailedSystemPage({ params }) {
           <OpticalCharts 
             chartRefs={opticalChartsRefs} 
             chartInstanceRefs={opticalChartInstanceRefs} 
+            hostId={id}
           />
         </CollapsibleSection>
       </div>
