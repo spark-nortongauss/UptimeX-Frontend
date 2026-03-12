@@ -145,6 +145,47 @@
       "report": "Report"
     }
   },
+  "Services": {
+    "title": "Services",
+    "subtitle": "Trigger-level availability powered by the Zabbix API.",
+    "searchPlaceholder": "Search by host or service name",
+    "filters": {
+      "label": "Status",
+      "all": "All",
+      "ok": "OK",
+      "warning": "Warning",
+      "problem": "Problem"
+    },
+    "columns": {
+      "hostName": "Host Name",
+      "serviceName": "Service Name",
+      "availability": "Availability",
+      "status": "Status",
+      "lastCheck": "Last Check"
+    },
+    "summary": {
+      "total": "Total Services",
+      "problem": "In Problem",
+      "warning": "Warnings",
+      "availability": "Avg Availability"
+    },
+    "window": {
+      "lastNDays": "Last {days} days"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "refreshing": "Refreshing..."
+    },
+    "empty": {
+      "title": "No services found",
+      "subtitle": "Try updating your filters or refresh to request the latest data."
+    },
+    "error": {
+      "title": "Unable to load services",
+      "action": "Retry"
+    },
+    "updated": "Updated {timestamp}"
+  },
   "Auth": {
     "signin": {
       "title": "Welcome back",
