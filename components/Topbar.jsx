@@ -3,7 +3,7 @@
 import { useMemo, useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Search, HelpCircle, ChevronDown } from "lucide-react"
+import { Search, HelpCircle, ChevronDown, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSidebar, SidebarTrigger } from "@/components/ui/sidebar"
@@ -11,20 +11,22 @@ import { useAuthStore } from "@/lib/stores/authStore"
 import ThemeToggle from "@/components/ThemeToggle"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
 import { useTranslations } from "next-intl"
-import { authService } from "@/lib/services/authService"
+import { notificationsService } from "@/lib/services/notificationsService"
 
 // Thin top navigation bar shown above the sidebar layout
 export default function Topbar() {
   const router = useRouter()
   const pathname = usePathname()
   const t = useTranslations("Topbar")
-  const { user, initialized, getToken } = useAuthStore()
+  const { user, initialized, isAdmin } = useAuthStore()
   const { state, isMobile } = useSidebar()
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const menuRef = useRef(null)
   const searchInputRef = useRef(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const notificationsRef = useRef(null)
 
   const displayName = useMemo(() => {
     return (
@@ -50,17 +52,34 @@ export default function Topbar() {
   }, [open])
 
   useEffect(() => {
+    const onClickNotif = (e) => {
+      if (!notificationsRef.current) return
+      if (!notificationsRef.current.contains(e.target)) setShowNotifications(false)
+    }
+    if (showNotifications) document.addEventListener("mousedown", onClickNotif)
+    return () => document.removeEventListener("mousedown", onClickNotif)
+  }, [showNotifications])
+
+  // Fetch notifications when admin status is available from the store
+  useEffect(() => {
+    let cancelled = false
     const run = async () => {
-      if (!initialized) return
-      const token = getToken() || await authService.getSessionToken()
-      if (!token) return
+      if (!initialized || !isAdmin) {
+        if (!cancelled) setNotifications([])
+        return
+      }
       try {
-        const admin = await authService.isAdmin(token)
-        setIsAdmin(admin)
-      } catch { }
+        const notifs = await notificationsService.getNotifications()
+        if (!cancelled) setNotifications(notifs || [])
+      } catch {
+        if (!cancelled) setNotifications([])
+      }
     }
     run()
-  }, [initialized]) // Only depend on initialized, not getToken
+    return () => {
+      cancelled = true
+    }
+  }, [initialized, isAdmin, user?.id])
 
   // Handle search form submission
   const handleSearchSubmit = (e) => {
@@ -81,6 +100,21 @@ export default function Topbar() {
     if (e.key === 'Enter') {
       handleSearchSubmit(e)
     }
+  }
+
+  const unreadCount = notifications.filter(n => !n.is_read).length
+
+  const handleNotificationClick = async (notif) => {
+    setShowNotifications(false)
+    if (!notif.is_read) {
+      try {
+        await notificationsService.markAsRead(notif.id)
+        setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n))
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    router.push('/settings/notification')
   }
 
   return (
@@ -132,6 +166,81 @@ export default function Topbar() {
           >
             <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
+
+          {/* Notifications button (Admin only) */}
+          {isAdmin && (
+            <div className="relative" ref={notificationsRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Notifications"
+                onClick={() => setShowNotifications((v) => !v)}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <div className="relative">
+                  <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-1 ring-white dark:ring-neutral-900 pb-[1px]">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+              </Button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-3 w-80 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-xl z-50 overflow-hidden transform origin-top-right transition-all">
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-800/50 flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Notifications</h3>
+                    {unreadCount > 0 && <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">{unreadCount} new</span>}
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {notifications.length > 0 ? (
+                      <div className="flex flex-col">
+                        {notifications.map((notif) => (
+                          <button
+                            key={notif.id}
+                            onClick={() => handleNotificationClick(notif)}
+                            className={`w-full text-left px-4 py-3 border-b border-gray-50 dark:border-neutral-800/50 hover:bg-gray-50 dark:hover:bg-neutral-800/80 transition-colors ${!notif.is_read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
+                          >
+                            <div className="flex gap-3">
+                              <div className="mt-1 flex-shrink-0">
+                                <div className={`h-2 w-2 rounded-full ${!notif.is_read ? 'bg-blue-500' : 'bg-transparent'}`} />
+                              </div>
+                              <div>
+                                <p className={`text-sm ${!notif.is_read ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300'}`}>
+                                  {notif.message}
+                                </p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                  {new Date(notif.created_at).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
+                        <p>No notifications yet</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="border-t border-gray-100 dark:border-neutral-800 p-2 bg-gray-50/50 dark:bg-neutral-800/50">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-transparent"
+                      onClick={() => {
+                        setShowNotifications(false);
+                        router.push('/settings/notification');
+                      }}
+                    >
+                      View all in Settings
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* User menu */}
           <div className="relative" ref={menuRef}>

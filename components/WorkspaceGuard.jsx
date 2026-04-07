@@ -19,7 +19,7 @@ export default function WorkspaceGuard({ children }) {
   const adminCheckDoneRef = useRef(false);
 
   // Routes that don't require workspace check
-  const publicRoutes = ['/signin', '/signup', '/forgot-password', '/auth/callback', '/workspace', '/admin'];
+  const publicRoutes = ['/signin', '/forgot-password', '/auth/callback', '/workspace', '/admin'];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
   // Perform admin check ONCE on mount, not on every pathname change

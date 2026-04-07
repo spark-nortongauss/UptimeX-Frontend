@@ -38,6 +38,7 @@ import {
   Building,
   LogOut,
   ChevronRight,
+  Bell,
 } from "lucide-react"
 import { useAuthStore } from "@/lib/stores/authStore"
 import { toast } from "sonner"
@@ -92,7 +93,9 @@ function buildNavigationItems(t, isAdminRoute) {
     {
       title: t("settings"),
       icon: Settings,
-      items: []
+      items: [
+        // Notifications added dynamically if admin
+      ]
     }
   ]
 }
@@ -101,12 +104,32 @@ export default function AppSidebar() {
   const t = useTranslations("Sidebar")
   const pathname = usePathname()
   const router = useRouter()
-  const { signOut } = useAuthStore()
+  const { signOut, user, initialized, isAdmin } = useAuthStore()
   const [expandedGroups, setExpandedGroups] = useState(new Set())
   const { sidebarSearch, setSidebarSearch } = useUIStore()
   const { state } = useSidebar()
   const isAdminRoute = pathname?.startsWith('/admin')
+  
+
   const navigationItems = buildNavigationItems(t, isAdminRoute)
+  
+  if (isAdmin) {
+    const settingsIndex = navigationItems.findIndex(i => i.title === t("settings"));
+    if (settingsIndex !== -1 && !navigationItems[settingsIndex].items.some(i => i.href === '/settings/notification')) {
+      if (navigationItems[settingsIndex].items.length === 0) {
+        navigationItems[settingsIndex].items.push({
+          label: t("general"),
+          href: '/settings',
+          icon: Settings
+        });
+      }
+      navigationItems[settingsIndex].items.push({
+        label: t("notificationCenter"),
+        href: '/settings/notification',
+        icon: Bell
+      });
+    }
+  }
 
   const handleLogout = async () => {
     try {

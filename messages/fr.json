@@ -4,7 +4,6 @@
     "solutions": "Solutions",
     "pricing": "Tarifs",
     "about": "À propos",
-    "signup": "S'inscrire",
     "platform": "Plateforme ObservOne",
     "platform_desc": "Solution complète de surveillance et d'observabilité pour les applications modernes.",
     "by_industry": "Par secteur",
@@ -75,6 +74,8 @@
     "racks": "Baies",
     "facilities": "Installations",
     "settings": "Paramètres",
+    "general": "Général",
+    "notificationCenter": "Notifications",
     "logout": "Déconnexion"
   }
   ,
@@ -190,8 +191,6 @@
     "signin": {
       "title": "Bon retour",
       "description": "Connectez-vous pour continuer vers ObservOne",
-      "noAccount": "Vous n'avez pas de compte ?",
-      "signup": "S'inscrire",
       "email": "E-mail",
       "password": "Mot de passe",
       "remember": "Se souvenir de moi",
@@ -207,26 +206,6 @@
       "toastGoogleFail": "Échec de la connexion avec Google",
       "toastLinkedInFail": "Échec de la connexion avec LinkedIn",
       "toastAzureFail": "Échec de la connexion avec Azure"
-    },
-    "signup": {
-      "title": "S'inscrire",
-      "description": "Créez un compte pour commencer à utiliser ObservOne",
-      "already": "Déjà inscrit ?",
-      "signin": "Se connecter",
-      "name": "Nom",
-      "email": "E-mail",
-      "password": "Mot de passe",
-      "terms": "Vous acceptez nos",
-      "termsLink": "Conditions générales",
-      "and": "et",
-      "privacy": "Politique de confidentialité",
-      "submit": "Créer un compte",
-      "submitting": "Création du compte...",
-      "or": "Ou continuer avec",
-      "withGoogle": "Continuer avec Google",
-      "toastSuccess": "Compte créé avec succès ! Veuillez vérifier votre e-mail pour confirmer.",
-      "toastFail": "Échec de la création du compte",
-      "toastGoogleFail": "Échec de l'inscription avec Google"
     }
   }
 }

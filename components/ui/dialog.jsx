@@ -34,6 +34,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
         "data-[state=open]:slide-in-from-top-[10%]",
         "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
         "dark:bg-neutral-900 dark:border-neutral-800",
+        "[caret-color:transparent] focus:outline-none",
         className
       )}
       {...props}

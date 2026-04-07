@@ -4,7 +4,6 @@
     "solutions": "Solutions",
     "pricing": "Pricing",
     "about": "About",
-    "signup": "Sign Up",
     "platform": "ObservOne Platform",
     "platform_desc": "Comprehensive monitoring and observability solution for modern applications.",
     "by_industry": "By Industry",
@@ -75,6 +74,8 @@
     "racks": "Racks",
     "facilities": "Facilities",
     "settings": "Settings",
+    "general": "General",
+    "notificationCenter": "Notifications",
     "logout": "Logout"
   }
   ,
@@ -190,8 +191,6 @@
     "signin": {
       "title": "Welcome back",
       "description": "Sign in to continue to ObservOne",
-      "noAccount": "Don't have an account?",
-      "signup": "Sign up",
       "email": "Email",
       "password": "Password",
       "remember": "Remember me",
@@ -207,26 +206,6 @@
       "toastGoogleFail": "Failed to sign in with Google",
       "toastLinkedInFail": "Failed to sign in with LinkedIn",
       "toastAzureFail": "Failed to sign in with Azure"
-    },
-    "signup": {
-      "title": "Sign up",
-      "description": "Create an account to start using ObservOne",
-      "already": "Already registered?",
-      "signin": "Sign in",
-      "name": "Name",
-      "email": "Email",
-      "password": "Password",
-      "terms": "You Accept Our",
-      "termsLink": "Terms And Conditions",
-      "and": "And",
-      "privacy": "Privacy Policy",
-      "submit": "Create An Account",
-      "submitting": "Creating Account...",
-      "or": "Or continue with",
-      "withGoogle": "Continue with Google",
-      "toastSuccess": "Account created successfully! Please check your email to verify your account.",
-      "toastFail": "Failed to create account",
-      "toastGoogleFail": "Failed to sign up with Google"
     }
   }
 }
