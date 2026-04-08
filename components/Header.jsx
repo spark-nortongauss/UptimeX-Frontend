@@ -16,15 +16,19 @@ export default function Header() {
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <motion.div 
-            className="flex items-center space-x-2"
+          <motion.div
+            className="flex items-center pt-2"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <img src="/assets/observone_logo_1080p.png" alt="ObservOne logo" className="w-8 h-8 rounded-lg object-contain" />
-            <span className="text-xl font-bold text-gray-900">ObservOne</span>
+            <Link href="/">
+              <img
+                src="/assets/observone_logo_1080p.png"
+                alt="ObservOne logo"
+                className="h-[48px] w-auto object-contain"
+              />
+            </Link>
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -60,7 +64,7 @@ export default function Header() {
                           <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
                             <div className="flex items-center space-x-2">
                               <BarChart3 className="h-4 w-4 text-gray-700" />
-                            <div className="text-sm font-medium leading-none text-gray-900">{t("monitoring")}</div>
+                              <div className="text-sm font-medium leading-none text-gray-900">{t("monitoring")}</div>
                             </div>
                             <p className="line-clamp-2 text-sm leading-snug text-gray-600">
                               {t("monitoring_desc")}
@@ -71,7 +75,7 @@ export default function Header() {
                           <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-not-allowed pointer-events-none bg-white" aria-disabled="true" role="link" tabIndex={-1}>
                             <div className="flex items-center space-x-2">
                               <Shield className="h-4 w-4 text-gray-700" />
-                            <div className="text-sm font-medium leading-none text-gray-900">{t("security")}</div>
+                              <div className="text-sm font-medium leading-none text-gray-900">{t("security")}</div>
                             </div>
                             <p className="line-clamp-2 text-sm leading-snug text-gray-600">
                               {t("security_desc")}
@@ -144,7 +148,7 @@ export default function Header() {
           </div>
 
           {/* Desktop CTA */}
-          <motion.div 
+          <motion.div
             className="hidden md:flex items-center space-x-4"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
