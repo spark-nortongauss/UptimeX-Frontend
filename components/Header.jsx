@@ -14,7 +14,7 @@ export default function Header() {
   const t = useTranslations("Header")
 
   return (
-    <header className="fixed top-0 w-full bg-background/98 backdrop-blur-md border-b border-border z-50">
+    <header className="fixed top-0 w-full bg-background/[0.95] backdrop-blur-lg backdrop-brightness-[0.45] border-b border-border z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <motion.div
