@@ -1,59 +1,64 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Monitor, Shield, BarChart3, Bell, Globe, Zap, Users, Clock } from "lucide-react"
+import { Radar, Brain, Zap, ShieldCheck, BarChart3, Bell, Layers, Clock, Database, Shield, Activity, Bot } from "lucide-react"
 
-const features = [
+const capabilities = [
   {
-    icon: Monitor,
-    title: "Real-time Monitoring",
-    description: "Monitor your applications 24/7 with instant notifications when issues arise. Get detailed insights into performance metrics and system health.",
-    color: "from-blue-500 to-blue-600"
-  },
-  {
-    icon: Shield,
-    title: "Advanced Security",
-    description: "Comprehensive security monitoring with threat detection, vulnerability scanning, and compliance reporting for enterprise-grade protection.",
-    color: "from-green-500 to-green-600"
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics & Insights",
-    description: "Powerful analytics dashboard with customizable reports, trend analysis, and actionable insights to optimize your infrastructure.",
-    color: "from-purple-500 to-purple-600"
-  },
-  {
-    icon: Bell,
-    title: "Smart Alerts",
-    description: "Intelligent alerting system that reduces noise and focuses on what matters. Configure custom thresholds and notification channels.",
-    color: "from-orange-500 to-orange-600"
-  },
-  {
-    icon: Globe,
-    title: "Global Coverage",
-    description: "Monitor from multiple geographic locations worldwide. Ensure optimal performance for users across different regions and time zones.",
-    color: "from-teal-500 to-teal-600"
+    icon: Brain,
+    title: "AI-Driven Root Cause",
+    description: "Machine learning correlates signals across every layer — network, application, and infrastructure — to pinpoint root cause in seconds, not hours."
   },
   {
     icon: Zap,
-    title: "Lightning Fast",
-    description: "Sub-second response times and instant data processing. Our optimized infrastructure ensures minimal latency and maximum reliability.",
-    color: "from-yellow-500 to-yellow-600"
+    title: "Autonomous Remediation",
+    description: "Zero-touch incident resolution executes guided runbooks automatically. Incidents self-heal before your end users ever notice a disruption."
+  },
+  {
+    icon: Bell,
+    title: "Predictive Alerting",
+    description: "Anomaly detection baselines your system's normal behavior and fires intelligent pre-failure alerts — not noisy, meaningless threshold triggers."
+  },
+  {
+    icon: ShieldCheck,
+    title: "SLA Assurance Engine",
+    description: "Customizable SLOs with error budget tracking ensure every contract commitment is met, with real-time visibility across your entire stack."
+  },
+  {
+    icon: Layers,
+    title: "Cross-Layer Correlation",
+    description: "Every incident trace spans the full topology — from physical links to cloud services — delivering complete situational awareness instantly."
+  },
+  {
+    icon: BarChart3,
+    title: "Performance Baselines",
+    description: "Continuous KPI benchmarking establishes intelligent baselines, enabling trend forecasting and capacity planning before you ever hit limits."
+  },
+  {
+    icon: Clock,
+    title: "24/7 NOC Coverage",
+    description: "Outsourced Observability with a dedicated Service Manager, smart escalation paths, and monthly and quarterly operational review cycles."
+  },
+  {
+    icon: Database,
+    title: "Operational Intelligence",
+    description: "Data-driven decisions backed by a collaborative knowledge base, audit-ready reporting, and continuously refined managed detection."
   }
 ]
 
 const stats = [
-  { number: "99.99%", label: "Uptime Guarantee", icon: Clock },
-  { number: "10K+", label: "Active Users", icon: Users },
-  { number: "50M+", label: "Checks Daily", icon: BarChart3 },
-  { number: "24/7", label: "Support", icon: Shield }
+  { number: "99.99%", label: "Availability Objective", icon: Shield },
+  { number: "< 5m",   label: "Mean Time to Resolve",  icon: Activity },
+  { number: "24/7",   label: "NOC Coverage",           icon: Radar },
+  { number: "Zero-Touch", label: "Operations Target",  icon: Bot }
 ]
 
 export default function FeaturesSection() {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+
+        {/* ── Section Header ── */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -61,62 +66,84 @@ export default function FeaturesSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-medium mb-4">
-            <Zap className="w-4 h-4 mr-2" />
-            Powerful Features
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-sm font-medium mb-4 border border-border">
+            <Radar className="w-4 h-4 mr-2" />
+            Observability & Monitoring
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Everything you need to
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> monitor & scale</span>
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
+            Unified visibility for
+            <span className="text-ng-teal dark:text-ng-yellow"> modern operations</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our comprehensive monitoring platform provides all the tools and insights you need to keep your applications running smoothly and your users happy.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Built for infrastructure health, incident prediction, and cognitive automation across distributed environments.
           </p>
         </motion.div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="relative group"
-            >
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-gray-200 h-full">
-                {/* Icon */}
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                  <feature.icon className="w-7 h-7 text-white" />
-                </div>
-                
-                {/* Content */}
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-                
-                {/* Hover Effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Stats Section */}
+        {/* ── Platform Capabilities ── */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-12 text-center"
+          className="mb-20"
         >
-          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Trusted by thousands of companies worldwide
+          <h3
+            className="font-heading text-3xl font-bold text-center mb-3 text-foreground"
+          >
+            Platform Capabilities
+          </h3>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Eight core pillars of intelligent, autonomous observability — built for modern operations teams.
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {capabilities.map((cap, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.08 }}
+                viewport={{ once: true }}
+                className="group text-center p-6 rounded-2xl transition-all duration-300 border border-border bg-card"
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = "#2D4344"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = ""
+                }}
+              >
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{ backgroundColor: "#2D4344" }}
+                >
+                  <cap.icon style={{ width: 24, height: 24, color: "#D9FF35" }} />
+                </div>
+                <h4 className="font-heading text-base font-bold mb-3 text-card-foreground">
+                  {cap.title}
+                </h4>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {cap.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── Stats Section (unchanged) ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-br from-[#0D1B1C] to-[#1A2C2D] rounded-3xl p-12 text-center"
+        >
+          <h3 className="font-heading text-3xl md:text-4xl font-bold text-white mb-4">
+            Operations confidence at every layer
           </h3>
           <p className="text-gray-300 text-lg mb-12 max-w-2xl mx-auto">
-            Join the growing community of developers and businesses who rely on ObservOne for their monitoring needs.
+            From anomaly detection to autonomous remediation, teams maintain resilience with a single operational intelligence plane.
           </p>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <motion.div
@@ -127,15 +154,16 @@ export default function FeaturesSection() {
                 viewport={{ once: true }}
                 className="text-center"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full mb-4">
-                  <stat.icon className="w-6 h-6 text-white" />
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-ng-yellow rounded-full mb-4">
+                  <stat.icon className="w-6 h-6 text-black" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.number}</div>
-                <div className="text-gray-300 font-medium">{stat.label}</div>
+                <div className="text-gray-200 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </motion.div>
+
       </div>
     </section>
   )

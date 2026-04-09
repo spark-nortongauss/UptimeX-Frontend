@@ -1,24 +1,24 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Check, Star, Zap, Shield, Crown } from "lucide-react"
+import { Check, Star, Radar, Shield, Crown } from "lucide-react"
 
 const plans = [
   {
-    name: "Starter",
-    description: "Perfect for small projects and personal websites",
-    price: "Free",
-    period: "forever",
-    icon: Zap,
-    color: "from-blue-500 to-blue-600",
+    name: "Observability Core",
+    description: "Cross-layer monitoring for full-stack visibility and telemetry clarity.",
+    price: "Foundation",
+    period: "stack",
+    icon: Radar,
+    color: "from-[#2D4344] to-[#4D6869]",
     popular: false,
     features: [
-      "Monitor up to 5 websites",
-      "5-minute check intervals",
-      "Email notifications",
-      "Basic uptime reports",
-      "Community support",
-      "30-day data retention"
+      "Full-Stack Observability",
+      "Real-Time Telemetry",
+      "End-to-End Visibility",
+      "Network Intelligence",
+      "Unified Operations View",
+      "Infrastructure Health"
     ],
     limitations: [
       "Limited to 5 monitors",
@@ -26,45 +26,42 @@ const plans = [
     ]
   },
   {
-    name: "Professional",
-    description: "Ideal for growing businesses and teams",
-    price: "$29",
-    period: "per month",
+    name: "AI & Automation",
+    description: "Cognitive automation workflows that reduce manual incident handling.",
+    price: "Advanced",
+    period: "automation",
     icon: Shield,
-    color: "from-purple-500 to-purple-600",
+    color: "from-[#243B3C] to-[#D9FF35]",
     popular: true,
     features: [
-      "Monitor up to 50 websites",
-      "1-minute check intervals",
-      "SMS & Email notifications",
-      "Advanced analytics",
-      "Priority support",
-      "1-year data retention",
-      "Custom dashboards",
-      "API access",
-      "Team collaboration"
+      "Agentic Incident Resolution",
+      "Autonomous Remediation",
+      "AI-Driven Root Cause",
+      "Self-Healing Networks",
+      "Predictive Intelligence",
+      "Zero-Touch Operations",
+      "Cognitive Automation",
+      "ML-Powered Detection"
     ],
     limitations: []
   },
   {
-    name: "Enterprise",
-    description: "For large organizations with complex needs",
-    price: "$99",
-    period: "per month",
+    name: "Reliability Command",
+    description: "Incident and SLA assurance designed for always-on operations teams.",
+    price: "Enterprise",
+    period: "resilience",
     icon: Crown,
-    color: "from-gold-500 to-gold-600",
+    color: "from-[#1A2C2D] to-[#2D4344]",
     popular: false,
     features: [
-      "Unlimited monitors",
-      "30-second check intervals",
-      "Multi-channel notifications",
-      "Custom integrations",
-      "24/7 phone support",
-      "Unlimited data retention",
-      "White-label reports",
-      "SLA guarantees",
-      "Dedicated account manager",
-      "Custom deployment options"
+      "Incident Prediction Engine",
+      "Proactive Fault Prevention",
+      "Smart Escalation Paths",
+      "Context-Aware Triage",
+      "Event Correlation Engine",
+      "SLA Assurance and Error Budget Tracking",
+      "99.99% Availability Monitoring",
+      "Dedicated War Room and 24/7 NOC Coverage"
     ],
     limitations: []
   }
@@ -72,7 +69,7 @@ const plans = [
 
 export default function PricingSection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+    <section className="py-24 bg-gradient-to-br from-background to-secondary/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -82,16 +79,16 @@ export default function PricingSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-800 text-sm font-medium mb-4">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-secondary-foreground border border-border text-sm font-medium mb-4">
             <Crown className="w-4 h-4 mr-2" />
-            Simple Pricing
+            Incident Management & Reliability
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Choose the perfect plan
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> for your needs</span>
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
+            Operational pillars for
+            <span className="text-ng-teal dark:text-ng-yellow"> resilient services</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Start free and scale as you grow. All plans include our core monitoring features with no hidden fees or setup costs.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Align teams around observability, autonomous remediation, and SLA-driven monitoring with a unified incident command model.
           </p>
         </motion.div>
 
@@ -109,14 +106,14 @@ export default function PricingSection() {
               {/* Popular Badge */}
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center">
+                  <div className="bg-ng-yellow text-black px-4 py-2 rounded-full text-sm font-medium flex items-center">
                     <Star className="w-4 h-4 mr-1" />
                     Most Popular
                   </div>
                 </div>
               )}
 
-              <div className={`bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 ${plan.popular ? 'border-purple-200 scale-105' : 'border-gray-100'} h-full relative overflow-hidden`}>
+              <div className={`bg-card rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 ${plan.popular ? 'border-ng-yellow scale-105' : 'border-border'} h-full relative overflow-hidden`}>
                 {/* Background Gradient */}
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${plan.color} opacity-10 rounded-full transform translate-x-16 -translate-y-16`}></div>
                 
@@ -126,21 +123,21 @@ export default function PricingSection() {
                     <plan.icon className="w-6 h-6 text-white" />
                   </div>
                   
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 mb-6">{plan.description}</p>
+                  <h3 className="text-2xl font-bold text-card-foreground mb-2">{plan.name}</h3>
+                  <p className="text-muted-foreground mb-6">{plan.description}</p>
                   
                   {/* Price */}
                   <div className="mb-8">
                     <div className="flex items-baseline">
-                      <span className="text-5xl font-bold text-gray-900">{plan.price}</span>
-                      {plan.price !== "Free" && <span className="text-gray-500 ml-2">/{plan.period}</span>}
+                      <span className="text-5xl font-bold text-card-foreground">{plan.price}</span>
+                      {plan.price !== "Foundation" && <span className="text-muted-foreground ml-2">/{plan.period}</span>}
                     </div>
-                    {plan.price === "Free" && <span className="text-gray-500">{plan.period}</span>}
+                    {plan.price === "Foundation" && <span className="text-muted-foreground">{plan.period}</span>}
                   </div>
 
                   {/* Features List */}
                   <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
+                    <h4 className="font-semibold text-card-foreground mb-3">What is included:</h4>
                     <ul className="space-y-3">
                       {plan.features.map((feature, featureIndex) => (
                         <motion.li
@@ -151,10 +148,10 @@ export default function PricingSection() {
                           viewport={{ once: true }}
                           className="flex items-start space-x-3"
                         >
-                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
-                            <Check className="w-3 h-3 text-green-600" />
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-secondary flex items-center justify-center mt-0.5">
+                            <Check className="w-3 h-3 text-primary" />
                           </div>
-                          <span className="text-gray-700">{feature}</span>
+                          <span className="text-muted-foreground">{feature}</span>
                         </motion.li>
                       ))}
                     </ul>
@@ -173,12 +170,12 @@ export default function PricingSection() {
           viewport={{ once: true }}
           className="text-center mt-16"
         >
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Need a custom solution?
+          <div className="bg-card rounded-2xl p-8 shadow-lg border border-border max-w-4xl mx-auto">
+            <h3 className="font-heading text-2xl font-bold text-card-foreground mb-4">
+              Managed operations requirement?
             </h3>
-            <p className="text-gray-600 mb-6">
-              Contact our sales team to discuss enterprise features, custom integrations, and volume discounts for large organizations.
+            <p className="text-muted-foreground mb-6">
+              Deploy outsourced observability, managed detection workflows, dedicated war room governance, and service health dashboards tailored to your NOC model.
             </p>
           </div>
         </motion.div>
