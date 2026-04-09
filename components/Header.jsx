@@ -14,7 +14,7 @@ export default function Header() {
   const t = useTranslations("Header")
 
   return (
-    <header className="fixed top-0 w-full bg-background/90 backdrop-blur-md border-b border-border z-50">
+    <header className="fixed top-0 w-full bg-background/98 backdrop-blur-md border-b border-border z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <motion.div
@@ -27,7 +27,7 @@ export default function Header() {
               <img
                 src="/assets/observone_logo_1080p.png"
                 alt="ObservOne logo"
-                className="h-[48px] w-auto object-contain"
+                className="h-[80px] w-auto object-contain"
               />
             </Link>
           </motion.div>
