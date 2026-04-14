@@ -148,7 +148,7 @@ export default function SignInPage() {
             placeholder="you@example.com"
             value={formData.email}
             onChange={handleInputChange}
-            className="!bg-white !border-gray-300 !text-gray-900 placeholder:!text-gray-400 focus:!border-blue-500 focus:!ring-blue-500 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:!shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827!important]"
+            className="!bg-white !border-gray-300 !text-gray-900 placeholder:!text-gray-400 focus:!border-[#3e6e70] focus:!ring-[#3e6e70] [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:!shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827!important]"
             style={{ backgroundColor: 'white !important', color: '#111827 !important' }}
             required
           />
@@ -163,7 +163,7 @@ export default function SignInPage() {
               placeholder="********"
               value={formData.password}
               onChange={handleInputChange}
-              className="!bg-white !border-gray-300 !text-gray-900 placeholder:!text-gray-400 focus:!border-blue-500 focus:!ring-blue-500 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:!shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827!important] pr-10"
+              className="!bg-white !border-gray-300 !text-gray-900 placeholder:!text-gray-400 focus:!border-[#3e6e70] focus:!ring-[#3e6e70] [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:!shadow-[inset_0_0_0px_1000px_rgb(255,255,255)] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827!important] pr-10"
               style={{ backgroundColor: 'white !important', color: '#111827 !important' }}
               required
             />
@@ -183,20 +183,21 @@ export default function SignInPage() {
             <input
               id="remember"
               type="checkbox"
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 bg-white"
+              className="rounded border-gray-300 text-[#2d4344] focus:ring-[#3e6e70] bg-white"
             />
             <Label htmlFor="remember" className="text-sm text-gray-600 font-normal">
               {t('remember')}
             </Label>
           </div>
-          <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
+          <Link href="/forgot-password" className="text-sm font-medium hover:underline transition-colors" style={{ color: "#3e6e70" }}>
             {t('forgot')}
           </Link>
         </div>
 
         <Button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors select-none"
+          className="w-full text-white font-semibold py-3 rounded-lg transition-all duration-200 select-none shadow-md hover:opacity-90 active:scale-[0.98]"
+          style={{ backgroundColor: "#2d4344" }}
           disabled={isLoading}
         >
           {isLoading ? t('submitting') : t('submit')}

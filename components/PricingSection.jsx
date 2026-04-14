@@ -44,6 +44,7 @@ const plans = [
     integrationFee: "250 / equipment model / OEM",
     features: allPlanFeatures,
     extraFeatures: [],
+    ctaStyle: "outline", // outline style for non-popular
   },
   {
     id: "outsourced",
@@ -58,6 +59,7 @@ const plans = [
     integrationFee: "250 / equipment model / OEM",
     features: allPlanFeatures,
     extraFeatures: outsourcedOnlyFeatures,
+    ctaStyle: "filled", // filled yellow for popular
   },
   {
     id: "dedicated",
@@ -73,6 +75,7 @@ const plans = [
     features: allPlanFeatures,
     extraFeatures: [],
     customNote: "All pricing on request — tailored to your infrastructure scale.",
+    ctaStyle: "outline",
   },
 ]
 
@@ -120,7 +123,7 @@ function FeatureRow({ feature, delay = 0 }) {
 
 export default function PricingSection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-background to-secondary/60 overflow-hidden">
+    <section id="pricing" className="py-24 bg-gradient-to-br from-background to-secondary/60 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -146,7 +149,7 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-start">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-start">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -154,7 +157,7 @@ export default function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.12 }}
               viewport={{ once: true }}
-              className={`relative ${plan.popular ? "md:-mt-6" : ""}`}
+              className={`relative ${plan.popular ? "lg:-mt-6" : ""}`}
             >
               {/* Popular Badge */}
               {plan.popular && (
@@ -167,7 +170,7 @@ export default function PricingSection() {
               )}
 
               <div
-                className={`bg-card rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 h-full relative overflow-hidden
+                className={`bg-card rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 h-full relative overflow-hidden flex flex-col
                   ${plan.popular ? "border-ng-yellow" : "border-border"}`}
               >
                 {/* Decorative blob */}
@@ -225,9 +228,9 @@ export default function PricingSection() {
                       <span className="text-muted-foreground">Deployment & Config Fee</span>
                       <span className="text-card-foreground font-medium">{plan.deploymentFee}</span>
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">New System / Service Integration</span>
-                      <span className="text-card-foreground font-medium text-right max-w-[50%]">{plan.integrationFee}</span>
+                    <div className="flex justify-between items-start gap-2 text-xs">
+                      <span className="text-muted-foreground shrink-0">New System / Service Integration</span>
+                      <span className="text-card-foreground font-medium text-right">{plan.integrationFee}</span>
                     </div>
                   </div>
                 </div>
@@ -263,6 +266,34 @@ export default function PricingSection() {
                     </div>
                   </>
                 )}
+
+                {/* Contact Us CTA — pinned to bottom of each card */}
+                <div className="relative z-10 mt-8 pt-6 border-t border-border">
+                  {plan.ctaStyle === "filled" ? (
+                    <button className="w-full px-6 py-3 rounded-xl bg-ng-yellow text-black font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-150 shadow-md">
+                      Contact Us
+                    </button>
+                  ) : (
+                    <button
+                      className="w-full px-6 py-3 rounded-xl border-2 font-semibold text-sm hover:bg-secondary active:scale-[0.98] transition-all duration-150"
+                      style={{
+                        borderColor: plan.accentColor + "66",
+                        color: plan.accentColor,
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = plan.accentColor
+                        e.currentTarget.style.background = plan.accentColor + "11"
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = plan.accentColor + "66"
+                        e.currentTarget.style.background = ""
+                      }}
+                    >
+                      Contact Us
+                    </button>
+                  )}
+                </div>
+
               </div>
             </motion.div>
           ))}
@@ -276,7 +307,7 @@ export default function PricingSection() {
           viewport={{ once: true }}
           className="text-center mt-20"
         >
-          <div className="bg-card rounded-2xl p-8 shadow-lg border border-border max-w-4xl mx-auto">
+          <div className="bg-card rounded-2xl p-6 sm:p-8 shadow-lg border border-border max-w-4xl mx-auto">
             <h3 className="font-heading text-2xl font-bold text-card-foreground mb-3">
               Need a managed operations setup?
             </h3>

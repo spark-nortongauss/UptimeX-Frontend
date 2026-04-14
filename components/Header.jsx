@@ -4,17 +4,24 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu"
-import { Menu, X, Monitor, Shield, BarChart3, LayoutGrid } from "lucide-react"
+import { Menu, X, Shield, BarChart3, LayoutGrid } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { SOLUTION_SECTIONS } from "@/lib/solutionsCatalog"
+
+const smoothScrollTo = (sectionId) => {
+  const el = document.getElementById(sectionId)
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+}
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const t = useTranslations("Header")
 
   return (
-    <header className="fixed top-0 w-full bg-background/[0.95] backdrop-blur-lg backdrop-brightness-[0.45] border-b border-border z-50">
+    <header className="fixed top-0 w-full border-b border-white/10 z-50" style={{ backgroundColor: "#3E6E70" }}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <motion.div
@@ -27,7 +34,7 @@ export default function Header() {
               <img
                 src="/assets/observone_logo_1080p.png"
                 alt="ObservOne logo"
-                className="h-[80px] w-auto object-contain"
+                className="h-[60px] sm:h-[80px] w-auto object-contain"
               />
             </Link>
           </motion.div>
@@ -35,60 +42,9 @@ export default function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <NavigationMenu>
-              <NavigationMenuList className="bg-background">
+              <NavigationMenuList className="bg-transparent">
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-background text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground data-[state=open]:bg-secondary">
-                    {t("products")}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-card border border-border">
-                    <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-card">
-                      <div className="row-span-3">
-                        <NavigationMenuLink asChild>
-                          <div
-                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-[#2D4344] to-[#4D6869] p-6 no-underline outline-none focus:shadow-md cursor-not-allowed pointer-events-none"
-                            aria-disabled="true"
-                            role="link"
-                            tabIndex={-1}
-                          >
-                            <Monitor className="h-6 w-6 text-white" />
-                            <div className="mb-2 mt-4 text-lg font-medium text-white">
-                              {t("platform")}
-                            </div>
-                            <p className="text-sm leading-tight text-white/90">
-                              {t("platform_desc")}
-                            </p>
-                          </div>
-                        </NavigationMenuLink>
-                      </div>
-                      <div className="grid gap-3">
-                        <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground cursor-not-allowed pointer-events-none bg-card" aria-disabled="true" role="link" tabIndex={-1}>
-                            <div className="flex items-center space-x-2">
-                              <BarChart3 className="h-4 w-4 text-ng-teal dark:text-ng-yellow" />
-                              <div className="text-sm font-medium leading-none text-foreground">{t("monitoring")}</div>
-                            </div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              {t("monitoring_desc")}
-                            </p>
-                          </div>
-                        </NavigationMenuLink>
-                        <NavigationMenuLink asChild>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground cursor-not-allowed pointer-events-none bg-card" aria-disabled="true" role="link" tabIndex={-1}>
-                            <div className="flex items-center space-x-2">
-                              <Shield className="h-4 w-4 text-ng-teal dark:text-ng-yellow" />
-                              <div className="text-sm font-medium leading-none text-foreground">{t("security")}</div>
-                            </div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              {t("security_desc")}
-                            </p>
-                          </div>
-                        </NavigationMenuLink>
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-background text-muted-foreground hover:bg-secondary hover:text-foreground focus:bg-secondary focus:text-foreground data-[state=open]:bg-secondary">
+                  <NavigationMenuTrigger className="bg-transparent text-white/80 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white data-[state=open]:bg-white/10 data-[state=open]:text-white">
                     {t("solutions")}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="bg-card border border-border">
@@ -129,14 +85,20 @@ export default function Header() {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <span className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed select-none">
+                  <button
+                    onClick={() => smoothScrollTo("pricing")}
+                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 cursor-pointer select-none"
+                  >
                     {t("pricing")}
-                  </span>
+                  </button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <span className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed select-none">
+                  <button
+                    onClick={() => smoothScrollTo("about")}
+                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 cursor-pointer select-none"
+                  >
                     {t("about")}
-                  </span>
+                  </button>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -160,7 +122,7 @@ export default function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-foreground hover:bg-secondary hover:text-foreground"
+              className="text-white hover:bg-white/10 hover:text-white"
             >
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -176,23 +138,22 @@ export default function Header() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-card border-t border-border">
-              <span className="block px-3 py-2 text-base font-medium text-muted-foreground rounded-md cursor-not-allowed select-none">Products</span>
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-white/10" style={{ backgroundColor: "#3E6E70" }}>
               <div className="px-3 py-2">
-                <div className="text-base font-medium text-foreground mb-2">{t("solutions")}</div>
+                <div className="text-base font-medium text-white mb-2">{t("solutions")}</div>
                 <Link
                   href="/solutions"
-                  className="block rounded-md px-3 py-2 text-sm font-medium text-ng-teal dark:text-ng-yellow hover:bg-secondary"
+                  className="block rounded-md px-3 py-2 text-sm font-medium text-ng-yellow hover:bg-white/10"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {t("solutions_overview")}
                 </Link>
-                <div className="mt-1 max-h-[50vh] overflow-y-auto space-y-0.5 border-l border-border ml-2 pl-2">
+                <div className="mt-1 max-h-[50vh] overflow-y-auto space-y-0.5 border-l border-white/20 ml-2 pl-2">
                   {SOLUTION_SECTIONS.map(({ id, headerPrefix }) => (
                     <Link
                       key={id}
                       href={`/solutions#${id}`}
-                      className="block rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      className="block rounded-md px-2 py-1.5 text-sm text-white/70 hover:bg-white/10 hover:text-white"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {t(`${headerPrefix}_title`)}
@@ -200,9 +161,19 @@ export default function Header() {
                   ))}
                 </div>
               </div>
-              <span className="block px-3 py-2 text-base font-medium text-muted-foreground rounded-md cursor-not-allowed select-none">Pricing</span>
-              <span className="block px-3 py-2 text-base font-medium text-muted-foreground rounded-md cursor-not-allowed select-none">About</span>
-              <div className="pt-4 pb-2 border-t border-border">
+              <button
+                onClick={() => { smoothScrollTo("pricing"); setIsMobileMenuOpen(false) }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-white/80 rounded-md hover:bg-white/10 hover:text-white transition-colors duration-200"
+              >
+                {t("pricing")}
+              </button>
+              <button
+                onClick={() => { smoothScrollTo("about"); setIsMobileMenuOpen(false) }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-white/80 rounded-md hover:bg-white/10 hover:text-white transition-colors duration-200"
+              >
+                {t("about")}
+              </button>
+              <div className="pt-4 pb-2 border-t border-white/10">
                 <Button asChild className="w-full bg-ng-yellow text-black hover:opacity-90">
                   <Link href="/signin">Access Platform</Link>
                 </Button>

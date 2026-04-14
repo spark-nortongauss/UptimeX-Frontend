@@ -8,6 +8,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { supabase } from "@/lib/supabase/client"
+import Loader from "@/components/shared/Loader"
 
 export default function UsersTable() {
   const { getToken } = useAuthStore()
@@ -75,7 +76,11 @@ export default function UsersTable() {
   }, [getToken])
 
   if (loading) {
-    return <div>Loading...</div>
+    return (
+      <div className="p-8">
+        <Loader />
+      </div>
+    )
   }
   if (error) {
     return <div className="text-red-600">{error}</div>

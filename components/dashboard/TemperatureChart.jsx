@@ -7,6 +7,7 @@ import { useEffect, useMemo, forwardRef, useRef, useCallback } from 'react'
 import { useMonitoringDataStore } from '@/lib/stores/monitoringDataStore'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 import { useParams } from 'next/navigation'
+import Loader from '@/components/shared/Loader'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -268,8 +269,8 @@ const TemperatureChart = forwardRef(function TemperatureChart({ hostId: propHost
           </CardHeader>
         ) : null}
         <CardContent className={showTitle ? undefined : 'p-6'}>
-          <div className="flex h-80 items-center justify-center">
-            <p className="text-muted-foreground">Loading temperature data...</p>
+          <div className="flex h-80 flex-col items-center justify-center">
+            <Loader />
           </div>
         </CardContent>
       </Card>

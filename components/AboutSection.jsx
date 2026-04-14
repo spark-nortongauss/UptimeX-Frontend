@@ -94,6 +94,7 @@ const metricBars = [
 export default function AboutSection() {
   return (
     <section
+      id="about"
       className="py-24 relative overflow-hidden"
       style={{ backgroundColor: "var(--background, #F5F5F5)" }}
     >
@@ -134,7 +135,7 @@ export default function AboutSection() {
           </div>
 
           <h2
-            className="text-4xl md:text-5xl font-bold mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6"
             style={{
               fontFamily: "var(--font-primary, 'Ancorli', serif)",
               color: "var(--foreground, #000000)",
@@ -228,7 +229,7 @@ export default function AboutSection() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
             {/* Left — copy */}
             <div>
@@ -245,7 +246,7 @@ export default function AboutSection() {
               </div>
 
               <h3
-                className="text-3xl font-bold mb-6"
+                className="text-2xl sm:text-3xl font-bold mb-6"
                 style={{
                   fontFamily: "var(--font-primary, 'Ancorli', serif)",
                   color: "var(--foreground, #000000)",
@@ -301,7 +302,7 @@ export default function AboutSection() {
 
             {/* Right — metric bars card */}
             <div
-              className="rounded-3xl p-8"
+              className="rounded-3xl p-6 sm:p-8"
               style={{
                 backgroundColor: "#2D4344",
                 border: "1px solid #4D6869",

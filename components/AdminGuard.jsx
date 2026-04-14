@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/stores/authStore"
 import { authService } from "@/lib/services/authService"
+import Loader from "@/components/shared/Loader"
 
 export default function AdminGuard({ children }) {
   const router = useRouter()
@@ -39,7 +40,11 @@ export default function AdminGuard({ children }) {
   }, [initialized, getToken, router])
 
   if (!ok) {
-    return <div className="mt-14 p-8">Loading...</div>
+    return (
+      <div className="mt-14 flex items-center justify-center min-h-[50vh]">
+        <Loader />
+      </div>
+    )
   }
 
   return children

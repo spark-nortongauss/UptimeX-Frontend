@@ -135,7 +135,7 @@ export default function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-[#0D1B1C] to-[#1A2C2D] rounded-3xl p-12 text-center"
+          className="bg-gradient-to-br from-[#0D1B1C] to-[#1A2C2D] rounded-3xl p-6 sm:p-8 md:p-12 text-center"
         >
           <h3 className="font-heading text-3xl md:text-4xl font-bold text-white mb-4">
             Operations confidence at every layer
@@ -144,7 +144,7 @@ export default function FeaturesSection() {
             From anomaly detection to autonomous remediation, teams maintain resilience with a single operational intelligence plane.
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {stats.map((stat, index) => (
               <motion.div
                 key={index}

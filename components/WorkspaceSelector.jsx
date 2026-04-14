@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, Building2, Users, Settings, ChevronDown, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import Loader from '@/components/shared/Loader';
 
 export default function WorkspaceSelector() {
   const router = useRouter();
@@ -95,9 +96,8 @@ export default function WorkspaceSelector() {
 
   if (loading) {
     return (
-      <div className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Loading workspaces...</span>
+      <div className="flex items-center justify-center p-4">
+        <Loader size="inline" className="w-5 h-5" />
       </div>
     );
   }

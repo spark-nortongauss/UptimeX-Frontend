@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup, ZoomControl } from 'react
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMemo, useEffect, useState } from 'react'
+import Loader from '@/components/shared/Loader'
 
 // Fix for default markers in production builds
 delete L.Icon.Default.prototype._getIconUrl
@@ -41,11 +42,8 @@ export default function DeviceMap({ devices, zoom = 2 }) {
 
   if (!isClient) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Loading map...</p>
-        </div>
+      <div className="h-full w-full">
+        <Loader text="Loading map..." />
       </div>
     )
   }

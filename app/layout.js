@@ -36,10 +36,20 @@ export default function RootLayout({ children }) {
             __html: `
               (function() {
                 try {
+                  var path = window.location.pathname || '';
+                  var forceLight =
+                    path === '/' ||
+                    path === '/solutions' ||
+                    path === '/signin' ||
+                    path === '/forgot-password' ||
+                    path.indexOf('/auth/') === 0;
+                  if (forceLight) {
+                    document.documentElement.classList.remove('dark');
+                    return;
+                  }
                   const stored = localStorage.getItem('ui-store');
                   if (stored) {
                     const parsed = JSON.parse(stored);
-                    // Zustand persist stores as { state: {...}, version: 0 }
                     const theme = parsed?.state?.theme || parsed?.theme;
                     if (theme === 'dark') {
                       document.documentElement.classList.add('dark');
@@ -47,7 +57,6 @@ export default function RootLayout({ children }) {
                       document.documentElement.classList.remove('dark');
                     }
                   } else {
-                    // Check system preference if no stored theme
                     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                       document.documentElement.classList.add('dark');
                     }

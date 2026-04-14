@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import SearchResultsClient from './searchResultsClient'
 import { Search } from 'lucide-react'
+import Loader from '@/components/shared/Loader'
 
 // Site pages index - all pages available for search
 // This is a frontend-only list of all searchable pages
@@ -41,7 +42,7 @@ export const dynamic = 'force-dynamic'
 export default function SearchResultsPage() {
   return (
     <AuthGuard>
-      <Suspense fallback={<div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-12">Loading search…</div>}>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader text="Loading search..." /></div>}>
         <SearchResultsClient />
       </Suspense>
     </AuthGuard>

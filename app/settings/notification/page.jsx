@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import AdminGuard from "@/components/AdminGuard"
 import { notificationsService } from "@/lib/services/notificationsService"
 import { Button } from "@/components/ui/button"
-import { Bell, Check, UserPlus, X, Mail, Phone, ShieldCheck, User } from "lucide-react"
+import { Bell, Check, UserPlus, X, Mail, Phone, Shield } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -20,15 +20,12 @@ import { toast } from "sonner"
 export default function NotificationPage() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [creatingUser, setCreatingUser] = useState(false)
-  const [selectedNotificationId, setSelectedNotificationId] = useState(null)
-  const [createUserForm, setCreateUserForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "User",
-  })
+  const [inviteOpen, setInviteOpen] = useState(false)
+  const [inviteNotif, setInviteNotif] = useState(null)
+  const [inviteMeta, setInviteMeta] = useState(null)
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [inviteSubmitting, setInviteSubmitting] = useState(false)
 
   useEffect(() => {
     fetchNotifications()
@@ -57,54 +54,6 @@ export default function NotificationPage() {
     }
   }
 
-  const handleMakeAccount = (notif) => {
-    let meta = notif.metadata || {}
-    if (typeof meta === "string") {
-      try { meta = JSON.parse(meta) } catch (e) {}
-    }
-    setSelectedNotificationId(notif.id)
-    setCreateUserForm({
-      name: "",
-      email: meta.email || "",
-      phone: meta.phone || "",
-      role: "User",
-    })
-    setIsCreateModalOpen(true)
-  }
-
-  const handleCreateUser = async () => {
-    const name = createUserForm.name.trim()
-    if (!selectedNotificationId) return
-    if (!name) {
-      toast.error("Please enter the user's full name")
-      return
-    }
-    if (!createUserForm.email.trim()) {
-      toast.error("Email is required")
-      return
-    }
-
-    try {
-      setCreatingUser(true)
-      await notificationsService.makeUserFromNotification(selectedNotificationId, {
-        name,
-        email: createUserForm.email,
-        phone: createUserForm.phone,
-      })
-      toast.success("Account created — login credentials sent to " + createUserForm.email)
-      setNotifications((prev) =>
-        prev.filter((n) => n.id !== selectedNotificationId)
-      )
-      setIsCreateModalOpen(false)
-      setSelectedNotificationId(null)
-    } catch (error) {
-      const msg = error?.message || "Failed to create user account"
-      toast.error(msg)
-    } finally {
-      setCreatingUser(false)
-    }
-  }
-
   const handleDecline = async (id) => {
     try {
       await notificationsService.deleteNotification(id)
@@ -115,14 +64,125 @@ export default function NotificationPage() {
     }
   }
 
-  const handleModalClose = () => {
-    if (creatingUser) return
-    setIsCreateModalOpen(false)
-    setSelectedNotificationId(null)
+  const openInviteModal = (notif, meta) => {
+    setInviteNotif(notif)
+    setInviteMeta(meta)
+    const local = meta.email?.split("@")[0] || ""
+    const parts = local.replace(/[._-]+/g, " ").trim().split(/\s+/)
+    setFirstName(parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : "")
+    setLastName(
+      parts.length > 1
+        ? parts
+            .slice(1)
+            .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+            .join(" ")
+        : ""
+    )
+    setInviteOpen(true)
+  }
+
+  const resetInviteModal = () => {
+    setInviteOpen(false)
+    setInviteNotif(null)
+    setInviteMeta(null)
+    setFirstName("")
+    setLastName("")
+  }
+
+  const handleInviteSubmit = async (e) => {
+    e.preventDefault()
+    if (!inviteNotif || !firstName.trim() || !lastName.trim()) {
+      toast.error("First and last name are required")
+      return
+    }
+    setInviteSubmitting(true)
+    try {
+      await notificationsService.makeUserFromTrial(inviteNotif.id, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      })
+      toast.success("Invitation sent. The user will receive an email to set their password.")
+      setNotifications((prev) => prev.filter((n) => n.id !== inviteNotif.id))
+      resetInviteModal()
+    } catch (err) {
+      const msg = err?.message || "Could not send invitation"
+      toast.error(msg)
+    } finally {
+      setInviteSubmitting(false)
+    }
   }
 
   return (
     <AdminGuard>
+      <Dialog
+        open={inviteOpen}
+        onOpenChange={(open) => {
+          if (!open && !inviteSubmitting) resetInviteModal()
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite user</DialogTitle>
+            
+          </DialogHeader>
+          <form onSubmit={handleInviteSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-muted-foreground">
+                <Mail className="h-3.5 w-3.5" />
+                Email
+              </Label>
+              <Input readOnly value={inviteMeta?.email || ""} className="bg-muted/50" />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-muted-foreground">
+                <Phone className="h-3.5 w-3.5" />
+                Phone
+              </Label>
+              <Input readOnly value={inviteMeta?.phone || "—"} className="bg-muted/50" />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-muted-foreground">
+                <Shield className="h-3.5 w-3.5" />
+                Role
+              </Label>
+              <Input readOnly value="user" className="bg-muted/50" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="invite-first">First name</Label>
+                <Input
+                  id="invite-first"
+                  value={firstName}
+                  onChange={(ev) => setFirstName(ev.target.value)}
+                  required
+                  autoComplete="given-name"
+                  disabled={inviteSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invite-last">Last name</Label>
+                <Input
+                  id="invite-last"
+                  value={lastName}
+                  onChange={(ev) => setLastName(ev.target.value)}
+                  required
+                  autoComplete="family-name"
+                  disabled={inviteSubmitting}
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button type="button" variant="outline" onClick={resetInviteModal} disabled={inviteSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={inviteSubmitting}>
+                {inviteSubmitting ? "Sending…" : "Send invitation"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-5xl mx-auto py-8 px-4 h-full">
         {/* ── Header ─────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-8">
@@ -226,7 +286,7 @@ export default function NotificationPage() {
                             <Button
                               size="sm"
                               className="h-8 text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 shadow-sm hover:shadow-md hover:opacity-90 transition-all"
-                              onClick={() => handleMakeAccount(notif)}
+                              onClick={() => openInviteModal(notif, meta)}
                             >
                               <UserPlus className="w-3.5 h-3.5 mr-1" />
                               Make User
@@ -251,138 +311,6 @@ export default function NotificationPage() {
           )}
         </div>
       </div>
-
-      {/* ── Create User Modal ─────────────────────────────────────────────── */}
-      <Dialog open={isCreateModalOpen} onOpenChange={handleModalClose}>
-        <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden rounded-2xl">
-
-          {/* Gradient header banner */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 px-6 pt-6 pb-8">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <DialogTitle className="text-white text-lg font-semibold">
-                  Create User Account
-                </DialogTitle>
-                <DialogDescription className="text-blue-100 text-sm mt-0.5">
-                  Fill in the name — email and phone are pre-filled from the trial request.
-                </DialogDescription>
-              </div>
-            </div>
-          </div>
-
-          {/* Form fields */}
-          <div className="px-6 pt-5 pb-2 space-y-4 -mt-3">
-
-            {/* Name */}
-            <div className="space-y-1.5">
-              <Label htmlFor="cu-name" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-gray-400" />
-                Full Name
-                <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="cu-name"
-                autoFocus
-                placeholder="e.g. John Smith"
-                value={createUserForm.name}
-                onChange={(e) =>
-                  setCreateUserForm((prev) => ({ ...prev, name: e.target.value }))
-                }
-                onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
-                className="h-10"
-              />
-            </div>
-
-            {/* Email — read-only, pre-filled */}
-            <div className="space-y-1.5">
-              <Label htmlFor="cu-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-gray-400" />
-                Email Address
-              </Label>
-              <Input
-                id="cu-email"
-                type="email"
-                readOnly
-                value={createUserForm.email}
-                className="h-10 bg-gray-50 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 cursor-default select-all"
-              />
-            </div>
-
-            {/* Phone — read-only, pre-filled */}
-            <div className="space-y-1.5">
-              <Label htmlFor="cu-phone" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-gray-400" />
-                Phone Number
-              </Label>
-              <Input
-                id="cu-phone"
-                readOnly
-                value={createUserForm.phone || "—"}
-                className="h-10 bg-gray-50 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 cursor-default"
-              />
-            </div>
-
-            {/* Role — read-only, always User */}
-            <div className="space-y-1.5">
-              <Label htmlFor="cu-role" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
-                Role
-              </Label>
-              <div className="flex items-center h-10 px-3 rounded-md border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800 gap-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                  User
-                </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  Cannot be changed here
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Info strip */}
-          <div className="mx-6 mb-4 mt-1 px-3 py-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 flex items-start gap-2">
-            <span className="text-amber-500 text-base leading-none mt-0.5">ℹ</span>
-            <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
-              A temporary password will be auto-generated and emailed to the user with their login credentials.
-            </p>
-          </div>
-
-          <DialogFooter className="px-6 pb-5 flex gap-2">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={handleModalClose}
-              disabled={creatingUser}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 hover:opacity-90 transition-opacity font-semibold"
-              onClick={handleCreateUser}
-              disabled={creatingUser || !createUserForm.name.trim()}
-            >
-              {creatingUser ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                  Creating…
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  Create Account
-                </span>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </AdminGuard>
   )
 }

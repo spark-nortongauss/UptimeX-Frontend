@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 import { zabbixService } from '@/lib/services/zabbixService'
+import Loader from '@/components/shared/Loader'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -331,8 +332,8 @@ export default function OpticalCharts({ hostId, chartRefs = {}, chartInstanceRef
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">Loading optical status...</div>
+      <div className="flex min-h-[200px] items-center justify-center p-8">
+        <Loader />
       </div>
     )
   }

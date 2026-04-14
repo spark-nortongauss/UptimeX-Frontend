@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
 import { useTimeframeFilterStore } from '@/lib/stores/timeframeFilterStore'
 import wanNetworkService from '@/lib/services/wanNetworkService'
+import Loader from '@/components/shared/Loader'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -346,7 +347,7 @@ export default function NetworkConnectivityCharts({
         </CardHeader>
         <CardContent className="overflow-visible">
           {wanLoading && (
-            <p className="mb-2 text-sm text-muted-foreground">Loading ICMP status…</p>
+            <div className="flex min-h-[100px] items-center justify-center mb-4"><Loader size="inline" /></div>
           )}
           {wanError && <p className="mb-2 text-sm text-red-500">{wanError}</p>}
           {hasNoData && (

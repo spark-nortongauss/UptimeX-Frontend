@@ -136,7 +136,7 @@
     "found": "Found {count} system(s) matching \"{term}\"",
     "noSystems": "No systems found",
     "tryAdjust": "Try adjusting your search terms",
-    "noData": "No data available from Zabbix",
+    "noData": "No data available",
     "columns": {
       "systemId": "System ID",
       "systemName": "System Name",
@@ -199,7 +199,7 @@
   },
   "Services": {
     "title": "Services",
-    "subtitle": "Trigger-level availability powered by the Zabbix API.",
+    "subtitle": "Trigger-level availability powered by the monitoring API.",
     "searchPlaceholder": "Search by host or service name",
     "filters": {
       "label": "Status",

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import ticketsService from "@/lib/services/ticketsService"
 import { Loader2, AlertCircle, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import Loader from '@/components/shared/Loader'
 
 export default function TicketsPage() {
   const [selectedCategory, setSelectedCategory] = useState(null) // null, 'EVENTS', or 'HOSTS'
@@ -297,8 +298,7 @@ export default function TicketsPage() {
           <div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-200 dark:border-neutral-800 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-3 text-gray-600 dark:text-gray-400">Loading tickets...</span>
+                <Loader text="Loading tickets..." />
               </div>
             ) : error ? (
               <div className="flex items-center justify-center py-16">

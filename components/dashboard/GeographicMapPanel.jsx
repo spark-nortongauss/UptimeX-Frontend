@@ -5,16 +5,14 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import zabbixService from '@/lib/services/zabbixService'
 import { useTranslations } from 'next-intl'
+import Loader from '@/components/shared/Loader'
 
 // Dynamically import the map with SSR disabled and proper error handling
 const DeviceMap = dynamic(() => import('./DeviceMap'), { 
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
-      </div>
+    <div className="h-full w-full">
+      <Loader text="Loading..." />
     </div>
   )
 })
@@ -203,11 +201,8 @@ export default function GeographicMapPanel() {
           </Button>
         </div>
         {loading ? (
-          <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('loadingDevices')}</p>
-            </div>
+          <div className="h-full w-full">
+            <Loader text={t('loadingDevices')} />
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full">

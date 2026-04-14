@@ -51,7 +51,7 @@ export default function HeroSection() {
       if (res.status === 422) {
         setInvalidEmailMessage(
           apiMessage(data) ||
-            "This email does not look valid or we could not deliver mail to it. Please check the address and try again.",
+          "This email does not look valid or we could not deliver mail to it. Please check the address and try again.",
         )
         setInvalidEmailOpen(true)
         return
@@ -185,15 +185,15 @@ export default function HeroSection() {
         }}
       />
 
-      <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-12 py-20 lg:py-28">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-20 lg:py-28">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
           {/* ── LEFT: Copy ── */}
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.75, ease: "easeOut" }}
-            className="flex flex-col items-start"
+            className="flex flex-col items-start w-full"
           >
             {/* Badge */}
             <motion.div
@@ -214,7 +214,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.7 }}
-              className="font-heading text-5xl md:text-6xl xl:text-7xl font-extrabold text-foreground leading-[1.08] tracking-tight mb-6"
+              className="font-heading text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold text-foreground leading-[1.08] tracking-tight mb-6 w-full"
             >
               Full-Stack
               <br />
@@ -222,7 +222,7 @@ export default function HeroSection() {
                 Observability
               </span>
               <br />
-              <span className="text-3xl md:text-4xl xl:text-5xl font-bold text-foreground/70">
+              <span className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-foreground/70">
                 with AI &amp; Automation
               </span>
             </motion.h1>
@@ -232,7 +232,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.7 }}
-              className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl"
+              className="text-base md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl w-full"
             >
               Real-time telemetry, network intelligence, incident prediction,
               and autonomous remediation — unified for resilient digital operations.
@@ -258,28 +258,28 @@ export default function HeroSection() {
               className="w-full max-w-xl mb-10"
             >
               <form onSubmit={handleAccessTrial} className="w-full">
-                <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-card border border-border shadow-sm">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-1 p-1.5 rounded-2xl bg-card border border-border shadow-sm">
                   <input
                     type="email"
                     value={trialEmail}
                     onChange={(e) => setTrialEmail(e.target.value)}
                     placeholder="Email address"
                     required
-                    className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none focus:bg-muted transition-colors"
+                    className="flex-1 min-w-0 w-full px-3 py-2.5 rounded-xl bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none focus:bg-muted transition-colors"
                   />
-                  <div className="w-px h-5 bg-border shrink-0" />
+                  <div className="hidden sm:block w-px h-5 bg-border shrink-0" />
                   <input
                     type="tel"
                     value={trialPhone}
                     onChange={(e) => setTrialPhone(e.target.value)}
                     placeholder="Phone number"
                     required
-                    className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none focus:bg-muted transition-colors"
+                    className="flex-1 min-w-0 w-full px-3 py-2.5 rounded-xl bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none focus:bg-muted transition-colors"
                   />
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="shrink-0 px-5 py-2.5 bg-ng-yellow hover:opacity-90 text-black text-sm font-semibold rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-md select-none whitespace-nowrap"
+                    className="shrink-0 w-full sm:w-auto px-5 py-2.5 bg-ng-yellow hover:opacity-90 text-black text-sm font-semibold rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-md select-none whitespace-nowrap"
                   >
                     {isSubmitting ? "Submitting…" : "Access Trial"}
                   </button>
@@ -312,7 +312,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-            className="relative flex justify-center lg:justify-end"
+            className="relative flex justify-center lg:justify-end w-full"
           >
             {/* Outer glow ring */}
             <div className="absolute inset-4 rounded-3xl bg-gradient-to-br from-[#2D4344]/20 to-[#D9FF35]/20 blur-2xl -z-10" />

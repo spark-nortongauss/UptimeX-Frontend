@@ -10,6 +10,7 @@ import { observoneAiService } from '@/lib/services/observoneAiService'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { AlertTriangle, CircleDot, ChevronLeft, ChevronRight, Activity, Server, Tag, Clock, ScrollText, Bot, CheckCircle2, Loader2, Copy } from 'lucide-react'
+import Loader from '@/components/shared/Loader'
 
 export default function ActiveAlarmsTable() {
   const t = useTranslations('Overview.alarms')
@@ -359,11 +360,8 @@ export default function ActiveAlarmsTable() {
             </table>
           </div>
           <div className="px-6 py-4 border-t border-gray-200/60 dark:border-neutral-800 bg-gradient-to-r from-gray-50/50 to-white dark:from-neutral-900/50 dark:to-neutral-900">
-            <div className="flex items-center justify-center">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
-                <span className="text-gray-600 dark:text-gray-300 font-medium">Loading alarms...</span>
-              </div>
+            <div className="py-2">
+              <Loader size="inline" className="w-6 h-6 mx-auto" text="" />
             </div>
           </div>
         </CardContent>

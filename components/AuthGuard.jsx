@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { toast } from 'sonner'
+import Loader from '@/components/shared/Loader'
 
 export default function AuthGuard({ children, fallback = null }) {
   const { user, loading, initialized } = useAuthStore()
@@ -24,10 +25,7 @@ export default function AuthGuard({ children, fallback = null }) {
   if (!initialized || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
+        <Loader fullScreen />
       </div>
     )
   }

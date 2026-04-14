@@ -59,41 +59,62 @@ export default function AuthLayout({
   const enabledProviders = providers.filter((provider) => typeof socialHandlers[provider] === "function")
 
   return (
-    <div className="min-h-screen flex bg-white">
-      {/* Left Panel - Background and Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '60px 60px'
-          }}></div>
-        </div>
+    <div className="min-h-screen flex" style={{ backgroundColor: "#0d1b1c" }}>
+      {/* Left Panel - Norton Gauss Branded Panel */}
+      <div
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #0d1b1c 0%, #1a2c2d 40%, #2d4344 100%)" }}
+      >
+        {/* Subtle grid overlay */}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(217,255,53,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(217,255,53,0.08) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        {/* Glowing accent blobs */}
+        <div
+          className="absolute -top-24 -left-24 w-96 h-96 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(62,110,112,0.35) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(217,255,53,0.08) 0%, transparent 70%)" }}
+        />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12 w-full">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 md:gap-1.5 mb-3 mr-12">
+            <div className="flex items-center justify-center gap-1 md:gap-1.5 mb-6 mr-8">
               <img src="/assets/observone_icon_1080p.png" alt="ObservOne icon" className="h-12 md:h-16 lg:h-20 w-auto -mr-3 md:-mr-4 mt-3" />
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-none">ObservOne</h1>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-none text-white">ObservOne</h1>
             </div>
-            <p className="text-xl text-gray-100 max-w-md">
+            <p className="text-lg max-w-md" style={{ color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>
               Unlock your project performance with advanced monitoring and analytics
             </p>
+
           </div>
         </div>
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+      <div
+        className="w-full lg:w-1/2 flex items-center justify-center p-8"
+        style={{ backgroundColor: "#f5f5f5" }}
+      >
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl bg-white">
-            <CardHeader className="text-center pb-8 bg-white">
-              <CardTitle className="text-3xl font-bold text-gray-900">{title}</CardTitle>
-              <CardDescription className="text-gray-600 text-lg">{description}</CardDescription>
+          <Card
+            className="border-0 shadow-2xl"
+            style={{ backgroundColor: "#ffffff", borderTop: "3px solid #2d4344" }}
+          >
+            <CardHeader className="text-center pb-6" style={{ backgroundColor: "#ffffff" }}>
+              <CardTitle className="text-3xl font-bold" style={{ color: "#1a2c2d" }}>{title}</CardTitle>
+              <CardDescription className="text-base mt-1" style={{ color: "#4d6869" }}>{description}</CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6 bg-white">
+            <CardContent className="space-y-6" style={{ backgroundColor: "#ffffff" }}>
               {children}
             </CardContent>
           </Card>

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 import { useUIStore } from "@/lib/stores/uiStore"
 import { useAuthStore } from "@/lib/stores/authStore"
+import { isPublicLightOnlyPath } from "@/lib/publicLightRoutes"
 import AppLayout from "./AppLayout"
 import WorkspaceGuard from "./WorkspaceGuard"
 
@@ -37,17 +38,21 @@ export default function ClientLayout({ children }) {
   // Check if current route should show layout (sidebar/topbar)
   const showLayout = shouldShowLayout(pathname || "/")
 
-  // Apply theme to document root for auth pages too
+  // Marketing + auth routes stay light; app shell follows stored theme
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const root = document.documentElement
-      if (isDark) {
-        root.classList.add('dark')
-      } else {
-        root.classList.remove('dark')
-      }
+    if (typeof window === "undefined") return
+    const path = pathname || "/"
+    const root = document.documentElement
+    if (isPublicLightOnlyPath(path)) {
+      root.classList.remove("dark")
+      return
     }
-  }, [isDark])
+    if (isDark) {
+      root.classList.add("dark")
+    } else {
+      root.classList.remove("dark")
+    }
+  }, [pathname, isDark])
 
   if (!showLayout) {
     return children
