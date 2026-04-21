@@ -22,9 +22,9 @@ export default function NotificationPage() {
   const [loading, setLoading] = useState(true)
   const [inviteOpen, setInviteOpen] = useState(false)
   const [inviteNotif, setInviteNotif] = useState(null)
-  const [inviteMeta, setInviteMeta] = useState(null)
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
   const [inviteSubmitting, setInviteSubmitting] = useState(false)
 
   useEffect(() => {
@@ -64,44 +64,40 @@ export default function NotificationPage() {
     }
   }
 
-  const openInviteModal = (notif, meta) => {
+  const openInviteModal = (notif) => {
     setInviteNotif(notif)
-    setInviteMeta(meta)
-    const local = meta.email?.split("@")[0] || ""
-    const parts = local.replace(/[._-]+/g, " ").trim().split(/\s+/)
-    setFirstName(parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() : "")
-    setLastName(
-      parts.length > 1
-        ? parts
-            .slice(1)
-            .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
-            .join(" ")
-        : ""
-    )
+    setName("")
+    setEmail("")
+    setPhone("")
     setInviteOpen(true)
   }
 
   const resetInviteModal = () => {
     setInviteOpen(false)
     setInviteNotif(null)
-    setInviteMeta(null)
-    setFirstName("")
-    setLastName("")
+    setName("")
+    setEmail("")
+    setPhone("")
   }
 
   const handleInviteSubmit = async (e) => {
     e.preventDefault()
-    if (!inviteNotif || !firstName.trim() || !lastName.trim()) {
-      toast.error("First and last name are required")
+    if (!inviteNotif || !name.trim() || !email.trim()) {
+      toast.error("Name and email are required")
       return
     }
     setInviteSubmitting(true)
     try {
-      await notificationsService.makeUserFromTrial(inviteNotif.id, {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+      const result = await notificationsService.makeUserFromTrial(inviteNotif.id, {
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || undefined,
       })
-      toast.success("Invitation sent. The user will receive an email to set their password.")
+      if (result?.action === "reset_sent") {
+        toast.success("User already existed. Sent a password setup email instead.")
+      } else {
+        toast.success("Invitation sent. The user will receive an email to set their password.")
+      }
       setNotifications((prev) => prev.filter((n) => n.id !== inviteNotif.id))
       resetInviteModal()
     } catch (err) {
@@ -123,22 +119,52 @@ export default function NotificationPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Invite user</DialogTitle>
-            
+            <DialogDescription>
+              Enter the details manually and send an invitation email. Role is always{" "}
+              <span className="font-medium text-foreground">user</span>.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleInviteSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-muted-foreground">
+              <Label htmlFor="invite-name">Name</Label>
+              <Input
+                id="invite-name"
+                value={name}
+                onChange={(ev) => setName(ev.target.value)}
+                required
+                autoComplete="name"
+                disabled={inviteSubmitting}
+                placeholder="e.g. Shovon Saiful"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-muted-foreground" htmlFor="invite-email">
                 <Mail className="h-3.5 w-3.5" />
                 Email
               </Label>
-              <Input readOnly value={inviteMeta?.email || ""} className="bg-muted/50" />
+              <Input
+                id="invite-email"
+                value={email}
+                onChange={(ev) => setEmail(ev.target.value)}
+                required
+                autoComplete="email"
+                disabled={inviteSubmitting}
+                placeholder="user@email.com"
+              />
             </div>
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-muted-foreground">
+              <Label className="flex items-center gap-2 text-muted-foreground" htmlFor="invite-phone">
                 <Phone className="h-3.5 w-3.5" />
-                Phone
+                Phone (optional)
               </Label>
-              <Input readOnly value={inviteMeta?.phone || "—"} className="bg-muted/50" />
+              <Input
+                id="invite-phone"
+                value={phone}
+                onChange={(ev) => setPhone(ev.target.value)}
+                autoComplete="tel"
+                disabled={inviteSubmitting}
+                placeholder="e.g. 017xxxxxxxx"
+              />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-muted-foreground">
@@ -146,30 +172,6 @@ export default function NotificationPage() {
                 Role
               </Label>
               <Input readOnly value="user" className="bg-muted/50" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="invite-first">First name</Label>
-                <Input
-                  id="invite-first"
-                  value={firstName}
-                  onChange={(ev) => setFirstName(ev.target.value)}
-                  required
-                  autoComplete="given-name"
-                  disabled={inviteSubmitting}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="invite-last">Last name</Label>
-                <Input
-                  id="invite-last"
-                  value={lastName}
-                  onChange={(ev) => setLastName(ev.target.value)}
-                  required
-                  autoComplete="family-name"
-                  disabled={inviteSubmitting}
-                />
-              </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={resetInviteModal} disabled={inviteSubmitting}>
@@ -286,7 +288,7 @@ export default function NotificationPage() {
                             <Button
                               size="sm"
                               className="h-8 text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 shadow-sm hover:shadow-md hover:opacity-90 transition-all"
-                              onClick={() => openInviteModal(notif, meta)}
+                              onClick={() => openInviteModal(notif)}
                             >
                               <UserPlus className="w-3.5 h-3.5 mr-1" />
                               Make User

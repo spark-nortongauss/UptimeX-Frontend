@@ -39,6 +39,7 @@ import {
   LogOut,
   ChevronRight,
   Bell,
+  Cpu,
 } from "lucide-react"
 import { useAuthStore } from "@/lib/stores/authStore"
 import { toast } from "sonner"
@@ -68,6 +69,7 @@ function buildNavigationItems(t, isAdminRoute) {
         { label: t("detailed"), href: "/observability/detailed", icon: Search },
         { label: t("topologyMap"), href: "/observability/topology", icon: Map },
         { label: t("events"), href: "/observability/events", icon: AlertTriangle },
+        { label: t("oemDevices"), href: "/observability/OEM", icon: Cpu },
         { label: t("services"), href: "/observability/services", icon: Server },
         { label: t("reports"), href: "/observability/reports", icon: FileText },
       ]

@@ -112,6 +112,7 @@
     "detailed": "Detailed",
     "topologyMap": "Topology Map",
     "events": "Events",
+    "oemDevices": "OEM Devices",
     "incidents": "Incidents",
     "problems": "Problems",
     "services": "Services",
