@@ -47,7 +47,7 @@ import { useUIStore } from "@/lib/stores/uiStore"
 import { useTranslations } from "next-intl"
 import WorkspaceSelector from "./WorkspaceSelector"
 
-function buildNavigationItems(t, isAdminRoute) {
+function buildNavigationItems(t, isAdminRoute, isAdmin) {
   if (isAdminRoute) {
     return [
       {
@@ -60,19 +60,22 @@ function buildNavigationItems(t, isAdminRoute) {
       }
     ]
   }
+
+  const observabilityItems = [
+    { label: t("overview"), href: "/observability/overview", icon: BarChart3 },
+    { label: t("detailed"), href: "/observability/detailed", icon: Search },
+    { label: t("topologyMap"), href: "/observability/topology", icon: Map },
+    { label: t("events"), href: "/observability/events", icon: AlertTriangle },
+    ...(isAdmin ? [{ label: t("oemDevices"), href: "/observability/OEM", icon: Cpu }] : []),
+    { label: t("services"), href: "/observability/services", icon: Server },
+    { label: t("reports"), href: "/observability/reports", icon: FileText },
+  ]
+
   return [
     {
       title: t("observability"),
       icon: Eye,
-      items: [
-        { label: t("overview"), href: "/observability/overview", icon: BarChart3 },
-        { label: t("detailed"), href: "/observability/detailed", icon: Search },
-        { label: t("topologyMap"), href: "/observability/topology", icon: Map },
-        { label: t("events"), href: "/observability/events", icon: AlertTriangle },
-        { label: t("oemDevices"), href: "/observability/OEM", icon: Cpu },
-        { label: t("services"), href: "/observability/services", icon: Server },
-        { label: t("reports"), href: "/observability/reports", icon: FileText },
-      ]
+      items: observabilityItems,
     },
     {
       title: t("support"),
@@ -113,7 +116,7 @@ export default function AppSidebar() {
   const isAdminRoute = pathname?.startsWith('/admin')
   
 
-  const navigationItems = buildNavigationItems(t, isAdminRoute)
+  const navigationItems = buildNavigationItems(t, isAdminRoute, isAdmin)
   
   if (isAdmin) {
     const settingsIndex = navigationItems.findIndex(i => i.title === t("settings"));
