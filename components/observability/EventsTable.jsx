@@ -33,6 +33,8 @@ import { alarmsService } from "@/lib/services/alarmsService"
 import { ticketsService } from "@/lib/services/ticketsService"
 import { toast } from "sonner"
 import { TicketDrawer } from "@/components/events/TicketDrawer"
+import { useAlarmAiAnalysis } from "@/lib/hooks/useAlarmAiAnalysis"
+import AiAlarmAnalysisDialog from "@/components/ai/AiAlarmAnalysisDialog"
 
 const ROW_SIZE_OPTIONS = [10, 25, 50, 100]
 
@@ -208,6 +210,7 @@ export default function EventsTable() {
   const [ticketSubmitting, setTicketSubmitting] = useState(false)
   const [ticketError, setTicketError] = useState(null)
   const [ticketDueDateTouched, setTicketDueDateTouched] = useState(false)
+  const aiAnalysis = useAlarmAiAnalysis()
 
   const activeRange = useMemo(() => getRangeInfo(), [getRangeInfo, mode, dateFrom, timeFrom, dateTo, timeTo])
   const timeFromSeconds = activeRange?.time_from ?? null
@@ -754,8 +757,9 @@ export default function EventsTable() {
                         } else if (selectedQuickAction === 'ticket') {
                           openTicketDrawer(alarm)
                         } else {
-                          // TODO: Implement the actual action when features are ready
-                          console.log(`Selected ${selectedQuickAction} action for event:`, alarm)
+                          aiAnalysis.runAnalysis(alarm, 'event')
+                          setSelectedQuickAction(null)
+                          setSelectedRowId(null)
                         }
                       } else {
                         // Navigate to detail page when clicking a row
@@ -1030,6 +1034,19 @@ export default function EventsTable() {
       isSubmitting={ticketSubmitting}
       error={ticketError}
       dueDateTouched={ticketDueDateTouched}
+    />
+    <AiAlarmAnalysisDialog
+      open={aiAnalysis.open}
+      onOpenChange={aiAnalysis.onOpenChange}
+      alarm={aiAnalysis.targetAlarm}
+      loading={aiAnalysis.loading}
+      error={aiAnalysis.error}
+      result={aiAnalysis.result}
+      copied={aiAnalysis.copied}
+      metadata={aiAnalysis.metadata}
+      onCopy={aiAnalysis.copyOutput}
+      onRetry={() => aiAnalysis.runAnalysis(aiAnalysis.targetAlarm, "event")}
+      onClose={aiAnalysis.reset}
     />
     </>
   )

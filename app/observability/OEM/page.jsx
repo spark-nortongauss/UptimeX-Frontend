@@ -8,6 +8,7 @@ import { toast } from "sonner"
 
 import DeviceProfileStep from "./DeviceProfileStep"
 import MibUploadStep from "./MibUploadStep"
+import ApiIntegrationStep from "./ApiIntegrationStep"
 
 export default function OEMDevicesPage() {
   const router = useRouter()
@@ -158,7 +159,15 @@ export default function OEMDevicesPage() {
               />
             )}
 
-            {screen === 2 && (
+            {screen === 2 && integrationType === "API" && (
+              <ApiIntegrationStep
+                oem={oem}
+                equipmentModel={equipmentModel}
+                onBack={handleBack}
+              />
+            )}
+
+            {screen === 2 && integrationType !== "API" && (
               <MibUploadStep
                 oem={oem}
                 equipmentModel={equipmentModel}
